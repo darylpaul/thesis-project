@@ -1,0 +1,19 @@
+@use '../shared' as *;
+
+.summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
+.summary-card { background: #fff; border-radius: 12px; padding: 12px 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-top: 3px solid #1a2eaa; }
+.summary-value { font-size: 18px; font-weight: 800; color: #1e2d6b; }
+.summary-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+.view-toggle-btn {
+  flex: 1; padding: 9px 0; border: 1.5px solid #d1d5db; border-radius: 10px;
+  background: #fff; color: #6b7280; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.18s;
+  &.active { background: #1a2eaa; color: #fff; border-color: #1a2eaa; }
+}
+
+.record-card { background: #fff; border-radius: 16px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #1a2eaa; }
+.student-summary-card { background: #fff; border-radius: 16px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #7c3aed; }
+.pct { font-size: 18px; font-weight: 800; }
+.grade-badge { font-size: 12px; font-weight: 700; margin-top: 2px; }
+.high { color: #16a34a; } .mid { color: #ca8a04; } .low { color: #dc2626; }

@@ -1,0 +1,63 @@
+<ion-content [fullscreen]="true">
+  <div class="wrapper">
+
+    <!-- Logo -->
+    <div class="logo-section">
+      <div class="logo-box">
+        <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
+          <path d="M32 14L6 26L32 38L58 26L32 14Z" fill="#F5A623"/>
+          <path d="M20 32V44C20 44 25 50 32 50C39 50 44 44 44 44V32L32 38L20 32Z" fill="#F5A623"/>
+          <line x1="52" y1="26" x2="52" y2="42" stroke="#F5A623" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="52" cy="44" r="3" fill="#F5A623"/>
+        </svg>
+      </div>
+      <h1 class="school-name">Mindful School of<br/>Berlyn Achievers</h1>
+      <p class="school-sub">Exam Management System</p>
+    </div>
+
+    <!-- Card -->
+    <div class="form-card">
+      <h2 class="form-title">Create Account</h2>
+      <p class="form-sub">Register to get started</p>
+
+      <div class="field-group">
+        <label class="field-label">Full Name</label>
+        <input class="field-input" type="text"
+          placeholder="e.g. Juan Dela Cruz"
+          [(ngModel)]="fullname" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Email</label>
+        <input class="field-input" type="email"
+          placeholder="teacher@school.edu"
+          [(ngModel)]="email" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <div class="password-wrap">
+          <input class="field-input"
+            [type]="showPass ? 'text' : 'password'"
+            placeholder="At least 6 characters"
+            [(ngModel)]="password" />
+          <button class="eye-btn" (click)="showPass = !showPass">
+            {{ showPass ? '🙈' : '👁️' }}
+          </button>
+        </div>
+      </div>
+
+      <p class="error-text" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+      <button class="submit-btn" (click)="signup()" [disabled]="isLoading">
+        {{ isLoading ? 'Creating account...' : 'Create Account' }}
+      </button>
+
+      <p class="switch-text">
+        Already have an account?
+        <span class="link" (click)="goLogin()">Log in</span>
+      </p>
+    </div>
+
+  </div>
+</ion-content>

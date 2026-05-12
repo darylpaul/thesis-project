@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../Component/Navbar.css"/>
+  <link rel="stylesheet" href="Print_Page.css"/>
+</head>
+<body data-page="print">
+  <div id="navbar-placeholder"></div>
+  <div class="layout">
+    <main class="main-content">
+
+      <div class="page-header no-print">
+        <div>
+          <h2 class="page-title">Print Questionnaire</h2>
+          <p class="page-subtitle">OCR & OMR optimized format</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-print no-print" id="printBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Print Exam
+          </button>
+          <button class="btn-answer-sheet no-print" id="answerSheetBtn">
+            📋 Print Answer Sheet
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar no-print">
+        <div class="filter-group">
+          <label class="filter-label">Section</label>
+          <div class="select-wrap">
+            <select id="sectionSelect"><option value="">Select section</option></select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Subject</label>
+          <div class="select-wrap">
+            <select id="subjectSelect"><option value="">Select subject</option></select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Questionnaire</label>
+          <div class="select-wrap">
+            <select id="questionnaireSelect"><option value="">Select questionnaire</option></select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prompt -->
+      <div class="prompt-state no-print" id="promptState">
+        <div class="prompt-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+        </div>
+        <p class="prompt-text">Select a section, subject and questionnaire to preview</p>
+      </div>
+
+      <!-- Preview -->
+      <div id="previewArea" style="display:none;">
+        <div class="exam-paper" id="examPaper">
+
+          <!-- Header -->
+          <div class="exam-header">
+            <div class="exam-school">Mindful School of Berlyn Achievers</div>
+            <div class="exam-title" id="previewTitle"></div>
+            <div class="exam-type-row">
+              <span class="exam-badge" id="previewType"></span>
+              <span class="exam-total" id="previewTotal"></span>
+            </div>
+          </div>
+
+          <!-- Student Info -->
+          <div class="student-info">
+            <div class="info-row full">
+              <span class="info-label">Name:</span>
+              <div class="info-line"></div>
+            </div>
+            <div class="info-row-grid">
+              <div class="info-row">
+                <span class="info-label">Section:</span>
+                <span class="info-val" id="previewSection"></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Subject:</span>
+                <span class="info-val" id="previewSubject"></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Date:</span>
+                <div class="info-line"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parts & Questions -->
+          <div id="partsContainer"></div>
+
+          <!-- Score Box -->
+          <div class="score-row">
+            <div class="score-box">
+              <div class="score-label">SCORE</div>
+              <div class="score-blank">_____ / <span id="scoreTotal"></span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="../config.js"></script>
+  <script src="../Component/Navbar.js"></script>
+  <script src="Print_Page.js"></script>
+</body>
+</html>

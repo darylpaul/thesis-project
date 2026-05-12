@@ -1,0 +1,106 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Answer Keys</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div style="padding:14px 16px 0;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" [(ngModel)]="searchQuery"
+        (input)="onSearch()" placeholder="Search answer keys..." />
+      <button class="search-clear" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+    </div>
+  </div>
+
+
+  <div style="padding:14px 16px 0;display:flex;gap:10px;">
+    <select class="field-input" [(ngModel)]="selectedSection" (change)="onFilterChange()">
+      <option value="">All Sections</option>
+      <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+    </select>
+    <select class="field-input" [(ngModel)]="selectedSubject" (change)="onFilterChange()">
+      <option value="">All Subjects</option>
+      <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
+    <ion-icon name="checkmark-done-outline"></ion-icon>
+    <h3>No answer keys yet</h3>
+    <p>Answer keys are auto-generated from questionnaires</p>
+  </div>
+
+  <div *ngIf="!isLoading && filtered.length > 0" style="padding:16px;">
+    <div *ngFor="let a of filtered" class="item-card" (click)="viewAnswerKey(a)">
+      <div class="item-icon green">
+        <ion-icon name="checkmark-done-outline"></ion-icon>
+      </div>
+      <div class="item-info">
+        <div class="item-title">{{ a.title }}</div>
+        <div class="item-sub">{{ a.type }} · {{ a.section_name }}</div>
+        <div class="item-sub">{{ a.subject_name }} · {{ getAnswerCount(a) }} items</div>
+      </div>
+      <div class="item-actions">
+        <button class="action-btn view" (click)="viewAnswerKey(a); $event.stopPropagation()">
+          <ion-icon name="eye-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- VIEW MODAL -->
+<ion-modal [isOpen]="showViewModal" (didDismiss)="closeViewModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeViewModal()">Close</ion-button>
+        </ion-buttons>
+        <ion-title>{{ viewKey?.title }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:16px;" *ngIf="viewKey">
+
+        <div class="view-header">
+          <div class="view-school">Mindful School of Berlyn Achievers</div>
+          <div class="view-title">{{ viewKey.title }}</div>
+          <div class="view-meta">{{ viewKey.type }} · {{ viewKey.section_name }} · {{ viewKey.subject_name }}</div>
+        </div>
+
+        <div class="answers-grid">
+          <div *ngFor="let a of getParsedAnswers(); let i = index" class="answer-grid-item">
+            <span class="grid-num">{{ i + 1 }}.</span>
+
+            <!-- MC bubble -->
+            <span *ngIf="isMC(a.answer)" class="ak-bubble">{{ a.answer }}</span>
+
+            <!-- TF badge -->
+            <span *ngIf="isTF(a.answer)" class="ak-tf-badge">{{ a.answer }}</span>
+
+            <!-- Text answer (Identification) -->
+            <span *ngIf="!isMC(a.answer) && !isTF(a.answer)" class="ak-text-ans">{{ a.answer }}</span>
+
+          </div>
+        </div>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

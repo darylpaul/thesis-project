@@ -1,0 +1,362 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Questionnaires</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="triggerUpload()" title="Upload">
+        <ion-icon name="cloud-upload-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openModal()">
+        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<input #fileInput type="file" accept=".json" style="display:none;" (change)="onFileSelected($event)" />
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div style="padding:16px 16px 0;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" [(ngModel)]="searchQuery"
+        (input)="onSearch()" placeholder="Search questionnaires..." />
+      <button class="search-clear" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+    </div>
+  </div>
+
+
+  <div style="padding:14px 16px 0;display:flex;gap:10px;">
+    <select class="field-input" [(ngModel)]="selectedSection" (change)="onFilterChange()">
+      <option value="">All Sections</option>
+      <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+    </select>
+    <select class="field-input" [(ngModel)]="selectedSubject" (change)="onFilterChange()">
+      <option value="">All Subjects</option>
+      <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
+    <ion-icon name="document-text-outline"></ion-icon>
+    <h3>No questionnaires yet</h3>
+    <p>Tap + to create one</p>
+  </div>
+
+  <div *ngIf="!isLoading && filtered.length > 0" style="padding:16px;">
+    <div *ngFor="let q of filtered" class="item-card" (click)="viewQuestionnaire(q)">
+      <div class="item-icon purple">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </div>
+      <div class="item-info">
+        <div class="item-title">{{ q.title }}</div>
+        <div class="item-sub">{{ q.type }} · {{ q.section_name }}</div>
+        <div class="item-sub">{{ q.subject_name }} · {{ getQuestionCount(q) }} questions</div>
+      </div>
+      <div class="item-actions">
+        <button class="action-btn edit" (click)="openEditModal(q); $event.stopPropagation()" title="Edit">
+          <ion-icon name="create-outline"></ion-icon>
+        </button>
+        <button class="action-btn export" (click)="exportQuestionnaire(q); $event.stopPropagation()">
+          <ion-icon name="download-outline"></ion-icon>
+        </button>
+        <button class="action-btn delete" (click)="confirmDelete(q); $event.stopPropagation()">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- ===================== CREATE / EDIT MODAL ===================== -->
+<ion-modal [isOpen]="showModal" (didDismiss)="closeModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeModal()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>{{ editingId ? 'Edit' : 'New' }} Questionnaire</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="save()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save' }}
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:16px;">
+
+        <!-- Upload banner (only for new) -->
+        <div class="upload-banner" (click)="triggerUploadInModal()" *ngIf="!editingId">
+          <div class="upload-banner-icon">📂</div>
+          <div class="upload-banner-text">
+            <div class="upload-banner-title">Reuse existing questionnaire</div>
+            <div class="upload-banner-sub">Tap to upload a .json file</div>
+          </div>
+          <ion-icon name="cloud-upload-outline" style="color:#1a2eaa;font-size:22px;"></ion-icon>
+        </div>
+
+        <!-- Basic Info -->
+        <div class="form-section">
+          <div class="form-section-title">Basic Information</div>
+          <div class="field-group">
+            <label class="field-label">Title *</label>
+            <input class="field-input" [(ngModel)]="form.title" placeholder="e.g. Science Quiz 1" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Type</label>
+            <select class="field-input" [(ngModel)]="form.type">
+              <option>Exam</option><option>Quiz</option>
+              <option>Activity</option><option>Assignment</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Section *</label>
+            <select class="field-input" [(ngModel)]="form.section_id">
+              <option value="">Select section</option>
+              <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Subject *</label>
+            <select class="field-input" [(ngModel)]="form.subject_id">
+              <option value="">Select subject</option>
+              <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Import from Test Bank -->
+        <div class="form-section">
+          <div class="form-section-title">Import from Test Bank</div>
+          <button class="import-bank-btn" type="button" (click)="openImportModal()">
+            <ion-icon name="library-outline" style="font-size:18px;"></ion-icon>
+            Import Questions from Bank
+          </button>
+          <p style="font-size:11px;color:#6b7280;margin-top:6px;text-align:center;">Select a topic to pull approved questions directly into this questionnaire</p>
+        </div>
+
+        <!-- Parts Builder -->
+        <div class="form-section">
+          <div class="form-section-title">Exam Parts & Questions</div>
+
+          <div *ngFor="let part of form.parts; let pi = index" class="part-card">
+            <div class="part-header">
+              <div class="part-num">Part {{ pi + 1 }}</div>
+              <button class="remove-btn" (click)="removePart(pi)" *ngIf="form.parts.length > 1">✕</button>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Section Type</label>
+              <select class="field-input" [(ngModel)]="part.type" (change)="onPartTypeChange(part)">
+                <option value="multiple_choice">Letter Shading / Multiple Choice</option>
+                <option value="true_false">True or False</option>
+                <option value="identification">Identification</option>
+                <option value="essay">Essay</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Direction / Instruction</label>
+              <textarea class="field-input" [(ngModel)]="part.direction" rows="2"></textarea>
+            </div>
+
+            <div class="questions-builder">
+              <div *ngFor="let q of part.questions; let qi = index" class="question-item-builder">
+                <div class="q-header-row">
+                  <div class="q-num-badge">{{ qi + 1 }}</div>
+                  <button class="remove-q-btn" (click)="removeQuestion(part, qi)">✕</button>
+                </div>
+
+                <input class="field-input" [(ngModel)]="q.text"
+                  placeholder="Enter question {{ qi + 1 }}" style="margin-bottom:10px;" />
+
+                <!-- Multiple Choice -->
+                <div *ngIf="part.type === 'multiple_choice'">
+                  <div class="choices-builder">
+                    <div *ngFor="let letter of ['A','B','C','D']" class="choice-row"
+                      [class.correct-choice]="q.answer === letter"
+                      (click)="q.answer = letter">
+                      <span class="choice-letter" [textContent]="letter + '.'" ></span>
+                      <input class="field-input choice-input" [(ngModel)]="q.choices[letter]"
+                        [placeholder]="'Option ' + letter" (click)="$event.stopPropagation()" />
+                      <span class="correct-check" *ngIf="q.answer === letter">✅</span>
+                    </div>
+                  </div>
+                  <p class="answer-hint">Tap a row to mark correct answer</p>
+                </div>
+
+                <!-- True or False -->
+                <div *ngIf="part.type === 'true_false'" class="tf-selector">
+                  <button class="tf-btn" [class.selected]="q.answer === 'True'" (click)="q.answer = 'True'">✓ True</button>
+                  <button class="tf-btn" [class.selected]="q.answer === 'False'" (click)="q.answer = 'False'">✗ False</button>
+                </div>
+
+                <!-- Identification -->
+                <div *ngIf="part.type === 'identification'" class="id-answer">
+                  <label class="field-label">Correct Answer</label>
+                  <input class="field-input" [(ngModel)]="q.answer" placeholder="Type the correct answer" />
+                </div>
+
+                <!-- Essay -->
+                <div *ngIf="part.type === 'essay'" class="essay-note">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  Essay — manually graded, no answer key needed.
+                </div>
+
+                <div class="answer-set" *ngIf="q.answer && part.type !== 'essay'">Answer: <strong>{{ q.answer }}</strong></div>
+                <div class="answer-missing" *ngIf="!q.answer && part.type !== 'essay'">⚠️ No answer set yet</div>
+              </div>
+
+              <button class="add-q-btn" (click)="addQuestion(part)">+ Add Question</button>
+            </div>
+          </div>
+
+          <button class="add-part-btn" (click)="addPart()">+ Add Part / Section</button>
+        </div>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- ===================== IMPORT FROM BANK MODAL ===================== -->
+<ion-modal [isOpen]="showImportModal" (didDismiss)="closeImportModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeImportModal()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>Import from Bank</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:16px;">
+
+        <div class="form-section">
+          <div class="form-section-title">1. Select Subject & Topic</div>
+          <div class="field-group">
+            <label class="field-label">Subject</label>
+            <select class="field-input" [(ngModel)]="importSubjectId" (change)="onImportSubjectChange()">
+              <option value="">Select subject</option>
+              <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+            </select>
+          </div>
+          <div class="field-group" *ngIf="importSubjectId">
+            <label class="field-label">Topic</label>
+            <div *ngIf="isLoadingTopics" style="padding:10px;text-align:center;font-size:13px;color:#6b7280;">Loading topics...</div>
+            <select *ngIf="!isLoadingTopics" class="field-input" [(ngModel)]="importSelectedTopic" (change)="onImportTopicChange()">
+              <option value="">Select a topic</option>
+              <option *ngFor="let t of importTopics" [value]="t.topic">{{ t.topic }} ({{ t.count }} questions)</option>
+            </select>
+            <p *ngIf="!isLoadingTopics && importTopics.length === 0" style="font-size:12px;color:#9ca3af;margin-top:4px;">No approved topics for this subject yet.</p>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="form-section" *ngIf="importSelectedTopic">
+          <div class="form-section-title">2. Preview Questions</div>
+          <div *ngIf="isLoadingPreview" style="text-align:center;padding:20px;font-size:13px;color:#6b7280;">Loading...</div>
+          <div *ngIf="!isLoadingPreview && importPreview.length === 0" style="text-align:center;padding:16px;font-size:13px;color:#9ca3af;">No approved questions for this topic.</div>
+          <div *ngFor="let q of importPreview; let i = index" class="import-preview-item">
+            <span class="import-q-num">{{ i + 1 }}</span>
+            <span class="import-q-text">{{ q.question_text }}</span>
+            <span class="import-q-type">{{ q.type === 'multiple_choice' ? 'MC' : q.type === 'true_false' ? 'TF' : q.type === 'identification' ? 'ID' : 'Essay' }}</span>
+          </div>
+        </div>
+
+        <!-- Import button -->
+        <button *ngIf="importPreview.length > 0"
+          class="submit-btn" type="button" (click)="doImport()">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Import {{ importPreview.length }} Question{{ importPreview.length !== 1 ? 's' : '' }}
+        </button>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- ===================== VIEW MODAL ===================== -->
+<ion-modal [isOpen]="showViewModal" (didDismiss)="closeViewModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeViewModal()">Close</ion-button>
+        </ion-buttons>
+        <ion-title>{{ viewQ?.title }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="exportQuestionnaire(viewQ)">
+            <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:16px;" *ngIf="viewQ">
+        <div class="view-header">
+          <div class="view-school">Mindful School of Berlyn Achievers</div>
+          <div class="view-title">{{ viewQ.title }}</div>
+          <div class="view-meta">{{ viewQ.type }} · {{ viewQ.section_name }} · {{ viewQ.subject_name }}</div>
+        </div>
+
+        <div *ngFor="let part of getParsedParts(); let pi = index" class="view-part">
+          <div class="view-part-label">{{ getPartLabel(part.type) }}</div>
+          <div class="view-direction" *ngIf="part.direction">
+            <strong>Direction:</strong> {{ part.direction }}
+          </div>
+          <div *ngFor="let q of part.questions; let qi = index" class="view-question">
+            <div class="view-q-num">{{ qi + 1 }}.</div>
+            <div class="view-q-body">
+              <div class="view-q-text">{{ q.text }}</div>
+
+              <!-- MC — bubble view -->
+              <div *ngIf="part.type === 'multiple_choice'" class="view-choices-ocr">
+                <div *ngFor="let letter of ['A','B','C','D']" class="view-mc-row"
+                  [class.correct-answer]="q.answer === letter">
+                  <span class="view-mc-bubble" [class.filled]="q.answer === letter">{{ letter }}</span>
+                  <span class="view-mc-text">{{ q.choices?.[letter] || '' }}</span>
+                  <span *ngIf="q.answer === letter" class="correct-badge">✓ Key</span>
+                </div>
+              </div>
+
+              <!-- TF — bubble view -->
+              <div *ngIf="part.type === 'true_false'" class="view-tf-bubbles">
+                <div class="view-tf-opt">
+                  <span class="view-tf-bubble" [class.filled]="q.answer === 'True'"></span>
+                  <span class="view-tf-word" [class.selected]="q.answer === 'True'">True</span>
+                </div>
+                <div class="view-tf-opt">
+                  <span class="view-tf-bubble" [class.filled]="q.answer === 'False'"></span>
+                  <span class="view-tf-word" [class.selected]="q.answer === 'False'">False</span>
+                </div>
+              </div>
+
+              <div *ngIf="part.type === 'identification'" class="view-id-answer">
+                Answer: <strong>{{ q.answer }}</strong>
+              </div>
+              <div *ngIf="part.type === 'essay'" class="view-essay">
+                <div class="essay-line" *ngFor="let l of [1,2,3]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

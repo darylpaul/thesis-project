@@ -1,0 +1,34 @@
+@use '../shared' as *;
+
+.item-card { border-left-color: #16a34a; cursor: pointer; &:active { opacity: 0.85; } }
+
+.answers-grid {
+  background: #fff; border-radius: 14px; padding: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.answer-grid-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; background: #f9fafb;
+  border-radius: 10px; border: 1.5px solid #e5e7eb;
+}
+.grid-num { font-weight: 800; font-size: 13px; color: #1a2eaa; min-width: 22px; }
+
+.ak-bubble {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border: 2.5px solid #1a2eaa;
+  border-radius: 50%; font-size: 14px; font-weight: 800;
+  color: #1a2eaa; background: #eff6ff;
+}
+.ak-tf-badge {
+  display: inline-block; padding: 4px 12px;
+  background: #f0fdf4; color: #16a34a;
+  border: 1.5px solid #bbf7d0; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+}
+.ak-text-ans {
+  display: inline-block; padding: 4px 10px;
+  background: #fefce8; color: #92400e;
+  border: 1.5px solid #fde68a; border-radius: 8px;
+  font-size: 12px; font-weight: 700; word-break: break-word;
+}

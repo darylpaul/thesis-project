@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Questionnaires – Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../Component/Navbar.css"/>
+  <link rel="stylesheet" href="Questionnares_Page.css"/>
+</head>
+<body data-page="questionnaires">
+  <div id="navbar-placeholder"></div>
+  <div class="layout">
+    <main class="main-content">
+
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Questionnaires</h2>
+          <p class="page-subtitle">Create questionnaires — answer keys are auto-generated!</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-upload" id="uploadQuestionnaireBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload
+          </button>
+          <button class="btn-create" id="createQuestionnaireBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Create Questionnaire
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label class="filter-label">Section</label>
+          <div class="select-wrap">
+            <select id="sectionFilter"><option value="">Select section</option></select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Subject</label>
+          <div class="select-wrap">
+            <select id="subjectFilter"><option value="">Select Subject</option></select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar-wrap">
+        <div class="search-input-wrap">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search questionnaires by title or type..." oninput="handleSearch(this.value)" />
+          <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+        </div>
+      </div>
+
+      <div class="questionnaires-container">
+        <div class="prompt-state" id="promptState">
+          <div class="prompt-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <p class="prompt-text">Select a Section and Subject to View Questionnaires</p>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <p class="empty-text">No questionnaires found for this selection.</p>
+          <button class="btn-create-first" id="createFirstBtn">+ Create Questionnaire</button>
+        </div>
+        <div class="questionnaires-list" id="questionnairesList" style="display:none;"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <input type="file" id="uploadFileInput" accept=".json" style="display:none;" />
+
+  <!-- CREATE / EDIT MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal modal-xl">
+      <div class="modal-header">
+        <h3 id="modalTitle">Create Questionnaire</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="upload-banner">
+          <span style="font-size:22px;flex-shrink:0;">📂</span>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:0.875rem;color:#1e2d6b;">Reuse an existing questionnaire</div>
+            <div style="font-size:0.78rem;color:#6b7280;">Upload a previously exported .json file to auto-fill</div>
+          </div>
+          <button class="btn-upload-inline" id="uploadInlineBtn">Upload File</button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="qTitle">Title <span class="required">*</span></label>
+            <input type="text" id="qTitle" placeholder="e.g. Science Exam 1"/>
+            <span class="error-msg" id="qTitleError"></span>
+          </div>
+          <div class="form-group">
+            <label for="qType">Type</label>
+            <select id="qType">
+              <option>Exam</option><option>Quiz</option>
+              <option>Activity</option><option>Assignment</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="qSection">Section <span class="required">*</span></label>
+            <select id="qSection"><option value="">Select section</option></select>
+            <span class="error-msg" id="qSectionError"></span>
+          </div>
+          <div class="form-group">
+            <label for="qSubject">Subject <span class="required">*</span></label>
+            <select id="qSubject"><option value="">Select subject</option></select>
+            <span class="error-msg" id="qSubjectError"></span>
+          </div>
+        </div>
+
+        <div class="auto-key-notice">
+          ✅ Answer key will be <strong>automatically generated</strong> when you save!
+        </div>
+
+        <div class="parts-section">
+          <div class="parts-header">
+            <span class="parts-title">Exam Parts &amp; Questions</span>
+            <button type="button" class="btn-add-part" id="addPartBtn">+ Add Part</button>
+          </div>
+          <div id="partsContainer"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-export" id="exportBtn">⬇ Export JSON</button>
+        <button class="btn-cancel" id="modalCancel">Cancel</button>
+        <button class="btn-save" id="modalSave">Save Questionnaire</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD MODAL -->
+  <div class="modal-overlay" id="uploadOverlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Upload Questionnaire</h3>
+        <button class="modal-close" id="uploadClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="upload-drop-zone" id="uploadDropZone">
+          <div style="font-size:48px;margin-bottom:12px;">📂</div>
+          <p style="font-weight:700;color:#1e2d6b;margin-bottom:6px;">Drop your .json file here</p>
+          <p style="font-size:0.82rem;color:#6b7280;margin-bottom:16px;">or click to browse</p>
+          <button class="btn-save" id="browseBtn">Browse File</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="uploadCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW MODAL -->
+  <div class="modal-overlay" id="viewOverlay">
+    <div class="modal modal-xl">
+      <div class="modal-header">
+        <div>
+          <h3 id="viewTitle">Questionnaire</h3>
+          <div class="view-meta" id="viewMeta"></div>
+        </div>
+        <button class="modal-close" id="viewClose">&times;</button>
+      </div>
+      <div class="modal-body" id="viewBody"></div>
+      <div class="modal-footer">
+        <button class="btn-export" id="exportViewBtn">⬇ Export JSON</button>
+        <button class="btn-cancel" id="viewCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div class="modal-overlay" id="deleteOverlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Delete Questionnaire</h3>
+        <button class="modal-close" id="deleteClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="delete-msg">Are you sure you want to delete <strong id="deleteQName"></strong>? This cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="btn-delete" id="deleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="../config.js"></script>
+  <script src="../Component/Navbar.js"></script>
+  <script src="Questionnares_Page.js"></script>
+  <script src="../Component/AuthDelete.js"></script>
+</body>
+</html>

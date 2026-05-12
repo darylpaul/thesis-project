@@ -1,0 +1,258 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Test Bank</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSuggestModal()" title="Add/Suggest Question">
+        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Search -->
+  <div style="padding:16px 16px 0;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" [(ngModel)]="searchQuery"
+        (input)="onSearch()" placeholder="Search questions or topics..." />
+      <button class="search-clear" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div style="padding:10px 16px 0;display:flex;gap:8px;">
+    <select class="field-input" [(ngModel)]="selectedSubject" (change)="onSubjectChange()">
+      <option value="">All Subjects</option>
+      <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+    </select>
+    <select class="field-input" [(ngModel)]="selectedType" (change)="onTypeChange()">
+      <option value="">All Types</option>
+      <option value="multiple_choice">Multiple Choice</option>
+      <option value="true_false">True or False</option>
+      <option value="identification">Identification</option>
+      <option value="essay">Essay</option>
+    </select>
+  </div>
+
+  <!-- Topic filter (shows when subject selected) -->
+  <div style="padding:8px 16px 0;" *ngIf="topics.length > 0">
+    <select class="field-input" [(ngModel)]="selectedTopic" (change)="onTopicChange()">
+      <option value="">All Topics</option>
+      <option *ngFor="let t of topics" [value]="t.topic">{{ t.topic }} ({{ typeLabel(t.type) }}, {{ t.count }})</option>
+    </select>
+  </div>
+
+  <!-- Admin pending alert -->
+  <div *ngIf="isAdmin && pendingCount() > 0" class="pending-banner">
+    <span>⏳ {{ pendingCount() }} pending question{{ pendingCount() !== 1 ? 's' : '' }} awaiting your review</span>
+  </div>
+
+  <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
+    <ion-icon name="library-outline"></ion-icon>
+    <h3>No questions found</h3>
+    <p *ngIf="!isAdmin">Tap + to suggest a question for admin review</p>
+    <p *ngIf="isAdmin">Tap + to add questions to the bank</p>
+  </div>
+
+  <div *ngIf="!isLoading && filtered.length > 0" style="padding:12px 16px 16px;">
+    <p style="font-size:12px;color:#6b7280;font-weight:600;margin:0 0 10px;">
+      {{ filtered.length }} question{{ filtered.length !== 1 ? 's' : '' }}
+    </p>
+    <div *ngFor="let q of filtered" class="tb-card" [class.pending-card]="q.status === 'pending'">
+      <div class="item-icon" [ngClass]="typeClass(q.type)">{{ typeIcon(q.type) }}</div>
+      <div class="item-info">
+        <div class="item-title" style="font-size:13px;">{{ q.question_text }}</div>
+        <div class="item-sub">{{ typeLabel(q.type) }} · {{ q.subject_name }}</div>
+        <div class="item-sub">
+          <span class="topic-chip">{{ q.topic }}</span>
+          <span *ngIf="q.status === 'pending'" class="pending-chip">Pending</span>
+        </div>
+      </div>
+      <div class="item-actions">
+        <button class="action-btn view" (click)="viewQuestion(q)">
+          <ion-icon name="eye-outline"></ion-icon>
+        </button>
+        <button *ngIf="isAdmin && q.status === 'pending'" class="action-btn approve" (click)="approveQuestion(q)">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </button>
+        <button *ngIf="isAdmin" class="action-btn edit" (click)="openEditModal(q)">
+          <ion-icon name="create-outline"></ion-icon>
+        </button>
+        <button *ngIf="isAdmin" class="action-btn delete" (click)="confirmDelete(q)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- SUGGEST / EDIT MODAL -->
+<ion-modal [isOpen]="showSuggestModal" (didDismiss)="closeSuggestModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeSuggestModal()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>{{ editingId ? 'Edit Question' : (isAdmin ? 'Add Question' : 'Suggest Question') }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="save()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save' }}
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:16px;">
+
+        <div class="form-section">
+          <div class="form-section-title">Question Details</div>
+          <div class="field-group">
+            <label class="field-label">Subject *</label>
+            <select class="field-input" [(ngModel)]="form.subject_id">
+              <option value="">Select subject</option>
+              <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Topic *</label>
+            <input class="field-input" [(ngModel)]="form.topic" placeholder="e.g. Photosynthesis" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Question Type</label>
+            <select class="field-input" [(ngModel)]="form.type" (change)="onFormTypeChange()">
+              <option value="multiple_choice">Multiple Choice</option>
+              <option value="true_false">True or False</option>
+              <option value="identification">Identification</option>
+              <option value="essay">Essay</option>
+            </select>
+          </div>
+          <div *ngIf="isAdmin" class="field-group">
+            <label class="field-label">Status</label>
+            <select class="field-input" [(ngModel)]="form.status">
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Question</div>
+          <div class="field-group">
+            <label class="field-label">Question Text *</label>
+            <textarea class="field-input" [(ngModel)]="form.question_text" rows="3" placeholder="Type the question here..."></textarea>
+          </div>
+
+          <!-- Multiple Choice -->
+          <div *ngIf="form.type === 'multiple_choice'">
+            <label class="field-label" style="margin-bottom:8px;">Answer Choices</label>
+            <div class="choices-builder">
+              <div *ngFor="let letter of ['A','B','C','D']" class="choice-row"
+                [class.correct-choice]="form.answer === letter"
+                (click)="form.answer = letter">
+                <span class="choice-letter">{{ letter }}.</span>
+                <input class="field-input choice-input" [(ngModel)]="form.choices[letter]"
+                  [placeholder]="'Option ' + letter" (click)="$event.stopPropagation()" />
+                <span class="correct-check" *ngIf="form.answer === letter">✅</span>
+              </div>
+            </div>
+            <p class="answer-hint">Tap a row to mark correct answer</p>
+          </div>
+
+          <!-- True or False -->
+          <div *ngIf="form.type === 'true_false'" class="tf-selector">
+            <button class="tf-btn" [class.selected]="form.answer === 'True'" (click)="form.answer = 'True'">✓ True</button>
+            <button class="tf-btn" [class.selected]="form.answer === 'False'" (click)="form.answer = 'False'">✗ False</button>
+          </div>
+
+          <!-- Identification -->
+          <div *ngIf="form.type === 'identification'" class="id-answer">
+            <label class="field-label">Correct Answer</label>
+            <input class="field-input" [(ngModel)]="form.answer" placeholder="Type the correct answer" />
+          </div>
+
+          <!-- Essay -->
+          <div *ngIf="form.type === 'essay'" class="essay-note">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            Essay — manually graded, no answer key needed.
+          </div>
+        </div>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- VIEW MODAL -->
+<ion-modal [isOpen]="showViewModal" (didDismiss)="closeViewModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeViewModal()">Close</ion-button>
+        </ion-buttons>
+        <ion-title>{{ typeLabel(viewQ?.type) }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:16px;" *ngIf="viewQ">
+        <div class="view-header">
+          <div class="view-school">{{ viewQ.subject_name }}</div>
+          <div class="view-title" style="font-size:15px;line-height:1.4;">{{ viewQ.question_text }}</div>
+          <div class="view-meta">{{ typeLabel(viewQ.type) }} · {{ viewQ.topic }}</div>
+        </div>
+
+        <!-- MC view -->
+        <div *ngIf="viewQ.type === 'multiple_choice'" class="form-section">
+          <div class="view-choices-ocr">
+            <div *ngFor="let c of getParsedChoices()" class="view-mc-row" [class.correct-answer]="viewQ.answer === c.letter">
+              <span class="view-mc-bubble" [class.filled]="viewQ.answer === c.letter">{{ c.letter }}</span>
+              <span class="view-mc-text">{{ c.text }}</span>
+              <span *ngIf="viewQ.answer === c.letter" class="correct-badge">✓ Key</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TF view -->
+        <div *ngIf="viewQ.type === 'true_false'" class="form-section">
+          <div class="view-tf-bubbles">
+            <div class="view-tf-opt">
+              <span class="view-tf-bubble" [class.filled]="viewQ.answer === 'True'"></span>
+              <span class="view-tf-word" [class.selected]="viewQ.answer === 'True'">True</span>
+            </div>
+            <div class="view-tf-opt">
+              <span class="view-tf-bubble" [class.filled]="viewQ.answer === 'False'"></span>
+              <span class="view-tf-word" [class.selected]="viewQ.answer === 'False'">False</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ID view -->
+        <div *ngIf="viewQ.type === 'identification'" class="form-section">
+          <div class="view-id-answer">Answer: <strong>{{ viewQ.answer }}</strong></div>
+        </div>
+
+        <!-- Essay -->
+        <div *ngIf="viewQ.type === 'essay'" class="essay-note">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Essay — manually graded.
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

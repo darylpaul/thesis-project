@@ -1,0 +1,206 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Grade Exam</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div style="padding:16px;">
+
+    <!-- Info banner -->
+    <div class="info-banner">
+      <div class="info-icon">🤖</div>
+      <div class="info-text">
+        <div class="info-title">Smart Auto-Detection</div>
+        <div class="info-sub">Automatically reads bubbles, circles, dots AND written text at the same time</div>
+      </div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <div class="step-title">Select Details</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Section *</label>
+        <select class="field-input" [(ngModel)]="selectedSection" (change)="onSectionChange()">
+          <option value="">Select section</option>
+          <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Subject *</label>
+        <select class="field-input" [(ngModel)]="selectedSubject" (change)="onSubjectChange()">
+          <option value="">Select subject</option>
+          <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Answer Key *</label>
+        <select class="field-input" [(ngModel)]="selectedAnswerKeyId" (change)="onAnswerKeyChange()"
+          [disabled]="!selectedSection || !selectedSubject || answerKeys.length === 0">
+          <option value="">
+            {{ !selectedSection || !selectedSubject ? 'Select section & subject first' :
+               answerKeys.length === 0 ? 'No answer keys found' : 'Select answer key' }}
+          </option>
+          <option *ngFor="let a of answerKeys" [value]="a.id">{{ a.title }}</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Student *</label>
+        <select class="field-input" [(ngModel)]="selectedStudent"
+          [disabled]="!selectedSection || students.length === 0">
+          <option value="">
+            {{ !selectedSection ? 'Select section first' :
+               students.length === 0 ? 'No students' : 'Select student' }}
+          </option>
+          <option *ngFor="let s of students" [value]="s.id">{{ s.last_name }}, {{ s.first_name }}</option>
+        </select>
+      </div>
+      <div *ngIf="selectedAnswerKey" class="info-box success">
+        ✅ {{ selectedAnswerKey.title }} — {{ getCorrectAnswers().length }} items
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div class="step-title">Upload Answer Sheet Photo</div>
+      </div>
+
+      <div class="tips-box">
+        <div class="tip">📸 <strong>Photo tips for best results:</strong></div>
+        <div class="tip">• Flat paper, good lighting, no shadows</div>
+        <div class="tip">• Hold camera straight above paper</div>
+        <div class="tip">• Bubbles: fill completely ●</div>
+        <div class="tip">• Written: write clearly, one answer per line</div>
+      </div>
+
+      <div class="upload-area" (click)="triggerUpload()" *ngIf="!imagePreview">
+        <ion-icon name="camera-outline" style="font-size:52px;color:#1a2eaa;margin-bottom:12px;"></ion-icon>
+        <p style="color:#374151;font-weight:700;margin:0 0 6px;font-size:15px;">Tap to take photo or upload</p>
+      </div>
+
+      <div *ngIf="imagePreview" style="position:relative;">
+        <img [src]="imagePreview" style="width:100%;border-radius:12px;max-height:360px;object-fit:contain;" />
+        <button class="remove-img-btn" (click)="removeImage()">✕</button>
+      </div>
+
+      <input #fileInput type="file" accept="image/*" capture="environment"
+        style="display:none;" (change)="onFileSelected($event)" />
+
+      <!-- Image Quality Tips -->
+      <div *ngIf="imageQualityTips.length > 0" style="margin-top:12px;">
+        <div *ngFor="let tip of imageQualityTips" class="quality-tip"
+          [class.tip-good]="tip.startsWith('✅')"
+          [class.tip-warn]="tip.startsWith('⚠️')">
+          {{ tip }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Results -->
+    <div class="step-card" *ngIf="ocrDone || isScanning">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <div class="step-title">Detected Answers</div>
+      </div>
+
+      <!-- Scanning -->
+      <div *ngIf="isScanning" style="text-align:center;padding:24px;">
+        <ion-spinner name="crescent" style="color:#1a2eaa;width:52px;height:52px;"></ion-spinner>
+        <p style="color:#1a2eaa;font-weight:700;margin-top:14px;font-size:15px;">{{ scanStatus }}</p>
+        <div class="progress-bar-wrap" *ngIf="scanProgress > 0">
+          <div class="progress-bar" [style.width]="scanProgress + '%'"></div>
+        </div>
+        <p style="color:#6b7280;font-size:13px;margin-top:6px;" *ngIf="scanProgress > 0">{{ scanProgress }}%</p>
+      </div>
+
+      <!-- Results -->
+      <div *ngIf="ocrDone && !isScanning">
+        <p class="review-hint">
+          Review detections. <strong>Type</strong> in the box to fix any wrong answer before scoring.
+        </p>
+        <div class="detection-summary">
+          <div class="det-stat green">✅ {{ getDetectedCount() }} detected</div>
+          <div class="det-stat red" *ngIf="getMissingCount() > 0">❓ {{ getMissingCount() }} missing</div>
+        </div>
+
+        <div *ngFor="let item of detectedAnswers" class="answer-row"
+          [class.row-correct]="item.isCorrect"
+          [class.row-wrong]="!item.isCorrect && item.detected !== '?'"
+          [class.row-missing]="item.detected === '?'">
+
+          <div class="answer-num">{{ item.num }}</div>
+
+          <div class="answer-info">
+            <div class="answer-label">Student</div>
+            <div class="answer-val" [class.missing]="item.detected === '?'">
+              {{ item.detected === '?' ? '—' : item.detected }}
+            </div>
+          </div>
+
+          <div class="answer-method" *ngIf="item.method">
+            <span class="method-badge" [class.omr]="item.method === 'OMR'" [class.ocr]="item.method === 'OCR'">
+              {{ item.method }}
+            </span>
+          </div>
+
+          <div class="answer-key-col">
+            <div class="answer-label">Key</div>
+            <div class="key-val">{{ item.correct }}</div>
+          </div>
+
+          <div class="match-icon">
+            <span *ngIf="item.isCorrect">✅</span>
+            <span *ngIf="!item.isCorrect && item.detected !== '?'">❌</span>
+            <span *ngIf="item.detected === '?'">❓</span>
+          </div>
+
+          <input class="fix-input" type="text"
+            [(ngModel)]="item.detected"
+            (input)="onAnswerChange(item)"
+            placeholder="Type answer"
+            maxlength="20" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Score -->
+    <div class="step-card result-card" *ngIf="scored">
+      <div class="step-header">
+        <div class="step-num">4</div>
+        <div class="step-title">Score Result</div>
+      </div>
+      <div class="score-display">
+        <div class="score-big" [class]="getGradeClass()">{{ score }}/{{ total }}</div>
+        <div class="score-pct" [class]="getGradeClass()">{{ percentage }}%</div>
+        <div class="score-grade" [class]="getGradeClass()">Grade: {{ getGrade() }}</div>
+      </div>
+      <button class="save-btn" (click)="saveRecord()" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : '💾 Save to Records' }}
+      </button>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px;margin-top:4px;" *ngIf="!isScanning">
+      <button class="scan-btn" (click)="startScan()"
+        [disabled]="!imagePreview || !selectedAnswerKeyId || !selectedStudent"
+        *ngIf="!ocrDone">
+        <ion-icon name="scan-outline"></ion-icon>
+        Auto Scan & Grade
+      </button>
+      <button class="rescan-btn" (click)="reset()" *ngIf="ocrDone">🔄 Scan Again</button>
+      <button class="scan-btn" (click)="calculateScore()" *ngIf="ocrDone && !scored">✅ Calculate Score</button>
+    </div>
+
+  </div>
+</ion-content>

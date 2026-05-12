@@ -1,0 +1,153 @@
+ion-toolbar { --background: #1a2eaa; --color: #fff; border-bottom: 3px solid #e8b800; }
+ion-content  { --background: #f0f2f7; }
+
+/* INFO BANNER */
+.info-banner {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #1a2eaa, #2d3fd4);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(26,46,170,0.3);
+}
+.info-icon  { font-size: 28px; flex-shrink: 0; }
+.info-text  { flex: 1; }
+.info-title { font-weight: 800; font-size: 14px; color: #fff; }
+.info-sub   { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px; line-height: 1.4; }
+
+/* STEP CARD */
+.step-card {
+  background: #fff; border-radius: 16px; padding: 16px;
+  margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.step-num {
+  width: 28px; height: 28px; background: #1a2eaa; color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; flex-shrink: 0;
+}
+.step-title { font-weight: 800; font-size: 15px; color: #1e2d6b; }
+
+/* TIPS BOX */
+.tips-box {
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 12px;
+}
+.tip { font-size: 12px; color: #78350f; line-height: 1.7; }
+
+/* FIELDS */
+.field-group { margin-bottom: 12px; }
+.field-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+.field-input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db;
+  border-radius: 10px; font-size: 14px; color: #111827;
+  background: #f9fafb; outline: none; box-sizing: border-box;
+  &:focus { border-color: #1a2eaa; background: #fff; }
+}
+
+.info-box { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-top: 8px; }
+.info-box.success { background: #f0fdf4; color: #166534; border: 1.5px solid #bbf7d0; }
+
+/* UPLOAD */
+.upload-area {
+  border: 2px dashed #93c5fd; border-radius: 14px; padding: 36px 20px;
+  text-align: center; cursor: pointer; background: #f0f9ff;
+  &:active { background: #e0f2fe; }
+}
+.remove-img-btn {
+  position: absolute; top: 8px; right: 8px; width: 30px; height: 30px;
+  background: rgba(220,38,38,0.85); color: #fff; border: none;
+  border-radius: 50%; font-size: 14px; cursor: pointer;
+}
+
+/* PROGRESS */
+.progress-bar-wrap { background: #e5e7eb; border-radius: 99px; height: 8px; margin: 10px 0; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, #1a2eaa, #4f6ef7); border-radius: 99px; transition: width 0.4s; }
+
+/* RESULTS */
+.review-hint { font-size: 13px; color: #6b7280; margin: 0 0 10px; }
+.detection-summary { display: flex; gap: 10px; margin-bottom: 12px; }
+.det-stat { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 20px; }
+.det-stat.green { background: #f0fdf4; color: #16a34a; }
+.det-stat.red   { background: #fef2f2; color: #dc2626; }
+
+.answer-row {
+  display: flex; align-items: center; gap: 6px; padding: 9px 10px;
+  border-radius: 10px; margin-bottom: 6px;
+  border: 1.5px solid #e5e7eb; background: #f9fafb;
+  &.row-correct { background: #f0fdf4; border-color: #86efac; }
+  &.row-wrong   { background: #fef2f2; border-color: #fca5a5; }
+  &.row-missing { background: #fefce8; border-color: #fde68a; }
+}
+.answer-num {
+  width: 26px; height: 26px; background: #1a2eaa; color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 11px; flex-shrink: 0;
+}
+.answer-info  { flex: 1; }
+.answer-label { font-size: 10px; color: #9ca3af; font-weight: 600; }
+.answer-val   { font-weight: 800; font-size: 15px; color: #1e2d6b; }
+.answer-val.missing { color: #9ca3af; font-size: 12px; }
+
+/* Method badge */
+.answer-method { flex-shrink: 0; }
+.method-badge {
+  font-size: 9px; font-weight: 800; padding: 2px 6px;
+  border-radius: 6px; text-transform: uppercase;
+  &.omr { background: #f0fdf4; color: #16a34a; }
+  &.ocr { background: #eff6ff; color: #2563eb; }
+}
+
+.answer-key-col { flex-shrink: 0; text-align: center; min-width: 36px; }
+.key-val { font-weight: 800; font-size: 15px; color: #16a34a; }
+.match-icon { font-size: 16px; flex-shrink: 0; }
+.fix-input {
+  width: 80px; padding: 6px 8px; border: 1.5px solid #d1d5db;
+  border-radius: 8px; font-size: 13px; font-weight: 700;
+  background: #fff; outline: none; flex-shrink: 0;
+  text-align: center; color: #1e2d6b;
+  &:focus { border-color: #1a2eaa; box-shadow: 0 0 0 3px rgba(26,46,170,0.1); }
+  &::placeholder { color: #9ca3af; font-weight: 400; font-size: 11px; }
+}
+
+/* SCORE */
+.result-card { border: 2px solid #e8b800; }
+.score-display { text-align: center; padding: 20px 0; }
+.score-big   { font-size: 52px; font-weight: 800; line-height: 1; }
+.score-pct   { font-size: 24px; font-weight: 700; margin-top: 4px; }
+.score-grade { font-size: 16px; font-weight: 600; margin-top: 6px; }
+.high { color: #16a34a; }
+.mid  { color: #ca8a04; }
+.low  { color: #dc2626; }
+
+/* BUTTONS */
+.scan-btn {
+  flex: 1; padding: 14px; background: #1a2eaa; color: #fff; border: none;
+  border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 16px rgba(26,46,170,0.3);
+  &:disabled { opacity: 0.5; }
+}
+.rescan-btn {
+  flex: 1; padding: 14px; background: #f3f4f6; color: #374151;
+  border: 1.5px solid #d1d5db; border-radius: 12px; font-size: 14px;
+  font-weight: 700; cursor: pointer;
+}
+.save-btn {
+  width: 100%; padding: 14px; background: #16a34a; color: #fff; border: none;
+  border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
+  margin-top: 12px; box-shadow: 0 4px 16px rgba(22,163,74,0.3);
+  &:disabled { opacity: 0.6; }
+}
+
+/* Image Quality Tips */
+.quality-tip {
+  padding: 8px 12px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; margin-bottom: 6px; line-height: 1.4;
+}
+.tip-good {
+  background: #f0fdf4; color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+.tip-warn {
+  background: #fffbeb; color: #92400e;
+  border: 1px solid #fde68a;
+}

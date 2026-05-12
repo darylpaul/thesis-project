@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login – Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="Admin_Login.css"/>
+</head>
+<body>
+
+  <div class="login-bg">
+    <div class="login-card">
+
+      <div class="login-logo">
+        <div class="logo-icon">🛡️</div>
+        <div class="logo-school">Mindful School of Berlyn Achievers</div>
+        <div class="logo-title">Admin Portal</div>
+        <div class="logo-sub">Exam Management System</div>
+      </div>
+
+      <div class="form-group">
+        <label>Admin Email</label>
+        <input type="email" id="email" placeholder="admin@school.com" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <button class="login-btn" id="loginBtn">Sign In as Admin</button>
+
+      <a href="../LogIn_Page/LogIn_Page.html" class="teacher-link">
+        ← Back to Teacher Login
+      </a>
+
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://127.0.0.1:3000/api';
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+      const btn      = document.getElementById('loginBtn');
+
+      if (!email || !password) { errorMsg.textContent = 'Please fill in all fields.'; return; }
+
+      btn.textContent = 'Signing in...';
+      btn.disabled    = true;
+      errorMsg.textContent = '';
+
+      try {
+        const res  = await fetch(`${API}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('adminToken', data.token);
+          localStorage.setItem('adminName',  data.fullname);
+          window.location.href = '../Admin_Page/Admin_Dashboard.html';
+        } else {
+          errorMsg.textContent = data.error || 'Login failed.';
+        }
+      } catch {
+        errorMsg.textContent = 'Cannot connect to server. Make sure XAMPP is running.';
+      }
+
+      btn.textContent = 'Sign In as Admin';
+      btn.disabled    = false;
+    });
+
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+  </script>
+  <script src="../config.js"></script>
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Sample Test Paper – Mindful School of Berlyn Achievers</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12pt;
+      background: #fff;
+      color: #000;
+      padding: 20px;
+    }
+
+    /* ── PRINT: hide browser chrome ── */
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none; }
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .header .school-name {
+      font-size: 14pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .header .exam-title {
+      font-size: 13pt;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+    .header .exam-meta {
+      font-size: 10pt;
+      margin-top: 2px;
+      color: #333;
+    }
+
+    /* ── STUDENT INFO ── */
+    .student-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+      margin-bottom: 14px;
+      border: 1.5px solid #000;
+      padding: 8px 12px;
+    }
+    .student-info .field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11pt;
+    }
+    .student-info .field label { font-weight: bold; white-space: nowrap; }
+    .student-info .field .line {
+      border-bottom: 1px solid #000;
+      flex: 1;
+      min-width: 80px;
+      height: 18px;
+    }
+
+    /* ── INSTRUCTIONS ── */
+    .instructions {
+      font-size: 10pt;
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      margin-bottom: 14px;
+      border-radius: 3px;
+    }
+    .instructions strong { font-size: 11pt; }
+
+    /* ── ANSWER SHEET GRID ── */
+    .answer-sheet {
+      border: 1.5px solid #000;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+    }
+    .answer-sheet h3 {
+      font-size: 11pt;
+      text-transform: uppercase;
+      text-align: center;
+      border-bottom: 1px solid #000;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .bubble-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px 12px;
+    }
+    .bubble-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11pt;
+    }
+    .bubble-row .q-num {
+      min-width: 22px;
+      font-weight: bold;
+      text-align: right;
+    }
+    .bubble {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9pt;
+      font-weight: bold;
+    }
+    /* Pre-filled bubbles to show example answers */
+    .bubble.filled {
+      background: #000;
+      color: #fff;
+    }
+
+    /* ── QUESTIONS ── */
+    .questions-section { margin-bottom: 16px; }
+    .questions-section h3 {
+      font-size: 12pt;
+      font-weight: bold;
+      border-bottom: 1.5px solid #000;
+      padding-bottom: 4px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .question {
+      margin-bottom: 14px;
+    }
+    .question .q-text {
+      font-size: 11pt;
+      margin-bottom: 5px;
+      line-height: 1.5;
+    }
+    .question .q-num-inline {
+      font-weight: bold;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px 16px;
+      padding-left: 20px;
+      font-size: 11pt;
+    }
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .option .bubble-opt {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #000;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── SCORE BOX ── */
+    .score-box {
+      border: 2px solid #000;
+      width: 160px;
+      float: right;
+      text-align: center;
+      padding: 8px;
+      margin-top: -60px;
+      margin-bottom: 10px;
+    }
+    .score-box .label { font-size: 10pt; font-weight: bold; }
+    .score-box .score-line {
+      border-bottom: 1px solid #000;
+      height: 24px;
+      margin: 6px 0;
+    }
+    .score-box .sub { font-size: 9pt; color: #555; }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid #000;
+      padding-top: 6px;
+      font-size: 9pt;
+      color: #444;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ── PRINT BUTTON ── */
+    .no-print {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .no-print button {
+      padding: 10px 30px;
+      font-size: 13pt;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .no-print button:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+
+  <!-- Print button (hidden when printing) -->
+  <div class="no-print">
+    <button onclick="window.print()">🖨️ Print Test Paper</button>
+  </div>
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="school-name">Mindful School of Berlyn Achievers</div>
+    <div class="exam-title">Grade 5 Science – Quarterly Examination</div>
+    <div class="exam-meta">
+      Subject: Science &nbsp;|&nbsp; Quarter: 3rd Quarter &nbsp;|&nbsp; S.Y. 2025–2026
+    </div>
+  </div>
+
+  <!-- ── STUDENT INFO ── -->
+  <div class="student-info">
+    <div class="field">
+      <label>Name:</label><div class="line"></div>
+    </div>
+    <div class="field">
+      <label>Date:</label><div class="line"></div>
+    </div>
+    <div class="field">
+      <label>Grade &amp; Section:</label><div class="line"></div>
+    </div>
+    <div class="field">
+      <label>Score:</label><div class="line"></div>
+    </div>
+  </div>
+
+  <!-- ── INSTRUCTIONS ── -->
+  <div class="instructions">
+    <strong>INSTRUCTIONS:</strong> Read each question carefully. Shade the circle of the letter that corresponds to the correct answer.
+    Use a <strong>No. 2 pencil</strong> only. Erase completely if you change your answer. Do <strong>NOT</strong> use pen.
+  </div>
+
+  <!-- ── ANSWER SHEET ── -->
+  <div class="answer-sheet">
+    <h3>Answer Sheet – Shade Your Answer Below</h3>
+    <div class="bubble-grid">
+
+      <!-- Items 1–25 (5 per row × 5 rows) -->
+      <!-- Row 1: 1–5 -->
+      <div class="bubble-row"><span class="q-num">1.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">2.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">3.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">4.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">5.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+
+      <!-- Row 2: 6–10 -->
+      <div class="bubble-row"><span class="q-num">6.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">7.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">8.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">9.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">10.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+
+      <!-- Row 3: 11–15 -->
+      <div class="bubble-row"><span class="q-num">11.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">12.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">13.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">14.</span>
+        <div class="bubble">A</div><div class="bubble">C</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">15.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+
+      <!-- Row 4: 16–20 -->
+      <div class="bubble-row"><span class="q-num">16.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">17.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">18.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">19.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">20.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+
+      <!-- Row 5: 21–25 -->
+      <div class="bubble-row"><span class="q-num">21.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">22.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">23.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">24.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+      <div class="bubble-row"><span class="q-num">25.</span>
+        <div class="bubble">A</div><div class="bubble">B</div><div class="bubble">C</div><div class="bubble">D</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── QUESTIONS ── -->
+  <div class="questions-section">
+    <h3>I. Multiple Choice (1 point each)</h3>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">1.</span> What is the basic unit of life?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Atom</div>
+        <div class="option"><div class="bubble-opt"></div> B. Cell</div>
+        <div class="option"><div class="bubble-opt"></div> C. Molecule</div>
+        <div class="option"><div class="bubble-opt"></div> D. Organ</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">2.</span> Which planet is known as the Red Planet?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Venus</div>
+        <div class="option"><div class="bubble-opt"></div> B. Jupiter</div>
+        <div class="option"><div class="bubble-opt"></div> C. Mars</div>
+        <div class="option"><div class="bubble-opt"></div> D. Saturn</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">3.</span> What process do plants use to make their own food?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Respiration</div>
+        <div class="option"><div class="bubble-opt"></div> B. Digestion</div>
+        <div class="option"><div class="bubble-opt"></div> C. Photosynthesis</div>
+        <div class="option"><div class="bubble-opt"></div> D. Fermentation</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">4.</span> Which of the following is a conductor of electricity?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Rubber</div>
+        <div class="option"><div class="bubble-opt"></div> B. Plastic</div>
+        <div class="option"><div class="bubble-opt"></div> C. Wood</div>
+        <div class="option"><div class="bubble-opt"></div> D. Copper</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">5.</span> What is the chemical symbol for water?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. CO₂</div>
+        <div class="option"><div class="bubble-opt"></div> B. H₂O</div>
+        <div class="option"><div class="bubble-opt"></div> C. O₂</div>
+        <div class="option"><div class="bubble-opt"></div> D. NaCl</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">6.</span> How many bones are in the adult human body?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. 106</div>
+        <div class="option"><div class="bubble-opt"></div> B. 206</div>
+        <div class="option"><div class="bubble-opt"></div> C. 306</div>
+        <div class="option"><div class="bubble-opt"></div> D. 406</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">7.</span> Which organ pumps blood through the body?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Lungs</div>
+        <div class="option"><div class="bubble-opt"></div> B. Kidneys</div>
+        <div class="option"><div class="bubble-opt"></div> C. Liver</div>
+        <div class="option"><div class="bubble-opt"></div> D. Heart</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">8.</span> What type of energy does the sun produce?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Chemical energy</div>
+        <div class="option"><div class="bubble-opt"></div> B. Nuclear energy</div>
+        <div class="option"><div class="bubble-opt"></div> C. Mechanical energy</div>
+        <div class="option"><div class="bubble-opt"></div> D. Sound energy</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">9.</span> What is the largest organ of the human body?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Liver</div>
+        <div class="option"><div class="bubble-opt"></div> B. Brain</div>
+        <div class="option"><div class="bubble-opt"></div> C. Skin</div>
+        <div class="option"><div class="bubble-opt"></div> D. Lungs</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">10.</span> Which gas do humans exhale when they breathe out?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Oxygen</div>
+        <div class="option"><div class="bubble-opt"></div> B. Nitrogen</div>
+        <div class="option"><div class="bubble-opt"></div> C. Carbon Dioxide</div>
+        <div class="option"><div class="bubble-opt"></div> D. Hydrogen</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">11.</span> What is the force that pulls objects toward the Earth?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Friction</div>
+        <div class="option"><div class="bubble-opt"></div> B. Magnetism</div>
+        <div class="option"><div class="bubble-opt"></div> C. Gravity</div>
+        <div class="option"><div class="bubble-opt"></div> D. Inertia</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">12.</span> Which of the following is NOT a state of matter?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Solid</div>
+        <div class="option"><div class="bubble-opt"></div> B. Liquid</div>
+        <div class="option"><div class="bubble-opt"></div> C. Gas</div>
+        <div class="option"><div class="bubble-opt"></div> D. Energy</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">13.</span> What is the closest star to Earth?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Sirius</div>
+        <div class="option"><div class="bubble-opt"></div> B. Polaris</div>
+        <div class="option"><div class="bubble-opt"></div> C. The Sun</div>
+        <div class="option"><div class="bubble-opt"></div> D. Alpha Centauri</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">14.</span> Which part of the plant absorbs water from the soil?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Leaves</div>
+        <div class="option"><div class="bubble-opt"></div> B. Stem</div>
+        <div class="option"><div class="bubble-opt"></div> C. Roots</div>
+        <div class="option"><div class="bubble-opt"></div> D. Flowers</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">15.</span> What instrument is used to measure temperature?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Barometer</div>
+        <div class="option"><div class="bubble-opt"></div> B. Thermometer</div>
+        <div class="option"><div class="bubble-opt"></div> C. Microscope</div>
+        <div class="option"><div class="bubble-opt"></div> D. Compass</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">16.</span> What is the speed of light (approximately)?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. 300,000 km/s</div>
+        <div class="option"><div class="bubble-opt"></div> B. 3,000 km/s</div>
+        <div class="option"><div class="bubble-opt"></div> C. 30,000 km/s</div>
+        <div class="option"><div class="bubble-opt"></div> D. 3,000,000 km/s</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">17.</span> Which animal is a mammal?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Crocodile</div>
+        <div class="option"><div class="bubble-opt"></div> B. Salmon</div>
+        <div class="option"><div class="bubble-opt"></div> C. Eagle</div>
+        <div class="option"><div class="bubble-opt"></div> D. Dolphin</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">18.</span> What layer of the Earth is made of molten rock?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Crust</div>
+        <div class="option"><div class="bubble-opt"></div> B. Mantle</div>
+        <div class="option"><div class="bubble-opt"></div> C. Inner Core</div>
+        <div class="option"><div class="bubble-opt"></div> D. Atmosphere</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">19.</span> What is the main source of energy for most living things on Earth?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Wind</div>
+        <div class="option"><div class="bubble-opt"></div> B. Water</div>
+        <div class="option"><div class="bubble-opt"></div> C. The Sun</div>
+        <div class="option"><div class="bubble-opt"></div> D. Oil</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">20.</span> What happens to water when it freezes?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. It expands</div>
+        <div class="option"><div class="bubble-opt"></div> B. It contracts</div>
+        <div class="option"><div class="bubble-opt"></div> C. It evaporates</div>
+        <div class="option"><div class="bubble-opt"></div> D. It disappears</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">21.</span> Which vitamin does the body produce when exposed to sunlight?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Vitamin A</div>
+        <div class="option"><div class="bubble-opt"></div> B. Vitamin B</div>
+        <div class="option"><div class="bubble-opt"></div> C. Vitamin C</div>
+        <div class="option"><div class="bubble-opt"></div> D. Vitamin D</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">22.</span> What is the powerhouse of the cell?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Nucleus</div>
+        <div class="option"><div class="bubble-opt"></div> B. Ribosome</div>
+        <div class="option"><div class="bubble-opt"></div> C. Mitochondria</div>
+        <div class="option"><div class="bubble-opt"></div> D. Cell Wall</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">23.</span> Which of these is a renewable source of energy?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Coal</div>
+        <div class="option"><div class="bubble-opt"></div> B. Natural gas</div>
+        <div class="option"><div class="bubble-opt"></div> C. Solar power</div>
+        <div class="option"><div class="bubble-opt"></div> D. Petroleum</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">24.</span> What is the boiling point of water at sea level?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. 50°C</div>
+        <div class="option"><div class="bubble-opt"></div> B. 75°C</div>
+        <div class="option"><div class="bubble-opt"></div> C. 100°C</div>
+        <div class="option"><div class="bubble-opt"></div> D. 150°C</div>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-text"><span class="q-num-inline">25.</span> Which part of the human body is responsible for pumping oxygenated blood to the rest of the body?</div>
+      <div class="options">
+        <div class="option"><div class="bubble-opt"></div> A. Right Atrium</div>
+        <div class="option"><div class="bubble-opt"></div> B. Left Ventricle</div>
+        <div class="option"><div class="bubble-opt"></div> C. Right Ventricle</div>
+        <div class="option"><div class="bubble-opt"></div> D. Left Atrium</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="footer">
+    <span>Mindful School of Berlyn Achievers &nbsp;|&nbsp; S.Y. 2025–2026</span>
+    <span>Grade 5 Science – 3rd Quarter Exam &nbsp;|&nbsp; 25 items</span>
+    <span>Page 1 of 1</span>
+  </div>
+
+</body>
+</html>

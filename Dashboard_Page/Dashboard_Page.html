@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../Component/Navbar.css"/>
+  <link rel="stylesheet" href="Dashboard_Page.css" />
+</head>
+<body data-page="dashboard">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="layout">
+    <main class="main-content">
+
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Dashboard</h2>
+          <p class="page-subtitle">Overview of Your Exam Management System</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+              <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+              <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+              <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-sections">—</span>
+            <span class="stat-label">Total Sections</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-students">—</span>
+            <span class="stat-label">Total Students</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon yellow">
+            <svg viewBox="0 0 20 20" fill="none">
+              <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M7 7h6M7 11h6M7 15h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-questionnaires">—</span>
+            <span class="stat-label">Questionnaires</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <svg viewBox="0 0 20 20" fill="none">
+              <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M7 8l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-answerkeys">—</span>
+            <span class="stat-label">Answer Keys</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon orange">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M4 15.5A2.5 2.5 0 0 1 6.5 13H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M6.5 2H17v16H6.5A2.5 2.5 0 0 1 4 15.5v-11A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-subjects">—</span>
+            <span class="stat-label">Total Subjects</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon teal">
+            <svg viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="3" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M7 17h6M10 14v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-records">—</span>
+            <span class="stat-label">Exam Records</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity + Chart Row -->
+      <div class="bottom-row">
+
+        <!-- Recent Activity -->
+        <div class="activity-card">
+          <div class="card-header">
+            <span class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Recent Activity
+            </span>
+          </div>
+          <div id="recentActivity" class="activity-list">
+            <div class="activity-loading">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="activity-card">
+          <div class="card-header">
+            <span class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Class Performance
+            </span>
+          </div>
+          <div id="chartWrap" class="chart-wrap">
+            <canvas id="perfChart"></canvas>
+            <div id="chartEmpty" class="chart-empty" style="display:none;">No records yet</div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="../config.js"></script>
+  <script src="../Component/Navbar.js"></script>
+  <script src="Dashboard_Page.js"></script>
+</body>
+</html>

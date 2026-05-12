@@ -1,0 +1,139 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Print Questionnaire</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="print()" *ngIf="questionnaire">
+        <ion-icon name="print-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div style="padding:16px;">
+
+    <!-- Filters -->
+    <div class="field-group">
+      <label class="field-label">Section</label>
+      <select class="field-input" [(ngModel)]="selectedSection" (change)="onSectionChange()">
+        <option value="">Select section</option>
+        <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Subject</label>
+      <select class="field-input" [(ngModel)]="selectedSubject" (change)="onSubjectChange()">
+        <option value="">Select subject</option>
+        <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Questionnaire</label>
+      <select class="field-input" [(ngModel)]="selectedQ" (change)="loadQuestionnaire()">
+        <option value="">Select questionnaire</option>
+        <option *ngFor="let q of questionnaires" [value]="q.id">{{ q.title }}</option>
+      </select>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!selectedQ" class="empty-state">
+      <ion-icon name="print-outline"></ion-icon>
+      <h3>Select a questionnaire</h3>
+      <p>to preview and print</p>
+    </div>
+
+    <!-- Preview -->
+    <div *ngIf="selectedQ && questionnaire" class="exam-preview">
+
+      <!-- Header -->
+      <div class="exam-header">
+        <div class="exam-school">Mindful School of Berlyn Achievers</div>
+        <div class="exam-title">{{ questionnaire.title }}</div>
+        <span class="exam-type-badge">{{ questionnaire.type }}</span>
+      </div>
+
+      <!-- Student info -->
+      <div class="exam-info">
+        <div class="info-row">
+          <span class="info-label">Name:</span>
+          <div class="info-line"></div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Section:</span>
+          <span class="info-val">{{ questionnaire.section_name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Subject:</span>
+          <span class="info-val">{{ questionnaire.subject_name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <div class="info-line"></div>
+        </div>
+      </div>
+
+      <!-- Parts -->
+      <div *ngFor="let part of getParts(); let pi = index" class="exam-part">
+        <div class="part-header-row">
+          <span class="part-roman">{{ toRoman(pi + 1) }}.</span>
+          <span class="part-label-text">{{ getPartLabel(part.type) }}</span>
+        </div>
+        <div class="part-direction" *ngIf="part.direction">{{ part.direction }}</div>
+
+        <div *ngFor="let q of part.questions; let qi = index" class="question-item">
+          <span class="q-num">{{ getQuestionNumber(pi, qi) }}.</span>
+          <div class="q-body">
+            <div class="q-text">{{ q.text }}</div>
+
+            <!-- Multiple choice - 2 column grid -->
+            <div *ngIf="part.type === 'multiple_choice'" class="mc-choices">
+              <div *ngFor="let letter of ['A','B','C','D']" class="mc-choice">
+                <span class="mc-letter">{{ letter }}.</span>
+                <span>{{ q.choices?.[letter] || '' }}</span>
+              </div>
+            </div>
+
+            <!-- True/False -->
+            <div *ngIf="part.type === 'true_false'" class="tf-choices">
+              <span class="tf-option">○ True</span>
+              <span class="tf-option">○ False</span>
+            </div>
+
+            <!-- Identification -->
+            <div *ngIf="part.type === 'identification'" class="id-blank">
+              Answer: ___________________________
+            </div>
+
+            <!-- Essay -->
+            <div *ngIf="part.type === 'essay'" class="essay-lines">
+              <div class="essay-line" *ngFor="let l of [1,2,3,4,5]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score box -->
+      <div class="score-row">
+        <div class="score-box">
+          <div class="score-label">SCORE</div>
+          <div class="score-blank">___ / {{ getTotalItems() }}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Print button -->
+    <button class="print-btn" (click)="print()" *ngIf="selectedQ && questionnaire">
+      <ion-icon name="print-outline"></ion-icon>
+      Share / Print as PDF
+    </button>
+
+  </div>
+</ion-content>

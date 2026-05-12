@@ -1,0 +1,109 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()"><ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon></ion-button>
+    </ion-buttons>
+    <ion-title>Students</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openModal()"><ion-icon name="add-outline" slot="icon-only"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div style="padding:16px 16px 0;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" [(ngModel)]="searchQuery"
+        (input)="onSearch()" placeholder="Search by name, student ID, section..." />
+      <button class="search-clear" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+    </div>
+  </div>
+
+  <div style="padding:14px 16px 0;">
+    <select class="field-input" [(ngModel)]="selectedSection" (change)="onSectionChange()">
+      <option value="">All Sections</option>
+      <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+    </select>
+  </div>
+  <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+  <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
+    <ion-icon name="people-outline"></ion-icon>
+    <h3>No students yet</h3>
+    <p>Tap + to add your first student</p>
+  </div>
+  <p *ngIf="!isLoading && filtered.length > 0" style="padding:12px 16px 0;font-size:13px;color:#6b7280;font-weight:600;margin:0;">
+    {{ students.length }} student{{ students.length !== 1 ? 's' : '' }}
+  </p>
+  <div *ngIf="!isLoading && filtered.length > 0" style="padding:10px 16px 16px;">
+    <div *ngFor="let s of students; let i = index" class="item-card">
+      <div class="avatar" [style.background]="getColor(i)">{{ getInitials(s.first_name, s.last_name) }}</div>
+      <div class="item-info">
+        <div class="item-title">{{ s.last_name }}, {{ s.first_name }}</div>
+        <div class="item-sub">ID: {{ s.student_id }}</div>
+        <div class="item-sub green">{{ s.section_name || '—' }}</div>
+      </div>
+      <div class="item-actions">
+        <button class="action-btn edit" (click)="openEditModal(s)"><ion-icon name="create-outline"></ion-icon></button>
+        <button class="action-btn delete" (click)="confirmDelete(s)"><ion-icon name="trash-outline"></ion-icon></button>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<ion-modal [isOpen]="showModal" (didDismiss)="closeModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ editing ? 'Edit Student' : 'Add Student' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()"><ion-icon name="close-outline" slot="icon-only"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="field-group">
+            <label class="field-label">First Name *</label>
+            <input class="field-input" [(ngModel)]="form.first_name" placeholder="Juan" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Last Name *</label>
+            <input class="field-input" [(ngModel)]="form.last_name" placeholder="Dela Cruz" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Student ID *</label>
+          <input class="field-input" [(ngModel)]="form.student_id" placeholder="2024-0001" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Gender</label>
+          <select class="field-input" [(ngModel)]="form.gender">
+            <option value="">Select gender</option>
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Section *</label>
+          <select class="field-input" [(ngModel)]="form.section_id">
+            <option value="">Select section</option>
+            <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </div>
+        <button class="submit-btn" (click)="save()" [disabled]="isSaving">
+          {{ isSaving ? 'Saving...' : (editing ? 'Update Student' : 'Save Student') }}
+        </button>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-footer>
+  <app-bottom-nav activePage="students"></app-bottom-nav>
+</ion-footer>

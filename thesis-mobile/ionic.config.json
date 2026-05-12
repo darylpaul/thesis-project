@@ -1,0 +1,7 @@
+{
+  "name": "thesis-mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

@@ -1,0 +1,177 @@
+<ion-content [fullscreen]="true" scroll-y="true">
+  <div class="wrapper">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-box">
+          <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
+            <path d="M32 14L6 26L32 38L58 26L32 14Z" fill="#F5A623"/>
+            <path d="M20 32V44C20 44 25 50 32 50C39 50 44 44 44 44V32L32 38L20 32Z" fill="#F5A623"/>
+            <line x1="52" y1="26" x2="52" y2="42" stroke="#F5A623" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="52" cy="44" r="3" fill="#F5A623"/>
+          </svg>
+        </div>
+        <div class="header-text">
+          <div class="header-title">Mindful School of Berlyn Achievers</div>
+          <div class="header-sub">Exam Management System</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="help-btn" (click)="openTutorial()" title="Tutorial">❓</button>
+        <button class="menu-btn" (click)="openMenu()">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <div class="stat-card" (click)="goTo('students')">
+        <div class="card-info">
+          <div class="card-count blue">{{ stats.students }}</div>
+          <div class="card-label">Students</div>
+        </div>
+        <div class="card-icon blue-circle">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="stat-card" (click)="goTo('subjects')">
+        <div class="card-info">
+          <div class="card-count purple">{{ stats.subjects }}</div>
+          <div class="card-label">Subjects</div>
+        </div>
+        <div class="card-icon purple-circle">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="stat-card" (click)="goTo('sections')">
+        <div class="card-info">
+          <div class="card-count green">{{ stats.sections }}</div>
+          <div class="card-label">Sections</div>
+        </div>
+        <div class="card-icon green-circle">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="scan-card" (click)="goTo('scan')">
+        <div class="scan-icon-wrap">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#1a2eaa" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
+        <div class="scan-text">
+          <div class="scan-title">Start Scanning</div>
+          <div class="scan-sub">Tap to capture and grade exam papers instantly. Results are automatically synced to your dashboard.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- TUTORIAL OVERLAY -->
+  <div class="tutorial-overlay" *ngIf="showTutorial">
+    <div class="tutorial-card">
+      <div class="tutorial-icon">{{ TUTORIAL_STEPS[tutorialStep].icon }}</div>
+      <div class="tutorial-title">{{ TUTORIAL_STEPS[tutorialStep].title }}</div>
+      <div class="tutorial-text">{{ TUTORIAL_STEPS[tutorialStep].text }}</div>
+      <div class="tutorial-dots">
+        <span class="tutorial-dot"
+          *ngFor="let s of TUTORIAL_STEPS; let i = index"
+          [class.active]="i === tutorialStep">
+        </span>
+      </div>
+      <div class="tutorial-btns">
+        <button class="tut-btn-skip" (click)="closeTutorial()">Skip</button>
+        <div class="tut-btn-group">
+          <button class="tut-btn-prev" *ngIf="tutorialStep > 0" (click)="tutorialPrev()">← Back</button>
+          <button class="tut-btn-next" (click)="tutorialNext()">
+            {{ tutorialStep < TUTORIAL_STEPS.length - 1 ? 'Next →' : 'Done ✓' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER OVERLAY -->
+  <div class="drawer-overlay" *ngIf="menuOpen" (click)="closeMenu()"></div>
+
+  <!-- DRAWER -->
+  <div class="drawer" [class.open]="menuOpen">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+          <path d="M32 14L6 26L32 38L58 26L32 14Z" fill="#F5A623"/>
+          <path d="M20 32V44C20 44 25 50 32 50C39 50 44 44 44 44V32L32 38L20 32Z" fill="#F5A623"/>
+          <line x1="52" y1="26" x2="52" y2="42" stroke="#F5A623" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="52" cy="44" r="3" fill="#F5A623"/>
+        </svg>
+      </div>
+      <div class="drawer-name">{{ fullname }}</div>
+      <div class="drawer-email">{{ email }}</div>
+    </div>
+    <div class="drawer-item" (click)="navigate('questionnaires')">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      <span>Questionnaires</span>
+    </div>
+    <div class="drawer-item" (click)="navigate('answer-keys')">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <polyline points="9 15 11 17 15 13"/>
+      </svg>
+      <span>Answer Keys</span>
+    </div>
+    <div class="drawer-item" (click)="navigate('records')">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>Records</span>
+    </div>
+    <div class="drawer-item" (click)="navigate('print')">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      <span>Print</span>
+    </div>
+    <div class="drawer-item logout" (click)="logout()">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#e8b800" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span class="logout-text">Logout</span>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- BOTTOM NAV FIXED OUTSIDE ION-CONTENT -->
+<ion-footer>
+  <app-bottom-nav activePage="dashboard"></app-bottom-nav>
+</ion-footer>

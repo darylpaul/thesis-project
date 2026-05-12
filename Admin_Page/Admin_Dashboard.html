@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="Admin_Dashboard.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="admin-nav">
+    <div class="nav-left">
+      <div class="nav-logo">🛡️</div>
+      <div class="nav-title">
+        <div class="nav-school">Mindful School of Berlyn Achievers</div>
+        <div class="nav-sub">Admin Dashboard</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <span class="nav-admin" id="adminName"></span>
+      <button class="logout-btn" id="logoutBtn">⬅ Logout</button>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="sidebar-btn active" data-tab="overview">
+        <span class="sb-icon">📊</span> Overview
+      </button>
+      <button class="sidebar-btn" data-tab="teachers">
+        <span class="sb-icon">👩‍🏫</span> Teachers
+      </button>
+      <button class="sidebar-btn" data-tab="logs">
+        <span class="sb-icon">📋</span> Activity Logs
+      </button>
+      <button class="sidebar-btn" data-tab="subjects">
+        <span class="sb-icon">📚</span> Subjects
+      </button>
+      <button class="sidebar-btn" data-tab="archive">
+        <span class="sb-icon">🗄️</span> Archive
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="admin-main">
+
+      <!-- OVERVIEW TAB -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="tab-header">
+          <h2 class="tab-title">System Overview</h2>
+          <p class="tab-sub">Real-time statistics of the exam management system</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon">👩‍🏫</div>
+            <div class="stat-num" id="stat-teachers">—</div>
+            <div class="stat-label">Teachers</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon">📄</div>
+            <div class="stat-num" id="stat-questionnaires">—</div>
+            <div class="stat-label">Questionnaires</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-num" id="stat-answerkeys">—</div>
+            <div class="stat-label">Answer Keys</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">📝</div>
+            <div class="stat-num" id="stat-records">—</div>
+            <div class="stat-label">Exam Records</div>
+          </div>
+          <div class="stat-card teal">
+            <div class="stat-icon">🏫</div>
+            <div class="stat-num" id="stat-sections">—</div>
+            <div class="stat-label">Sections</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon">👨‍🎓</div>
+            <div class="stat-num" id="stat-students">—</div>
+            <div class="stat-label">Students</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Recent Activity</h3>
+          </div>
+          <div id="recentLogs" class="logs-list"></div>
+        </div>
+      </div>
+
+      <!-- TEACHERS TAB -->
+      <div class="tab-content" id="tab-teachers">
+        <div class="tab-header-row">
+          <div>
+            <h2 class="tab-title">Teachers</h2>
+            <p class="tab-sub">Only admin can create and manage teacher accounts</p>
+          </div>
+          <button class="btn-add-teacher" id="addTeacherBtn">
+            + Add Teacher
+          </button>
+        </div>
+
+        <div class="section-card">
+          <div class="search-bar">
+            <input type="text" id="teacherSearch" placeholder="🔍 Search by name or email..." />
+          </div>
+          <div class="table-wrap">
+            <table class="admin-table" id="teachersTable">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Questionnaires</th>
+                  <th>Records</th>
+                  <th>Last Active</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teachersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGS TAB -->
+      <!-- SUBJECTS TAB -->
+      <div class="tab-content" id="tab-subjects">
+        <div class="tab-header">
+          <h2 class="tab-title">Subjects</h2>
+          <p class="tab-sub">School-wide subjects managed by admin — teachers can view but not edit</p>
+        </div>
+        <div class="section-card">
+          <div class="logs-filters">
+            <input type="text" id="subjectSearch" placeholder="🔍 Search subjects..."
+              style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;outline:none;flex:1;min-width:200px;"
+              oninput="filterSubjects()" />
+            <button class="btn-add-teacher" id="addSubjectBtn">+ Add Subject</button>
+            <button class="refresh-btn" onclick="loadSubjects()">🔄 Refresh</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Subject Name</th>
+                <th>Code</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subjectsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ARCHIVE TAB -->
+      <div class="tab-content" id="tab-archive">
+        <div class="tab-header">
+          <h2 class="tab-title">Archive</h2>
+          <p class="tab-sub">Deleted items are kept here for 30 days — only admin can restore or permanently delete</p>
+        </div>
+        <div class="section-card">
+          <div class="logs-filters">
+            <input type="text" id="archiveSearch" placeholder="🔍 Search archived items..."
+              style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;outline:none;flex:1;min-width:200px;"
+              oninput="filterArchive()" />
+            <select id="archiveFilter" onchange="filterArchive()">
+              <option value="">All Types</option>
+              <option value="sections">Sections</option>
+              <option value="students">Students</option>
+              <option value="subjects">Subjects</option>
+              <option value="questionnaires">Questionnaires</option>
+              <option value="answerkeys">Answer Keys</option>
+              <option value="records">Records</option>
+              <option value="users">Teachers</option>
+            </select>
+            <button class="refresh-btn" onclick="loadArchive()">🔄 Refresh</button>
+          </div>
+          <div id="archiveList">
+            <div style="text-align:center;padding:48px;color:#9ca3af;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin:0 auto 12px;display:block;">
+                <polyline points="21 8 21 21 3 21 3 8"/>
+                <rect x="1" y="3" width="22" height="5"/>
+                <line x1="10" y1="12" x2="14" y2="12"/>
+              </svg>
+              No archived items found
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-logs">
+        <div class="tab-header">
+          <h2 class="tab-title">Activity Logs</h2>
+          <p class="tab-sub">All teacher actions on web and mobile app</p>
+        </div>
+        <div class="section-card">
+          <div class="logs-filters">
+            <input type="text" id="logsSearch" placeholder="🔍 Search by teacher name or action..."
+              style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;outline:none;flex:1;min-width:200px;"
+              oninput="filterLogs()" />
+            <select id="logsFilter">
+              <option value="">All Actions</option>
+              <option value="LOGIN">Login</option>
+              <option value="CREATE_QUESTIONNAIRE">Create Questionnaire</option>
+              <option value="UPDATE_QUESTIONNAIRE">Update Questionnaire</option>
+              <option value="DELETE_QUESTIONNAIRE">Delete Questionnaire</option>
+              <option value="CREATE_ANSWERKEY">Create Answer Key</option>
+              <option value="SAVE_RECORD">Save Record</option>
+              <option value="CREATE_STUDENT">Create Student</option>
+              <option value="CREATE_SECTION">Create Section</option>
+            </select>
+            <select id="platformFilter">
+              <option value="">All Platforms</option>
+              <option value="web">Web</option>
+              <option value="app">Mobile App</option>
+            </select>
+            <button class="refresh-btn" id="refreshLogs">🔄 Refresh</button>
+          </div>
+          <div id="allLogs" class="logs-list"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ADD TEACHER MODAL -->
+  <div class="modal-overlay" id="addTeacherOverlay">
+    <div class="modal-box">
+      <!-- Modal Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:#eff2ff;
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a2eaa" stroke-width="2.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+              <line x1="12" y1="3" x2="12" y2="1"/>
+              <line x1="19" y1="7" x2="21" y2="7"/>
+            </svg>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:18px;">Add New Teacher</h3>
+            <p style="margin:0;font-size:12px;color:#9ca3af;font-weight:500;border:none;padding:0;">
+              Create a teacher account. Share the credentials with the teacher.
+            </p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('addTeacherOverlay').style.display='none'"
+          style="background:none;border:none;font-size:20px;color:#9ca3af;
+          cursor:pointer;line-height:1;padding:4px;">×</button>
+      </div>
+      <div style="height:1.5px;background:#f1f5f9;margin:14px 0 18px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" id="newTeacherFirstName" placeholder="e.g. Maria" />
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" id="newTeacherLastName" placeholder="e.g. Santos" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Gender *</label>
+        <select id="newTeacherGender" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;outline:none;">
+          <option value="">Select gender</option>
+          <option value="female">Female (Ms.)</option>
+          <option value="male">Male (Mr.)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <div style="display:flex;align-items:center;border:1.5px solid #d1d5db;border-radius:8px;overflow:hidden;background:#fff;"
+          onfocusin="this.style.borderColor='#1a2eaa'" onfocusout="this.style.borderColor='#d1d5db'">
+          <input type="text" id="newTeacherEmail"
+            placeholder="username"
+            autocomplete="off"
+            style="flex:1;border:none;outline:none;padding:10px 12px;font-size:14px;background:transparent;" />
+          <span style="background:#f3f4f6;padding:10px 12px;font-size:13px;font-weight:700;color:#6b7280;border-left:1.5px solid #d1d5db;white-space:nowrap;">
+            @mindfulschool.com
+          </span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password *</label>
+        <input type="password" id="newTeacherPassword"
+          placeholder="e.g. Teacher@123"
+          autocomplete="new-password"
+          oninput="updateStrength('newTeacherPassword', 'newTeacherStrength')" />
+
+        <!-- Password strength bar -->
+        <div id="newTeacherStrength" style="margin-top:8px;display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Strength</span>
+            <span id="newTeacherStrengthLabel" style="font-size:11px;font-weight:800;"></span>
+          </div>
+          <div style="height:6px;background:#e5e7eb;border-radius:10px;overflow:hidden;">
+            <div id="newTeacherStrengthBar" style="height:100%;border-radius:10px;transition:all 0.4s ease;width:0;"></div>
+          </div>
+        </div>
+
+        <!-- Requirements checklist -->
+        <div style="margin-top:10px;background:#f0f4ff;border:1.5px solid #c7d2fe;
+          border-radius:10px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a2eaa" stroke-width="2.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span style="font-size:11px;font-weight:800;color:#1e2d6b;
+              text-transform:uppercase;letter-spacing:0.6px;">Password Requirements</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+            <div id="req-length"  class="pw-req">
+              <span class="req-icon">●</span> 8+ characters
+            </div>
+            <div id="req-upper"   class="pw-req">
+              <span class="req-icon">●</span> 1 uppercase (A-Z)
+            </div>
+            <div id="req-special" class="pw-req">
+              <span class="req-icon">●</span> 1 special (!@#$%)
+            </div>
+            <div id="req-number"  class="pw-req">
+              <span class="req-icon">●</span> 1 number (0-9)
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="error-msg" id="addTeacherError"></div>
+      <div style="height:1.5px;background:#f1f5f9;margin:16px 0 14px;"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="addTeacherCancelBtn">Cancel</button>
+        <button class="btn-save" id="addTeacherSaveBtn" style="display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Create Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT SUBJECT MODAL -->
+  <div class="modal-overlay" id="subjectOverlay">
+    <div class="modal-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:#eff2ff;
+            display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a2eaa" stroke-width="2.5">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 id="subjectModalTitle" style="margin:0;font-size:18px;">Add Subject</h3>
+            <p style="margin:0;font-size:12px;color:#9ca3af;font-weight:500;border:none;padding:0;">
+              Manage school-wide subjects
+            </p>
+          </div>
+        </div>
+        <button onclick="closeSubjectModal()" style="background:none;border:none;font-size:20px;color:#9ca3af;cursor:pointer;">×</button>
+      </div>
+      <div style="height:1.5px;background:#f1f5f9;margin:14px 0 18px;"></div>
+      <div class="form-group">
+        <label>Subject Name *</label>
+        <input type="text" id="subjectName" placeholder="e.g. Mathematics" />
+      </div>
+      <div class="form-group">
+        <label>Subject Code</label>
+        <input type="text" id="subjectCode" placeholder="e.g. MATH101" />
+      </div>
+      <div class="error-msg" id="subjectError"></div>
+      <div style="height:1.5px;background:#f1f5f9;margin:16px 0 14px;"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeSubjectModal()">Cancel</button>
+        <button class="btn-save" id="subjectSaveBtn">Save Subject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE TEACHER MODAL -->
+  <div class="modal-overlay" id="deleteOverlay">
+    <div class="modal-box">
+      <h3>🗑️ Delete Teacher</h3>
+      <p>Are you sure you want to delete <strong id="deleteTeacherName"></strong>?<br>This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="btn-delete" id="deleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESET PASSWORD MODAL -->
+  <div class="modal-overlay" id="resetOverlay">
+    <div class="modal-box">
+      <h3>🔑 Reset Password</h3>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:14px;">Set a new password for <strong id="resetTeacherName"></strong></p>
+      <div class="form-group">
+        <label>New Password *</label>
+        <input type="password" id="newPassword"
+          placeholder="Min 8 chars, 1 uppercase, 1 special (!@#$%)"
+          autocomplete="new-password"
+          oninput="updateStrength('newPassword', 'resetStrength')" />
+        <div id="resetStrength" style="margin-top:6px;display:none;">
+          <div style="height:5px;background:#e5e7eb;border-radius:10px;overflow:hidden;">
+            <div id="resetStrengthBar" style="height:100%;border-radius:10px;transition:all 0.3s;"></div>
+          </div>
+          <div id="resetStrengthLabel" style="font-size:11px;font-weight:700;margin-top:3px;"></div>
+        </div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:4px;">
+          Must have: 8+ characters · 1 uppercase (A-Z) · 1 special character (!@#$%)
+        </div>
+      </div>
+      <div class="error-msg" id="resetError"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="resetCancelBtn">Cancel</button>
+        <button class="btn-save" id="resetSaveBtn">Reset Password</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="Admin_Dashboard.js"></script>
+  <script src="../Component/AuthDelete.js"></script>
+</body>
+</html>

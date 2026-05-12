@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exam Records – Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+
+  <!-- Shared navbar + sidebar styles -->
+  <link rel="stylesheet" href="../Component/Navbar.css"/>
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="Records_Page.css"/>
+</head>
+
+<body data-page="records">
+
+  <!-- Navbar + Sidebar injected here -->
+  <div id="navbar-placeholder"></div>
+
+  <div class="layout">
+    <main class="main-content">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Exam Records</h2>
+          <p class="page-subtitle">View and Export Examination Results</p>
+        </div>
+        <button class="btn-export" id="exportBtn" style="display:none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export CSV
+        </button>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label class="filter-label">Section</label>
+          <div class="select-wrap">
+            <select id="sectionFilter">
+              <option value="">Select Section</option>
+            </select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+              fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Subject</label>
+          <div class="select-wrap">
+            <select id="subjectFilter">
+              <option value="">Select Subject</option>
+            </select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+              fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar-wrap" id="recordsSearchWrap" style="display:none;">
+        <div class="search-input-wrap">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="search-input" id="recordsSearch" placeholder="Search by student name or ID..." oninput="handleSearch(this.value)" />
+          <button class="search-clear" id="recordsSearchClear" onclick="clearSearch()" style="display:none;">✕</button>
+        </div>
+      </div>
+
+      <!-- Records Container -->
+      <div class="records-container" id="recordsContainer">
+
+        <!-- Prompt State -->
+        <div class="prompt-state" id="promptState">
+          <div class="prompt-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" fill="none"
+              viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+              <rect x="9" y="3" width="6" height="4" rx="1"/>
+              <line x1="9" y1="12" x2="15" y2="12"/>
+              <line x1="9" y1="16" x2="12" y2="16"/>
+            </svg>
+          </div>
+          <p class="prompt-text">Select a Section and Subject to View Exam Records</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" fill="none"
+              viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+              <rect x="9" y="3" width="6" height="4" rx="1"/>
+              <line x1="9" y1="12" x2="15" y2="12"/>
+              <line x1="9" y1="16" x2="12" y2="16"/>
+            </svg>
+          </div>
+          <p class="empty-text">No exam records found for this selection.</p>
+          <p class="empty-hint">Records are created when students are scanned via the exam scanner.</p>
+        </div>
+
+        <!-- Records Table -->
+        <div class="table-wrap" id="tableWrap" style="display:none;">
+
+          <!-- Summary Cards -->
+          <div class="summary-row" id="summaryRow"></div>
+
+          <!-- Table -->
+          <table class="records-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Student Name</th>
+                <th>Student ID</th>
+                <th>Exam / Answer Key</th>
+                <th>Score</th>
+                <th>Percentage</th>
+                <th>Grade</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recordsTableBody"></tbody>
+          </table>
+
+          <!-- Table Footer -->
+          <div class="table-footer" id="tableFooter"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== VIEW RECORD MODAL ===== -->
+  <div class="modal-overlay" id="viewOverlay">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="viewTitle">Record Details</h3>
+          <div class="view-meta" id="viewMeta"></div>
+        </div>
+        <button class="modal-close" id="viewClose">&times;</button>
+      </div>
+      <div class="modal-body" id="viewBody"></div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="viewCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="deleteOverlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Delete Record</h3>
+        <button class="modal-close" id="deleteClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="delete-msg">Are you sure you want to delete the record for <strong id="deleteRecordName"></strong>? This cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="btn-delete" id="deleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Shared navbar loader -->
+  <script src="../Component/Navbar.js"></script>
+  <!-- Page script -->
+  <script src="Records_Page.js"></script>
+</body>
+</html>

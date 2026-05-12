@@ -1,0 +1,111 @@
+<ion-content [fullscreen]="true">
+  <div class="login-wrapper">
+
+    <!-- Logo -->
+    <div class="logo-section">
+      <div class="logo-box">
+        <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+          <path d="M32 14L6 26L32 38L58 26L32 14Z" fill="#F5A623"/>
+          <path d="M20 32V44C20 44 25 50 32 50C39 50 44 44 44 44V32L32 38L20 32Z" fill="#F5A623"/>
+          <line x1="52" y1="26" x2="52" y2="42" stroke="#F5A623" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="52" cy="44" r="3" fill="#F5A623"/>
+        </svg>
+      </div>
+      <h1 class="school-name">Mindful School of<br/>Berlyn Achievers</h1>
+      <p class="school-sub">Exam Management System</p>
+    </div>
+
+    <!-- Card -->
+    <div class="form-card">
+      <h2 class="form-title">Welcome Back</h2>
+      <p class="form-sub">Sign in to your account</p>
+
+      <div class="field-group">
+        <label class="field-label">Email</label>
+        <input
+          class="field-input"
+          type="email"
+          placeholder="teacher@school.edu"
+          [(ngModel)]="email"
+        />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <div class="password-wrap">
+          <input
+            class="field-input"
+            [type]="showPass ? 'text' : 'password'"
+            placeholder="Enter your password"
+            [(ngModel)]="password"
+          />
+          <button class="eye-btn" (click)="showPass = !showPass">
+            {{ showPass ? '🙈' : '👁️' }}
+          </button>
+        </div>
+      </div>
+
+      <p class="error-text" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+      <button class="submit-btn" (click)="login()" [disabled]="isLoading">
+        {{ isLoading ? 'Logging in...' : 'Log In' }}
+      </button>
+
+      <!-- Contact admin instead of signup -->
+      <div class="contact-admin-box">
+        <span class="contact-icon">🛡️</span>
+        <p class="contact-text">
+          Don't have an account?<br/>
+          <strong>Contact your school admin</strong> to get access.
+        </p>
+      </div>
+
+      <button class="help-link" (click)="showHelp = true">❓ Need help logging in?</button>
+
+    </div>
+
+  </div>
+
+  <!-- HELP MODAL -->
+  <div class="help-overlay" *ngIf="showHelp" (click)="showHelp = false">
+    <div class="help-card" (click)="$event.stopPropagation()">
+      <div class="help-header">
+        <span class="help-header-icon">❓</span>
+        <span class="help-header-title">Need Help Logging In?</span>
+        <button class="help-close" (click)="showHelp = false">✕</button>
+      </div>
+
+      <div class="help-item">
+        <span class="help-item-icon">🔑</span>
+        <div>
+          <div class="help-item-title">Can't log in?</div>
+          <div class="help-item-text">Your account is created by your school administrator. Contact your admin to get your credentials or have your password reset.</div>
+        </div>
+      </div>
+
+      <div class="help-item">
+        <span class="help-item-icon">🎓</span>
+        <div>
+          <div class="help-item-title">First time here?</div>
+          <div class="help-item-text">This app lets you scan and grade exams, manage questionnaires, and track student records. You need an account from your admin to start.</div>
+        </div>
+      </div>
+
+      <div class="help-item">
+        <span class="help-item-icon">🔒</span>
+        <div>
+          <div class="help-item-title">Forgot your password?</div>
+          <div class="help-item-text">There is no self-reset option. Ask your administrator to update your password from the admin portal.</div>
+        </div>
+      </div>
+
+      <div class="help-contact-box">
+        <span>🛡️</span>
+        <span>For all account issues, contact your <strong>school administrator</strong>.</span>
+      </div>
+
+      <button class="help-ok-btn" (click)="showHelp = false">Got it</button>
+    </div>
+  </div>
+
+</ion-content>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subjects – Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../Component/Navbar.css"/>
+  <link rel="stylesheet" href="Subject_Page.css"/>
+</head>
+<body data-page="subjects">
+
+  <!-- Navbar + Sidebar injected here -->
+  <div id="navbar-placeholder"></div>
+
+  <div class="layout">
+    <main class="main-content">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Subjects</h2>
+          <p class="page-subtitle">Manage academic subjects</p>
+        </div>
+        <button class="btn-add" id="addSubjectBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Subject
+        </button>
+      </div>
+
+      <!-- Subjects Container -->
+      <!-- Search Bar -->
+      <div class="search-bar-wrap">
+        <div class="search-input-wrap">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search subjects by name or code..." oninput="handleSearch(this.value)" />
+          <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+        </div>
+      </div>
+
+      <div class="subjects-container" id="subjectsContainer">
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none"
+              viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <p class="empty-text">No subjects yet</p>
+          <button class="btn-create-first" id="createFirstBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Create First Subject
+          </button>
+        </div>
+
+        <!-- Subjects Grid -->
+        <div class="subjects-grid" id="subjectsGrid" style="display:none;"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== ADD / EDIT SUBJECT MODAL ===== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Subject</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="subjectName">Subject Name <span class="required">*</span></label>
+          <input type="text" id="subjectName" placeholder="e.g. Mathematics"/>
+          <span class="error-msg" id="subjectNameError"></span>
+        </div>
+        <div class="form-group">
+          <label for="subjectCode">Subject Code</label>
+          <input type="text" id="subjectCode" placeholder="e.g. MATH-101"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="subjectGrade">Grade Level</label>
+            <select id="subjectGrade">
+              <option value="">Select grade</option>
+              <option>Grade 7</option>
+              <option>Grade 8</option>
+              <option>Grade 9</option>
+              <option>Grade 10</option>
+              <option>Grade 11</option>
+              <option>Grade 12</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="subjectColor">Color Tag</label>
+            <select id="subjectColor">
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="purple">Purple</option>
+              <option value="orange">Orange</option>
+              <option value="pink">Pink</option>
+              <option value="teal">Teal</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="subjectDesc">Description</label>
+          <textarea id="subjectDesc" rows="3" placeholder="Brief description of the subject..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="modalCancel">Cancel</button>
+        <button class="btn-save" id="modalSave">Save Subject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="deleteOverlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Delete Subject</h3>
+        <button class="modal-close" id="deleteClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="delete-msg">Are you sure you want to delete <strong id="deleteSubjectName"></strong>? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="btn-delete" id="deleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../config.js"></script>
+  <script src="../Component/Navbar.js"></script>
+  <script src="Subject_Page.js"></script>
+  <script src="../Component/AuthDelete.js"></script>
+</body>
+</html>

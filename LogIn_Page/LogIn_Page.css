@@ -1,0 +1,247 @@
+/* ===========================
+   RESET & BASE
+=========================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Open Sans', sans-serif;
+  background: radial-gradient(ellipse at 70% 40%, #2a4fd6 0%, #1a2eaa 40%, #0d1a7a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.18;
+}
+
+/* ===========================
+   CARD
+=========================== */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  border: 2.5px solid #e8b800;
+  padding: 48px 52px 40px;
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 48px rgba(10, 20, 90, 0.35);
+  animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===========================
+   LOGO
+=========================== */
+.logo-wrap { position: relative; margin-bottom: 22px; }
+.logo-box {
+  width: 92px; height: 92px; background: #1a2eaa;
+  border-radius: 20px; display: flex; align-items: center;
+  justify-content: center; box-shadow: 0 4px 18px rgba(26,46,170,0.25);
+}
+.logo-box svg { width: 58px; height: 58px; }
+.logo-badge {
+  position: absolute; bottom: -4px; right: -4px;
+  width: 26px; height: 26px; background: #1a2eaa;
+  border: 2.5px solid #fff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-badge::after {
+  content: ''; width: 10px; height: 10px;
+  border-radius: 50%; border: 2px solid #4fc3f7; background: transparent;
+}
+
+/* ===========================
+   HEADING
+=========================== */
+h1 {
+  font-family: 'Montserrat', sans-serif; font-weight: 800;
+  font-size: 1.35rem; color: #1a2eaa; text-align: center;
+  letter-spacing: 0.5px; line-height: 1.35;
+  margin-bottom: 6px; text-transform: uppercase;
+}
+.subtitle { font-size: 0.88rem; color: #6b7280; margin-bottom: 28px; letter-spacing: 0.2px; }
+
+/* ===========================
+   FORM
+=========================== */
+form { width: 100%; }
+.form-group { width: 100%; margin-bottom: 18px; }
+label { display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db;
+  border-radius: 8px; font-size: 0.9rem; font-family: 'Open Sans', sans-serif;
+  color: #111827; background: #f9fafb; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus { border-color: #1a2eaa; box-shadow: 0 0 0 3px rgba(26,46,170,0.12); background: #fff; }
+input::placeholder { color: #9ca3af; }
+input.input-error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 44px; }
+.toggle-pw {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; padding: 0;
+  display: flex; align-items: center;
+}
+
+.error-msg { display: block; font-size: 0.78rem; color: #ef4444; margin-top: 5px; min-height: 16px; }
+
+/* ===========================
+   LOGIN BUTTON
+=========================== */
+.btn-login {
+  width: 100%; padding: 13px; background: #1a2eaa; color: #fff;
+  border: none; border-radius: 8px;
+  font-family: 'Montserrat', sans-serif; font-weight: 700;
+  font-size: 1rem; letter-spacing: 0.5px; cursor: pointer; margin-top: 4px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 3px 12px rgba(26,46,170,0.3);
+}
+.btn-login:hover { background: #142490; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,46,170,0.35); }
+.btn-login:active { transform: translateY(0); }
+.btn-login:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+/* ===========================
+   SIGN UP LINK
+=========================== */
+.signup-text { margin-top: 22px; font-size: 0.875rem; color: #6b7280; }
+.signup-text a { color: #1a2eaa; font-weight: 600; text-decoration: none; transition: color 0.2s; }
+.signup-text a:hover { color: #e8b800; }
+
+/* ===========================
+   ADMIN PORTAL LINK
+=========================== */
+.admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 8px 18px;
+  background: transparent;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-decoration: none;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.admin-link:hover {
+  border-color: #1a2eaa;
+  color: #1a2eaa;
+  background: #eff6ff;
+}
+
+/* ===========================
+   HELP BUTTON
+=========================== */
+.help-btn {
+  position: fixed; bottom: 20px; right: 20px;
+  width: 40px; height: 40px; background: #1a2eaa; color: #fff;
+  border: none; border-radius: 50%; font-size: 1.1rem; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(26,46,170,0.4);
+  font-family: 'Montserrat', sans-serif; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  z-index: 50;
+}
+.help-btn:hover { background: #142490; transform: scale(1.1); }
+
+/* ===========================
+   HELP MODAL
+=========================== */
+.help-backdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.55);
+  align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+.help-backdrop.open { display: flex; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.help-modal {
+  background: #fff; border-radius: 20px;
+  padding: 28px 24px 22px;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  animation: slideUp 0.25s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.help-modal-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+}
+.help-modal-icon { font-size: 26px; }
+.help-modal-title {
+  flex: 1; font-family: 'Montserrat', sans-serif;
+  font-size: 1.05rem; font-weight: 800; color: #1e2d6b; margin: 0;
+}
+.help-modal-close {
+  background: #f3f4f6; border: none; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 14px; cursor: pointer;
+  color: #6b7280; display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.help-modal-close:hover { background: #e5e7eb; color: #111; }
+
+.help-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid #f1f5f9;
+}
+.help-item:last-of-type { border-bottom: none; }
+.help-item-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.help-item-title {
+  font-weight: 700; font-size: 0.88rem; color: #1e2d6b; margin-bottom: 4px;
+}
+.help-item-text { font-size: 0.82rem; color: #4b5563; line-height: 1.55; }
+
+.help-contact-box {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 16px; padding: 12px 14px;
+  background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;
+  font-size: 0.82rem; color: #374151; line-height: 1.5;
+}
+.help-contact-box strong { color: #1a2eaa; }
+
+.help-modal-ok {
+  width: 100%; margin-top: 16px; padding: 12px;
+  background: #1a2eaa; color: #fff; border: none; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-weight: 700;
+  font-size: 0.95rem; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(26,46,170,0.3);
+  transition: background 0.2s;
+}
+.help-modal-ok:hover { background: #142490; }
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+@media (max-width: 500px) {
+  .card { padding: 36px 24px 30px; margin: 16px; }
+  h1 { font-size: 1.15rem; }
+}

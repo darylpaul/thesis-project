@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Students – Mindful School of Berlyn Achievers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../Component/Navbar.css"/>
+  <link rel="stylesheet" href="Student_Page.css"/>
+</head>
+
+<body data-page="students">
+
+  <!-- Navbar + Sidebar injected here -->
+  <div id="navbar-placeholder"></div>
+
+  <div class="layout">
+    <main class="main-content">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Students</h2>
+          <p class="page-subtitle">Manage Student Records</p>
+        </div>
+        <button class="btn-add" id="addStudentBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Student
+        </button>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <label class="filter-label" for="sectionFilter">Filter by Section:</label>
+        <div class="select-wrap">
+          <select id="sectionFilter">
+            <option value="">All Sections</option>
+          </select>
+          <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+            fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar-wrap">
+        <div class="search-input-wrap">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by name, student ID, section..." oninput="handleSearch(this.value)" />
+          <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+        </div>
+      </div>
+
+      <!-- Students Container -->
+      <div class="students-container" id="studentsContainer">
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none"
+              viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <p class="empty-text">No students yet</p>
+          <button class="btn-create-first" id="addFirstStudentBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add First Student
+          </button>
+        </div>
+
+        <!-- Students Table -->
+        <div class="table-wrap" id="tableWrap" style="display:none;">
+          <table class="students-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Student ID</th>
+                <th>Section</th>
+                <th>Gender</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== ADD / EDIT STUDENT MODAL ===== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="studentModal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Student</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="studentFirstName">First Name <span class="required">*</span></label>
+            <input type="text" id="studentFirstName" placeholder="e.g. Juan"/>
+            <span class="error-msg" id="firstNameError"></span>
+          </div>
+          <div class="form-group">
+            <label for="studentLastName">Last Name <span class="required">*</span></label>
+            <input type="text" id="studentLastName" placeholder="e.g. Dela Cruz"/>
+            <span class="error-msg" id="lastNameError"></span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="studentId">Student ID <span class="required">*</span></label>
+            <input type="text" id="studentId" placeholder="e.g. 2024-0001"/>
+            <span class="error-msg" id="studentIdError"></span>
+          </div>
+          <div class="form-group">
+            <label for="studentGender">Gender</label>
+            <select id="studentGender">
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="studentSection">Section <span class="required">*</span></label>
+          <select id="studentSection">
+            <option value="">Select section</option>
+          </select>
+          <span class="error-msg" id="sectionError"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="modalCancel">Cancel</button>
+        <button class="btn-save" id="modalSave">Save Student</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="deleteOverlay">
+    <div class="modal modal-sm" id="deleteModal">
+      <div class="modal-header">
+        <h3>Remove Student</h3>
+        <button class="modal-close" id="deleteClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="delete-msg">Are you sure you want to remove <strong id="deleteStudentName"></strong>? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="btn-delete" id="deleteConfirmBtn">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../config.js"></script>
+  <script src="../Component/Navbar.js"></script>
+  <script src="Student_Page.js"></script>
+  <script src="../Component/AuthDelete.js"></script>
+</body>
+</html>

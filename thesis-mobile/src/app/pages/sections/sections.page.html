@@ -1,0 +1,92 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()"><ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon></ion-button>
+    </ion-buttons>
+    <ion-title>Sections</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openModal()"><ion-icon name="add-outline" slot="icon-only"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div style="padding:16px 16px 0;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" [(ngModel)]="searchQuery"
+        (input)="onSearch()" placeholder="Search sections..." />
+      <button class="search-clear" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+    </div>
+  </div>
+  <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+  <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
+    <ion-icon name="grid-outline"></ion-icon>
+    <h3>{{ searchQuery ? "No results found" : "No sections yet" }}</h3>
+    <p>{{ searchQuery ? "Try a different search" : "Tap + to add your first section" }}</p>
+  </div>
+  <div *ngIf="!isLoading && filtered.length > 0" style="padding:16px;">
+    <div *ngFor="let s of filtered" class="item-card">
+      <div class="item-icon blue"><ion-icon name="grid-outline"></ion-icon></div>
+      <div class="item-info">
+        <div class="item-title">{{ s.name }}</div>
+        <div class="item-sub" *ngIf="s.grade">{{ s.grade }}</div>
+        <div class="item-sub" *ngIf="s.adviser">Adviser: {{ s.adviser }}</div>
+        <div class="item-sub" style="color:#1a2eaa;font-weight:700;">
+          👥 {{ s.studentCount || 0 }} student{{ s.studentCount !== 1 ? 's' : '' }}
+        </div>
+      </div>
+      <div class="item-actions">
+        <button class="action-btn edit" (click)="openEditModal(s)"><ion-icon name="create-outline"></ion-icon></button>
+        <button class="action-btn delete" (click)="confirmDelete(s)"><ion-icon name="trash-outline"></ion-icon></button>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<ion-modal [isOpen]="showModal" (didDismiss)="closeModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ editing ? 'Edit Section' : 'Add Section' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()"><ion-icon name="close-outline" slot="icon-only"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:20px;">
+        <div class="field-group">
+          <label class="field-label">Section Name *</label>
+          <input class="field-input" [(ngModel)]="form.name" placeholder="e.g. Section A" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Grade Level</label>
+          <select class="field-input" [(ngModel)]="form.grade">
+            <option value="">Select grade</option>
+            <option>Grade 7</option><option>Grade 8</option>
+            <option>Grade 9</option><option>Grade 10</option>
+            <option>Grade 11</option><option>Grade 12</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Adviser <span style="font-size:11px;color:#9ca3af;">(auto-filled)</span></label>
+          <input class="field-input" [(ngModel)]="form.adviser" readonly
+            style="background:#f3f4f6;color:#6b7280;" />
+        </div>
+        <button class="submit-btn" (click)="save()" [disabled]="isSaving">
+          {{ isSaving ? 'Saving...' : (editing ? 'Update Section' : 'Save Section') }}
+        </button>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-footer>
+  <app-bottom-nav activePage="sections"></app-bottom-nav>
+</ion-footer>
