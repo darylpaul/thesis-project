@@ -300,7 +300,6 @@
 
   function startTour(step) {
     currentStep = step || 0;
-    localStorage.setItem('tour_step', currentStep);
     if (!backdropEl) buildDOM();
     backdropEl.style.display = '';
     spotEl.style.display = '';
@@ -313,7 +312,6 @@
     if (spotEl)     spotEl.style.display = 'none';
     if (tooltipEl)  tooltipEl.style.display = 'none';
     localStorage.setItem('tour_seen', '1');
-    localStorage.removeItem('tour_step');
   }
 
   function buildDOM() {
@@ -356,10 +354,10 @@
       </div>`;
 
     tooltipEl.querySelector('#tourNext').addEventListener('click', function () {
-      if (isLast) { endTour(); } else { currentStep++; localStorage.setItem('tour_step', currentStep); renderStep(); }
+      if (isLast) { endTour(); } else { currentStep++; renderStep(); }
     });
     const prevBtn = tooltipEl.querySelector('#tourPrev');
-    if (prevBtn) prevBtn.addEventListener('click', function () { currentStep--; localStorage.setItem('tour_step', currentStep); renderStep(); });
+    if (prevBtn) prevBtn.addEventListener('click', function () { currentStep--; renderStep(); });
     const skipBtn = tooltipEl.querySelector('#tourSkip');
     if (skipBtn) skipBtn.addEventListener('click', endTour);
 
@@ -381,7 +379,15 @@
     }
 
     const target = document.querySelector(step.target);
-    if (!target) { currentStep++; if (currentStep < STEPS.length) renderStep(); return; }
+    if (!target) {
+      // Target not found — retry once after a short delay before skipping
+      setTimeout(function () {
+        const retryTarget = document.querySelector(step.target);
+        if (!retryTarget) { currentStep++; if (currentStep < STEPS.length) renderStep(); }
+        else positionStep(step);
+      }, 300);
+      return;
+    }
 
     const r = target.getBoundingClientRect();
 
@@ -436,16 +442,10 @@
       startTour(0);
     });
 
+    // Auto-start for first-time visitors (skip on login/signup pages)
     const path = window.location.pathname.toLowerCase();
     const isPublic = ['login', 'signup'].some(p => path.includes(p));
-    if (isPublic) return;
-
-    const savedStep = localStorage.getItem('tour_step');
-    if (savedStep !== null) {
-      // Resume in-progress tour after page navigation
-      setTimeout(function () { startTour(parseInt(savedStep, 10)); }, 800);
-    } else if (!localStorage.getItem('tour_seen')) {
-      // Auto-start for first-time visitors
+    if (!isPublic && !localStorage.getItem('tour_seen')) {
       setTimeout(function () { startTour(0); }, 800);
     }
   }
