@@ -224,219 +224,82 @@
 // GUIDED TOUR ENGINE
 // ═══════════════════════════════════════════════════════
 (function () {
-  // Inject Tutorial.css once
-  const cssLink = document.createElement('link');
-  cssLink.rel = 'stylesheet';
-  cssLink.href = (function () {
-    const scripts = document.getElementsByTagName('script');
-    for (let i = 0; i < scripts.length; i++) {
-      const src = scripts[i].src || '';
-      if (src.includes('Navbar.js')) return src.replace('Navbar.js', 'Tutorial.css');
-    }
-    return '../Component/Tutorial.css';
-  })();
-  document.head.appendChild(cssLink);
 
   const STEPS = [
-    {
-      title: 'Welcome to the System! 👋',
-      text: "This quick tour covers all the main features. Click Next to continue, or Skip to close.",
-      target: null
-    },
-    {
-      title: '📊 Dashboard',
-      text: 'Your home screen. See a real-time overview of students, sections, questionnaires, answer keys, and exam records.',
-      target: '[data-page="dashboard"]'
-    },
-    {
-      title: '📋 Sections',
-      text: 'Create class sections (e.g., Grade 7-Einstein). Sections group your students and link to their exams.',
-      target: '[data-page="sections"]'
-    },
-    {
-      title: '👥 Students',
-      text: 'Add students and assign them to sections. Each student has a unique ID used during exam scanning and grading.',
-      target: '[data-page="students"]'
-    },
-    {
-      title: '📖 Subjects',
-      text: 'Admin manages the subject list (e.g., Science, Math). All teachers can view subjects and use them in questionnaires.',
-      target: '[data-page="subjects"]'
-    },
-    {
-      title: '📝 Questionnaires',
-      text: 'Create exams with multiple parts — Multiple Choice, True or False, Identification, and Essay. Upload a .json file to reuse an existing exam, or import questions from the Test Bank.',
-      target: '[data-page="questionnaires"]'
-    },
-    {
-      title: '✅ Answer Keys',
-      text: 'Answer keys are auto-generated when you save a questionnaire. They are view-only and used by the scanner to grade student papers.',
-      target: '[data-page="answerkeys"]'
-    },
-    {
-      title: '📈 Exam Records',
-      text: 'View graded results by section and subject. See class averages, highest scores, and pass rates. Switch to "By Student" for individual summaries, or export to CSV.',
-      target: '[data-page="records"]'
-    },
-    {
-      title: '🗄️ Test Bank',
-      text: 'A library of reusable questions by subject and topic. Admin approves questions, teachers can suggest new ones. Import a whole topic into any questionnaire in one click.',
-      target: '[data-page="testbank"]'
-    },
-    {
-      title: '🖨️ Print',
-      text: 'Generate a print-ready version of any questionnaire formatted for distribution to students.',
-      target: '[data-page="print"]'
-    },
-    {
-      title: "You're all set! 🎉",
-      text: "You now know all the main features. Click the ❓ Tutorial button in the top bar anytime to replay this tour.",
-      target: null
-    }
+    { icon: '👋', title: 'Welcome to the System!',  text: 'This quick tour covers all the main features. Click Next to continue, or Skip to close.' },
+    { icon: '📊', title: 'Dashboard',               text: 'Your home screen. See a real-time overview of students, sections, questionnaires, answer keys, and exam records.' },
+    { icon: '📋', title: 'Sections',                text: 'Create class sections (e.g., Grade 7-Einstein). Sections group your students and link to their exams.' },
+    { icon: '👥', title: 'Students',                text: 'Add students and assign them to sections. Each student has a unique ID used during exam scanning and grading.' },
+    { icon: '📖', title: 'Subjects',                text: 'Admin manages the subject list (e.g., Science, Math). All teachers can view subjects and use them in questionnaires.' },
+    { icon: '📝', title: 'Questionnaires',          text: 'Create exams with multiple parts — Multiple Choice, True or False, Identification, and Essay. Upload a .json file to reuse an existing exam, or import questions from the Test Bank.' },
+    { icon: '✅', title: 'Answer Keys',             text: 'Answer keys are auto-generated when you save a questionnaire. They are view-only and used by the scanner to grade student papers.' },
+    { icon: '📈', title: 'Exam Records',            text: 'View graded results by section and subject. See class averages, highest scores, and pass rates. Export to CSV.' },
+    { icon: '🗄️', title: 'Test Bank',              text: 'A library of reusable questions by subject and topic. Admin approves questions, teachers can suggest new ones.' },
+    { icon: '🖨️', title: 'Print',                  text: 'Generate a print-ready version of any questionnaire formatted for distribution to students.' },
+    { icon: '🎉', title: "You're all set!",         text: "You now know all the main features. Click the ❓ Tutorial button in the top bar anytime to replay this tour." }
   ];
 
   let currentStep = 0;
-  let spotEl, tooltipEl, backdropEl;
+  let overlayEl, cardEl;
+
+  function buildDOM() {
+    overlayEl = document.createElement('div');
+    overlayEl.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99998;display:flex;align-items:center;justify-content:center;';
+
+    cardEl = document.createElement('div');
+    cardEl.style.cssText = 'background:#fff;border-radius:20px;padding:36px 32px 28px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.22);text-align:center;position:relative;z-index:99999;';
+
+    overlayEl.appendChild(cardEl);
+    document.body.appendChild(overlayEl);
+  }
 
   function startTour(step) {
     currentStep = step || 0;
     localStorage.setItem('tour_step', currentStep);
-    if (!backdropEl) buildDOM();
-    backdropEl.style.display = '';
-    spotEl.style.display = '';
-    tooltipEl.style.display = '';
+    if (!overlayEl) buildDOM();
+    overlayEl.style.display = 'flex';
     renderStep();
   }
 
   function endTour() {
-    if (backdropEl) backdropEl.style.display = 'none';
-    if (spotEl)     spotEl.style.display = 'none';
-    if (tooltipEl)  tooltipEl.style.display = 'none';
+    if (overlayEl) overlayEl.style.display = 'none';
     localStorage.setItem('tour_seen', '1');
     localStorage.removeItem('tour_step');
   }
 
-  function buildDOM() {
-    backdropEl = document.createElement('div');
-    backdropEl.className = 'tour-backdrop';
-
-    spotEl    = document.createElement('div');
-    spotEl.className = 'tour-spotlight';
-
-    tooltipEl = document.createElement('div');
-    tooltipEl.className = 'tour-tooltip';
-
-    document.body.appendChild(backdropEl);
-    document.body.appendChild(spotEl);
-    document.body.appendChild(tooltipEl);
-  }
-
   function renderStep() {
-    const step = STEPS[currentStep];
+    const step  = STEPS[currentStep];
     const total = STEPS.length;
     const isFirst = currentStep === 0;
     const isLast  = currentStep === total - 1;
 
-    // Dots
     const dots = STEPS.map((_, i) =>
-      `<div class="tour-dot${i === currentStep ? ' active' : ''}"></div>`
+      `<div style="width:8px;height:8px;border-radius:50%;background:${i === currentStep ? '#1a2eaa' : '#d1d5db'};display:inline-block;margin:0 3px;"></div>`
     ).join('');
 
-    tooltipEl.innerHTML = `
-      <div class="tour-step-badge">Step ${currentStep + 1} of ${total}</div>
-      <div class="tour-title">${step.title}</div>
-      <div class="tour-text">${step.text}</div>
-      <div class="tour-dots">${dots}</div>
-      <div class="tour-btns">
-        <button class="tour-btn-skip" id="tourSkip">${isLast ? '' : 'Skip tour'}</button>
-        <div class="tour-btn-group">
-          ${!isFirst ? '<button class="tour-btn-prev" id="tourPrev">← Back</button>' : ''}
-          <button class="tour-btn-next" id="tourNext">${isLast ? 'Done ✓' : 'Next →'}</button>
+    cardEl.innerHTML = `
+      <div style="font-size:48px;margin-bottom:12px;">${step.icon}</div>
+      <div style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:1px;margin-bottom:6px;">STEP ${currentStep + 1} OF ${total}</div>
+      <div style="font-size:20px;font-weight:800;color:#1e2d6b;margin-bottom:10px;">${step.title}</div>
+      <div style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:20px;">${step.text}</div>
+      <div style="margin-bottom:20px;">${dots}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <button id="tourSkip" style="background:none;border:none;color:#9ca3af;font-size:13px;cursor:pointer;padding:8px;">${isLast ? '' : 'Skip tour'}</button>
+        <div style="display:flex;gap:8px;">
+          ${!isFirst ? '<button id="tourPrev" style="padding:9px 18px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;font-weight:700;font-size:13px;cursor:pointer;">← Back</button>' : ''}
+          <button id="tourNext" style="padding:9px 22px;border-radius:10px;border:none;background:#1a2eaa;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">${isLast ? 'Done ✓' : 'Next →'}</button>
         </div>
       </div>`;
 
-    tooltipEl.querySelector('#tourNext').addEventListener('click', function () {
+    cardEl.querySelector('#tourNext').addEventListener('click', function () {
       if (isLast) { endTour(); } else { currentStep++; localStorage.setItem('tour_step', currentStep); renderStep(); }
     });
-    const prevBtn = tooltipEl.querySelector('#tourPrev');
+    const prevBtn = cardEl.querySelector('#tourPrev');
     if (prevBtn) prevBtn.addEventListener('click', function () { currentStep--; localStorage.setItem('tour_step', currentStep); renderStep(); });
-    const skipBtn = tooltipEl.querySelector('#tourSkip');
+    const skipBtn = cardEl.querySelector('#tourSkip');
     if (skipBtn) skipBtn.addEventListener('click', endTour);
-
-    positionStep(step);
   }
 
-  function positionStep(step) {
-    const PAD = 12;
-
-    if (!step.target) {
-      // Center screen — no spotlight
-      spotEl.style.cssText = 'display:none;';
-      tooltipEl.className  = 'tour-tooltip no-arrow';
-      tooltipEl.style.cssText = `
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        display: block;`;
-      return;
-    }
-
-    const target = document.querySelector(step.target);
-    if (!target) {
-      // Target not found — retry once after a short delay before skipping
-      setTimeout(function () {
-        const retryTarget = document.querySelector(step.target);
-        if (!retryTarget) { currentStep++; if (currentStep < STEPS.length) renderStep(); }
-        else positionStep(step);
-      }, 300);
-      return;
-    }
-
-    const r = target.getBoundingClientRect();
-
-    // Position spotlight
-    spotEl.style.cssText = `
-      top:    ${r.top    - PAD}px;
-      left:   ${r.left   - PAD}px;
-      width:  ${r.width  + PAD * 2}px;
-      height: ${r.height + PAD * 2}px;
-      display: block;`;
-    spotEl.className = 'tour-spotlight';
-
-    // Decide tooltip side
-    const viewW = window.innerWidth;
-    const viewH = window.innerHeight;
-    const tipW  = 310;
-    const tipH  = 240;
-
-    let top, left, arrowClass;
-
-    if (r.right + PAD + tipW + 16 < viewW) {
-      // Place to the right
-      left = r.right + PAD + 8;
-      top  = Math.max(10, Math.min(r.top - PAD, viewH - tipH - 10));
-      arrowClass = 'arrow-left';
-    } else if (r.left - PAD - tipW - 16 > 0) {
-      // Place to the left
-      left = r.left - PAD - tipW - 8;
-      top  = Math.max(10, Math.min(r.top - PAD, viewH - tipH - 10));
-      arrowClass = 'arrow-right';
-    } else if (r.bottom + PAD + tipH + 16 < viewH) {
-      // Below
-      top  = r.bottom + PAD + 8;
-      left = Math.max(10, Math.min(r.left, viewW - tipW - 10));
-      arrowClass = 'arrow-top';
-    } else {
-      // Above
-      top  = r.top - PAD - tipH - 8;
-      left = Math.max(10, Math.min(r.left, viewW - tipW - 10));
-      arrowClass = 'arrow-bottom';
-    }
-
-    tooltipEl.style.cssText = `top:${top}px; left:${left}px; transform:none; display:block;`;
-    tooltipEl.className = `tour-tooltip ${arrowClass}`;
-  }
-
-  // Wire up Tutorial button (added after navbar loads)
   function wireTutorial() {
     const btn = document.getElementById('tourHelpBtn');
     if (btn) btn.addEventListener('click', function () {
@@ -445,22 +308,13 @@
       startTour(0);
     });
 
-    // Save step before navigating away so tour resumes on the next page
-    document.querySelectorAll('.sidebar-nav .nav-item').forEach(function (link) {
-      link.addEventListener('click', function () {
-        if (localStorage.getItem('tour_step') !== null) {
-          localStorage.setItem('tour_step', currentStep);
-        }
-      });
-    });
-
     const path = window.location.pathname.toLowerCase();
     const isPublic = ['login', 'signup'].some(p => path.includes(p));
     if (isPublic) return;
 
     const savedStep = localStorage.getItem('tour_step');
     if (savedStep !== null) {
-      setTimeout(function () { startTour(parseInt(savedStep, 10)); }, 800);
+      setTimeout(function () { startTour(parseInt(savedStep, 10)); }, 600);
     } else if (!localStorage.getItem('tour_seen')) {
       setTimeout(function () { startTour(0); }, 800);
     }
