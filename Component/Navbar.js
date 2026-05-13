@@ -300,6 +300,7 @@
 
   function startTour(step) {
     currentStep = step || 0;
+    localStorage.setItem('tour_step', currentStep);
     if (!backdropEl) buildDOM();
     backdropEl.style.display = '';
     spotEl.style.display = '';
@@ -312,6 +313,7 @@
     if (spotEl)     spotEl.style.display = 'none';
     if (tooltipEl)  tooltipEl.style.display = 'none';
     localStorage.setItem('tour_seen', '1');
+    localStorage.removeItem('tour_step');
   }
 
   function buildDOM() {
@@ -354,10 +356,10 @@
       </div>`;
 
     tooltipEl.querySelector('#tourNext').addEventListener('click', function () {
-      if (isLast) { endTour(); } else { currentStep++; renderStep(); }
+      if (isLast) { endTour(); } else { currentStep++; localStorage.setItem('tour_step', currentStep); renderStep(); }
     });
     const prevBtn = tooltipEl.querySelector('#tourPrev');
-    if (prevBtn) prevBtn.addEventListener('click', function () { currentStep--; renderStep(); });
+    if (prevBtn) prevBtn.addEventListener('click', function () { currentStep--; localStorage.setItem('tour_step', currentStep); renderStep(); });
     const skipBtn = tooltipEl.querySelector('#tourSkip');
     if (skipBtn) skipBtn.addEventListener('click', endTour);
 
@@ -439,13 +441,27 @@
     const btn = document.getElementById('tourHelpBtn');
     if (btn) btn.addEventListener('click', function () {
       localStorage.removeItem('tour_seen');
+      localStorage.removeItem('tour_step');
       startTour(0);
     });
 
-    // Auto-start for first-time visitors (skip on login/signup pages)
+    // Save step before navigating away so tour resumes on the next page
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (localStorage.getItem('tour_step') !== null) {
+          localStorage.setItem('tour_step', currentStep);
+        }
+      });
+    });
+
     const path = window.location.pathname.toLowerCase();
     const isPublic = ['login', 'signup'].some(p => path.includes(p));
-    if (!isPublic && !localStorage.getItem('tour_seen')) {
+    if (isPublic) return;
+
+    const savedStep = localStorage.getItem('tour_step');
+    if (savedStep !== null) {
+      setTimeout(function () { startTour(parseInt(savedStep, 10)); }, 800);
+    } else if (!localStorage.getItem('tour_seen')) {
       setTimeout(function () { startTour(0); }, 800);
     }
   }
