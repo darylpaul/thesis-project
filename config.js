@@ -8,9 +8,10 @@
 
 const CONFIG = {
   // ── CHANGE THIS LINE ONLY ──
-  API_URL: 'http://localhost:3000/api',
+  API_URL: 'https://thesis-project-production-0338.up.railway.app/api',
 
   // Examples:
+  // Railway:     'https://thesis-project-production-0338.up.railway.app/api'
   // Local WiFi:  'http://192.168.18.123:3000/api'
   // ngrok:       'https://abc123.ngrok-free.app/api'
   // localhost:   'http://localhost:3000/api'
