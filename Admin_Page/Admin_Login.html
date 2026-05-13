@@ -39,8 +39,9 @@
     </div>
   </div>
 
+  <script src="../config.js"></script>
   <script>
-    const API = 'http://127.0.0.1:3000/api';
+    const API = window.API_URL || 'http://localhost:3000/api';
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
       const email    = document.getElementById('email').value.trim();
@@ -80,6 +81,5 @@
       if (e.key === 'Enter') document.getElementById('loginBtn').click();
     });
   </script>
-  <script src="../config.js"></script>
 </body>
 </html>
