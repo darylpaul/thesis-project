@@ -113,7 +113,7 @@ html, body {
 }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 650px) {
+@media (max-width: 768px) {
   .main-content { margin-left: 0; padding: 20px 14px; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
 }

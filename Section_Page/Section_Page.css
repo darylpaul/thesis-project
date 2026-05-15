@@ -435,7 +435,7 @@ body {
 /* ===========================
    RESPONSIVE
 =========================== */
-@media (max-width: 650px) {
+@media (max-width: 768px) {
   .main-content { margin-left: 0; padding: 20px 14px; }
   .sections-grid { grid-template-columns: 1fr; }
 }

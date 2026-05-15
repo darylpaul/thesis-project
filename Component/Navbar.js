@@ -38,6 +38,11 @@
   const NAVBAR_HTML = `
 <header class="navbar">
   <div class="navbar-left">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <div class="nav-logo-box">
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M32 14L6 26L32 38L58 26L32 14Z" fill="#F5A623"/>
@@ -171,9 +176,16 @@
 
     placeholder.innerHTML = NAVBAR_HTML;
 
+    // Sidebar overlay for mobile
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    overlay.id = 'sidebarOverlay';
+    document.body.appendChild(overlay);
+
     setActiveNavItem();
     loadUserInfo();
     wireLogout();
+    wireHamburger();
   }
 
   function setActiveNavItem() {
@@ -209,6 +221,26 @@
         localStorage.removeItem('gender');
         window.location.href = '../LogIn_Page/LogIn_Page.html';
       }
+    });
+  }
+
+  function wireHamburger() {
+    const hamburger = document.getElementById('hamburgerBtn');
+    const sidebar   = document.querySelector('.sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
+    if (!hamburger || !sidebar || !overlay) return;
+
+    function openSidebar()  { sidebar.classList.add('open'); overlay.classList.add('active'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+
+    hamburger.addEventListener('click', function () {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar when a nav link is clicked on mobile
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(function (link) {
+      link.addEventListener('click', closeSidebar);
     });
   }
 

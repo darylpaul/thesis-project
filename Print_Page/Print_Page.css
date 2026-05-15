@@ -229,7 +229,8 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
 
 @page { margin: 10mm 12mm; size: A4; }
 
-@media (max-width: 650px) {
+@media (max-width: 768px) {
+  .main-content { margin-left: 0; padding: 20px 14px; }
   .filter-bar { flex-direction: column; }
   .info-row-grid { grid-template-columns: 1fr; }
 }
