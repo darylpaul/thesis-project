@@ -205,21 +205,33 @@ app.post('/api/archives/:id/restore', async (req, res) => {
       return val;
     };
 
+    if (Object.keys(filteredData).length === 0)
+      return res.status(400).json({ error: 'No restorable data found in archive.' });
+
     const cols  = Object.keys(filteredData).join(', ');
     const vals  = Object.values(filteredData).map(toMysqlDate);
     const marks = vals.map(() => '?').join(', ');
 
-    await db.query(`REPLACE INTO ${table} (${cols}) VALUES (${marks})`, vals);
+    console.log(`[RESTORE] table=${table} cols=${cols}`);
+    console.log(`[RESTORE] vals=`, vals);
 
-    // Remove from archive
+    // Delete any conflicting row first (same id or email), then insert cleanly
+    if (filteredData.id) {
+      await db.query(`DELETE FROM ${table} WHERE id = ?`, [filteredData.id]).catch(() => {});
+    }
+    if (filteredData.email) {
+      await db.query(`DELETE FROM ${table} WHERE email = ?`, [filteredData.email]).catch(() => {});
+    }
+
+    await db.query(`INSERT INTO ${table} (${cols}) VALUES (${marks})`, vals);
+
     await db.query('DELETE FROM archives WHERE id=?', [req.params.id]);
-
     await logActivity(user.id, user.fullname, 'RESTORE',
       `Restored ${table} "${arc.item_name}"`, 'web');
 
     res.json({ message: 'Item restored!' });
   } catch (err) {
-    console.error('Restore error:', err);
+    console.error('[RESTORE ERROR]', err.message, err.code);
     res.status(500).json({ error: err.message || 'Server error' });
   }
 });

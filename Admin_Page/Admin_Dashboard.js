@@ -303,13 +303,15 @@ document.getElementById('restoreArchiveConfirmBtn').addEventListener('click', as
   if (!pendingRestoreId) return;
   document.getElementById('restoreArchiveOverlay').style.display = 'none';
   try {
-    const res  = await fetch(`${API}/archives/${pendingRestoreId}/restore`, { method: 'POST', headers });
+    const res  = await fetch(`${API}/archives/${pendingRestoreId}/restore`, {
+      method: 'POST', headers, body: JSON.stringify({})
+    });
     const text = await res.text();
     let data = {};
     try { data = JSON.parse(text); } catch { /* non-JSON response */ }
     if (res.ok) { showToast('Item restored successfully!', 'success'); loadArchive(); }
-    else showToast(data.error || `Server error (${res.status})`, 'error');
-  } catch (err) { showToast('Network error: ' + (err.message || 'unknown'), 'error'); }
+    else showToast(data.error || `Error ${res.status}`, 'error');
+  } catch (err) { showToast('Network: ' + (err.message || 'unknown'), 'error'); }
   pendingRestoreId = null;
 });
 
