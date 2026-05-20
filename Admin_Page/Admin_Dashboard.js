@@ -1,5 +1,9 @@
 const API = window.API_URL || 'http://localhost:3000/api';
 
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // ── Auth guard ──
 const adminToken = localStorage.getItem('adminToken');
 const adminName  = localStorage.getItem('adminName');
