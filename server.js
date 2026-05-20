@@ -42,21 +42,40 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// Login rate limiter — 5 attempts per 15 minutes per IP
+// Login rate limiter — 5 wrong attempts triggers lockout: 1 min on 1st offense, 5 mins thereafter
 // Separate maps so teacher and admin lockouts don't affect each other
 const teacherLoginAttempts = new Map();
 const adminLoginAttempts   = new Map();
 function checkLoginRateLimit(ip, store) {
   const now = Date.now();
-  const entry = store.get(ip);
-  if (!entry || entry.resetAt < now) {
-    store.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 });
+  let entry = store.get(ip);
+
+  if (!entry) {
+    store.set(ip, { count: 1, offenses: 0, lockedUntil: null });
     return { allowed: true };
   }
-  if (entry.count >= 5) {
-    const minutesLeft = Math.ceil((entry.resetAt - now) / 60000);
+
+  // Currently locked out
+  if (entry.lockedUntil && entry.lockedUntil > now) {
+    const minutesLeft = Math.ceil((entry.lockedUntil - now) / 60000);
     return { allowed: false, minutesLeft };
   }
+
+  // Lockout just expired — reset attempt count, preserve offense history
+  if (entry.lockedUntil !== null && entry.lockedUntil <= now) {
+    entry.count = 1;
+    entry.lockedUntil = null;
+    return { allowed: true };
+  }
+
+  // 5 failed attempts reached — apply lockout
+  if (entry.count >= 5) {
+    entry.offenses++;
+    const lockMinutes = entry.offenses === 1 ? 1 : 5;
+    entry.lockedUntil = now + lockMinutes * 60 * 1000;
+    return { allowed: false, minutesLeft: lockMinutes };
+  }
+
   entry.count++;
   return { allowed: true };
 }
@@ -172,10 +191,19 @@ app.post('/api/archives/:id/restore', async (req, res) => {
       Object.entries(data).filter(([col]) => allowed.includes(col))
     );
 
-    const cols  = Object.keys(safeData).join(', ');
-    const vals  = Object.values(safeData);
+    // Exclude 'id' — let the DB auto-assign to avoid duplicate key conflicts.
+    // For users (teachers), restore WITH the original id so user_id references stay valid.
+    const keepId = (table === 'users');
+    const filteredData = Object.fromEntries(
+      Object.entries(safeData).filter(([col]) => keepId || col !== 'id')
+    );
+
+    const cols  = Object.keys(filteredData).join(', ');
+    const vals  = Object.values(filteredData);
     const marks = vals.map(() => '?').join(', ');
-    await db.query(`INSERT INTO ${table} (${cols}) VALUES (${marks})`, vals);
+
+    // Use REPLACE INTO so a duplicate id/email doesn't hard-fail
+    await db.query(`REPLACE INTO ${table} (${cols}) VALUES (${marks})`, vals);
 
     // Remove from archive
     await db.query('DELETE FROM archives WHERE id=?', [req.params.id]);
@@ -184,7 +212,10 @@ app.post('/api/archives/:id/restore', async (req, res) => {
       `Restored ${table} "${arc.item_name}"`, 'web');
 
     res.json({ message: 'Item restored!' });
-  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+  } catch (err) {
+    console.error('Restore error:', err);
+    res.status(500).json({ error: err.message || 'Server error' });
+  }
 });
 
 // Permanently delete from archive

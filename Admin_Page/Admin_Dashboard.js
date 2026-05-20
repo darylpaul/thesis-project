@@ -278,9 +278,10 @@ document.getElementById('restoreArchiveConfirmBtn').addEventListener('click', as
   if (!pendingRestoreId) return;
   document.getElementById('restoreArchiveOverlay').style.display = 'none';
   try {
-    const res = await fetch(`${API}/archives/${pendingRestoreId}/restore`, { method: 'POST', headers });
+    const res  = await fetch(`${API}/archives/${pendingRestoreId}/restore`, { method: 'POST', headers });
+    const data = await res.json();
     if (res.ok) { showToast('Item restored successfully!', 'success'); loadArchive(); }
-    else showToast('Could not restore item.', 'error');
+    else showToast(data.error || 'Could not restore item.', 'error');
   } catch { showToast('Server error.', 'error'); }
   pendingRestoreId = null;
 });
