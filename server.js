@@ -441,7 +441,15 @@ app.get('/api/sections', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const [rows] = await db.query('SELECT * FROM sections WHERE user_id=? ORDER BY name ASC', [user.id]);
+    const [rows] = await db.query(
+      `SELECT sections.*, COUNT(students.id) AS students
+       FROM sections
+       LEFT JOIN students ON students.section_id = sections.id
+       WHERE sections.user_id = ?
+       GROUP BY sections.id
+       ORDER BY sections.name ASC`,
+      [user.id]
+    );
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
