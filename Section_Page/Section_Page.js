@@ -14,10 +14,22 @@ let allSectionsData = [];
 
 async function loadSections() {
   try {
-    const res = await fetch(`${API}/sections`, {
-      headers: { 'Authorization': localStorage.getItem('token') }
+    const [secRes, stuRes] = await Promise.all([
+      fetch(`${API}/sections`, { headers: { 'Authorization': localStorage.getItem('token') } }),
+      fetch(`${API}/students`,  { headers: { 'Authorization': localStorage.getItem('token') } })
+    ]);
+    const sections = await secRes.json();
+    const students = await stuRes.json();
+
+    const countMap = {};
+    (Array.isArray(students) ? students : []).forEach(s => {
+      if (s.section_id) countMap[s.section_id] = (countMap[s.section_id] || 0) + 1;
     });
-    allSectionsData = await res.json();
+
+    allSectionsData = (Array.isArray(sections) ? sections : []).map(sec => ({
+      ...sec,
+      students: countMap[sec.id] || 0
+    }));
     renderSections(allSectionsData);
   } catch (err) {
     showToast('Could not load sections. Is the server running?', 'error');
