@@ -111,6 +111,11 @@ app.post('/api/archive', async (req, res) => {
       [table, item_id, item_name, JSON.stringify(item_data), reason, user.id, user.fullname]
     );
 
+    // When deleting a questionnaire, also remove its linked answer key
+    if (table === 'questionnaires') {
+      await db.query('DELETE FROM answerkeys WHERE questionnaire_id=?', [item_id]);
+    }
+
     // Now actually delete from original table
     await db.query(`DELETE FROM ${table} WHERE id=?`, [item_id]);
 
@@ -794,4 +799,25 @@ app.delete('/api/test-bank/:id', requireAdmin, async (req, res) => {
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 
-app.listen(3000, '0.0.0.0', () => console.log('Server running on http://localhost:3000'));
+// ── Create archives table on first run if it doesn't exist ──
+async function initDB() {
+  try {
+    await db.query(`CREATE TABLE IF NOT EXISTS archives (
+      id            INT AUTO_INCREMENT PRIMARY KEY,
+      table_name    VARCHAR(100) NOT NULL,
+      item_id       INT NOT NULL,
+      item_name     VARCHAR(255),
+      item_data     LONGTEXT,
+      reason        TEXT,
+      deleted_by_id INT,
+      deleted_by_name VARCHAR(255),
+      deleted_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      expires_at    TIMESTAMP NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    console.log('DB ready: archives table exists');
+  } catch (err) { console.log('DB init warning:', err.message); }
+}
+
+initDB().then(() => {
+  app.listen(3000, '0.0.0.0', () => console.log('Server running on http://localhost:3000'));
+});
