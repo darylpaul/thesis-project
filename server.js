@@ -191,18 +191,24 @@ app.post('/api/archives/:id/restore', async (req, res) => {
       Object.entries(data).filter(([col]) => allowed.includes(col))
     );
 
-    // Exclude 'id' — let the DB auto-assign to avoid duplicate key conflicts.
-    // For users (teachers), restore WITH the original id so user_id references stay valid.
+    // For users (teachers), keep the original id so user_id references stay valid.
     const keepId = (table === 'users');
     const filteredData = Object.fromEntries(
       Object.entries(safeData).filter(([col]) => keepId || col !== 'id')
     );
 
+    // Convert ISO date strings (from JSON serialization) to MySQL datetime format
+    const toMysqlDate = (val) => {
+      if (val instanceof Date) return val.toISOString().slice(0, 19).replace('T', ' ');
+      if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(val))
+        return val.slice(0, 19).replace('T', ' ');
+      return val;
+    };
+
     const cols  = Object.keys(filteredData).join(', ');
-    const vals  = Object.values(filteredData);
+    const vals  = Object.values(filteredData).map(toMysqlDate);
     const marks = vals.map(() => '?').join(', ');
 
-    // Use REPLACE INTO so a duplicate id/email doesn't hard-fail
     await db.query(`REPLACE INTO ${table} (${cols}) VALUES (${marks})`, vals);
 
     // Remove from archive

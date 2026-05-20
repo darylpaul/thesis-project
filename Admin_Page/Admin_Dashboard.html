@@ -384,6 +384,33 @@
     </div>
   </div>
 
+  <!-- DELETE SUBJECT MODAL -->
+  <div class="modal-overlay" id="deleteSubjectOverlay">
+    <div class="modal-box">
+      <h3>🗑️ Delete Subject</h3>
+      <p>Are you sure you want to delete <strong id="deleteSubjectName"></strong>?<br>This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="deleteSubjectCancelBtn">Cancel</button>
+        <button class="btn-delete" id="deleteSubjectConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHER CREDENTIALS MODAL -->
+  <div class="modal-overlay" id="credentialsOverlay">
+    <div class="modal-box">
+      <h3>✅ Teacher Account Created</h3>
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:13px;line-height:1.8;">
+        <div><strong>Name:</strong> <span id="credName"></span></div>
+        <div><strong>Email:</strong> <span id="credEmail"></span></div>
+      </div>
+      <p style="font-size:12px;color:#6b7280;">Share these login credentials with the teacher privately.</p>
+      <div class="modal-actions">
+        <button class="btn-save" id="credentialsDoneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
   <!-- DELETE TEACHER MODAL -->
   <div class="modal-overlay" id="deleteOverlay">
     <div class="modal-box">

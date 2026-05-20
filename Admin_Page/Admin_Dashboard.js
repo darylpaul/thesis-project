@@ -134,14 +134,30 @@ document.getElementById('subjectSaveBtn').addEventListener('click', async () => 
   } catch { errEl.textContent = 'Server error.'; }
 });
 
-async function deleteSubject(id, name) {
-  if (!confirm(`Delete subject "${name}"?`)) return;
+let deleteSubjectId = null;
+
+function deleteSubject(id, name) {
+  deleteSubjectId = id;
+  document.getElementById('deleteSubjectName').textContent = name;
+  document.getElementById('deleteSubjectOverlay').style.display = 'flex';
+}
+
+document.getElementById('deleteSubjectCancelBtn').addEventListener('click', () => {
+  document.getElementById('deleteSubjectOverlay').style.display = 'none';
+  deleteSubjectId = null;
+});
+
+document.getElementById('deleteSubjectConfirmBtn').addEventListener('click', async () => {
+  if (!deleteSubjectId) return;
+  const name = document.getElementById('deleteSubjectName').textContent;
+  document.getElementById('deleteSubjectOverlay').style.display = 'none';
   try {
-    const res = await fetch(`${API}/subjects/${id}`, { method: 'DELETE', headers });
+    const res = await fetch(`${API}/subjects/${deleteSubjectId}`, { method: 'DELETE', headers });
     if (res.ok) { showToast(`"${name}" deleted.`, 'success'); loadSubjects(); }
     else showToast('Could not delete subject.', 'error');
   } catch { showToast('Server error.', 'error'); }
-}
+  deleteSubjectId = null;
+});
 
 // ═══════════════════════════════════════
 // ARCHIVE
@@ -288,10 +304,12 @@ document.getElementById('restoreArchiveConfirmBtn').addEventListener('click', as
   document.getElementById('restoreArchiveOverlay').style.display = 'none';
   try {
     const res  = await fetch(`${API}/archives/${pendingRestoreId}/restore`, { method: 'POST', headers });
-    const data = await res.json();
+    const text = await res.text();
+    let data = {};
+    try { data = JSON.parse(text); } catch { /* non-JSON response */ }
     if (res.ok) { showToast('Item restored successfully!', 'success'); loadArchive(); }
-    else showToast(data.error || 'Could not restore item.', 'error');
-  } catch { showToast('Server error.', 'error'); }
+    else showToast(data.error || `Server error (${res.status})`, 'error');
+  } catch (err) { showToast('Network error: ' + (err.message || 'unknown'), 'error'); }
   pendingRestoreId = null;
 });
 
@@ -580,7 +598,9 @@ document.getElementById('addTeacherSaveBtn').addEventListener('click', async () 
       addTeacherOverlay.style.display = 'none';
       loadTeachers();
       loadStats();
-      alert(`✅ Teacher account created!\n\nName: ${fullname}\nEmail: ${email}\n\nPlease share the login credentials with the teacher privately.`);
+      document.getElementById('credName').textContent  = fullname;
+      document.getElementById('credEmail').textContent = email;
+      document.getElementById('credentialsOverlay').style.display = 'flex';
     } else {
       errEl.textContent = data.error || 'Could not create account.';
     }
@@ -590,6 +610,10 @@ document.getElementById('addTeacherSaveBtn').addEventListener('click', async () 
 
   document.getElementById('addTeacherSaveBtn').textContent = 'Create Account';
   document.getElementById('addTeacherSaveBtn').disabled    = false;
+});
+
+document.getElementById('credentialsDoneBtn').addEventListener('click', () => {
+  document.getElementById('credentialsOverlay').style.display = 'none';
 });
 
 // ═══════════════════════════════════════
@@ -630,7 +654,7 @@ document.getElementById('resetSaveBtn').addEventListener('click', async () => {
 
     if (res.ok) {
       resetOverlay.style.display = 'none';
-      alert(`✅ Password reset successfully!\n\nPlease share the new password with the teacher privately.`);
+      showToast('Password reset successfully! Share the new password with the teacher.', 'success');
     } else {
       errEl.textContent = data.error || 'Could not reset password.';
     }
