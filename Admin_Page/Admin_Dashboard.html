@@ -396,6 +396,30 @@
     </div>
   </div>
 
+  <!-- RESTORE ARCHIVE MODAL -->
+  <div class="modal-overlay" id="restoreArchiveOverlay">
+    <div class="modal-box">
+      <h3>↩ Restore Item</h3>
+      <p>Restore <strong id="restoreArchiveName"></strong> back to the system?<br>It will be active again and removed from the archive.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="restoreArchiveCancelBtn">Cancel</button>
+        <button class="btn-save" id="restoreArchiveConfirmBtn">Restore</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERMANENT DELETE ARCHIVE MODAL -->
+  <div class="modal-overlay" id="permanentDeleteOverlay">
+    <div class="modal-box">
+      <h3>🗑️ Delete Forever</h3>
+      <p>Permanently delete <strong id="permanentDeleteName"></strong>?<br>This <strong style="color:#dc2626;">CANNOT be undone.</strong></p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="permanentDeleteCancelBtn">Cancel</button>
+        <button class="btn-delete" id="permanentDeleteConfirmBtn">Delete Forever</button>
+      </div>
+    </div>
+  </div>
+
   <!-- RESET PASSWORD MODAL -->
   <div class="modal-overlay" id="resetOverlay">
     <div class="modal-box">

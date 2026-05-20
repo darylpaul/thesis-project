@@ -253,23 +253,53 @@ function renderArchive(data) {
     </div>`;
 }
 
-async function restoreArchive(id) {
-  if (!confirm('Restore this item back to the system?')) return;
+let pendingRestoreId      = null;
+let pendingPermanentId    = null;
+
+function restoreArchive(id) {
+  const item = allArchiveData.find(a => a.id === id);
+  pendingRestoreId = id;
+  document.getElementById('restoreArchiveName').textContent = item ? item.item_name : 'this item';
+  document.getElementById('restoreArchiveOverlay').style.display = 'flex';
+}
+
+function permanentDelete(id, name) {
+  pendingPermanentId = id;
+  document.getElementById('permanentDeleteName').textContent = name;
+  document.getElementById('permanentDeleteOverlay').style.display = 'flex';
+}
+
+document.getElementById('restoreArchiveCancelBtn').addEventListener('click', () => {
+  document.getElementById('restoreArchiveOverlay').style.display = 'none';
+  pendingRestoreId = null;
+});
+
+document.getElementById('restoreArchiveConfirmBtn').addEventListener('click', async () => {
+  if (!pendingRestoreId) return;
+  document.getElementById('restoreArchiveOverlay').style.display = 'none';
   try {
-    const res = await fetch(`${API}/archives/${id}/restore`, { method:'POST', headers });
+    const res = await fetch(`${API}/archives/${pendingRestoreId}/restore`, { method: 'POST', headers });
     if (res.ok) { showToast('Item restored successfully!', 'success'); loadArchive(); }
     else showToast('Could not restore item.', 'error');
   } catch { showToast('Server error.', 'error'); }
-}
+  pendingRestoreId = null;
+});
 
-async function permanentDelete(id, name) {
-  if (!confirm(`Permanently delete "${name}"?\nThis CANNOT be undone.`)) return;
+document.getElementById('permanentDeleteCancelBtn').addEventListener('click', () => {
+  document.getElementById('permanentDeleteOverlay').style.display = 'none';
+  pendingPermanentId = null;
+});
+
+document.getElementById('permanentDeleteConfirmBtn').addEventListener('click', async () => {
+  if (!pendingPermanentId) return;
+  document.getElementById('permanentDeleteOverlay').style.display = 'none';
   try {
-    const res = await fetch(`${API}/archives/${id}`, { method:'DELETE', headers });
+    const res = await fetch(`${API}/archives/${pendingPermanentId}`, { method: 'DELETE', headers });
     if (res.ok) { showToast('Permanently deleted.', 'success'); loadArchive(); }
     else showToast('Could not delete.', 'error');
   } catch { showToast('Server error.', 'error'); }
-}
+  pendingPermanentId = null;
+});
 
 // ═══════════════════════════════════════
 // STATS
