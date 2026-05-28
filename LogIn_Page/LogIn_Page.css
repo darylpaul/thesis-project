@@ -53,12 +53,11 @@ body::before {
    LOGO
 =========================== */
 .logo-wrap { position: relative; margin-bottom: 22px; }
-.logo-box {
-  width: 92px; height: 92px; background: #1a2eaa;
-  border-radius: 20px; display: flex; align-items: center;
-  justify-content: center; box-shadow: 0 4px 18px rgba(26,46,170,0.25);
+.logo-img {
+  width: 92px; height: 92px;
+  border-radius: 50%; object-fit: cover;
+  box-shadow: 0 4px 18px rgba(26,46,170,0.25);
 }
-.logo-box svg { width: 58px; height: 58px; }
 .logo-badge {
   position: absolute; bottom: -4px; right: -4px;
   width: 26px; height: 26px; background: #1a2eaa;

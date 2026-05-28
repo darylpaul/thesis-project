@@ -17,15 +17,13 @@ ion-content {
   margin-bottom: 32px;
 }
 
-.logo-box {
-  width: 76px;
-  height: 76px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.logo-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
   margin: 0 auto 14px;
+  display: block;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 

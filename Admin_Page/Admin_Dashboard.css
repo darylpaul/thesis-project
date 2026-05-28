@@ -9,7 +9,7 @@ body { font-family: 'Open Sans', sans-serif; background: #f0f2f7; min-height: 10
   padding: 0 24px; z-index: 100;
 }
 .nav-left  { display: flex; align-items: center; gap: 12px; }
-.nav-logo  { font-size: 26px; }
+.nav-logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .nav-school { font-size: 11px; font-weight: 700; color: #e8b800; text-transform: uppercase; letter-spacing: 0.5px; }
 .nav-sub   { font-size: 14px; font-weight: 800; color: #fff; }
 .nav-right { display: flex; align-items: center; gap: 14px; }

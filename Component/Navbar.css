@@ -20,19 +20,13 @@
   align-items: center; 
   gap: 12px; }
 
-.nav-logo-box {
-  width: 36px; 
+.nav-logo-img {
+  width: 36px;
   height: 36px;
-  background: #142490; 
-  border-radius: 8px;
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
+  border-radius: 50%;
+  object-fit: cover;
   flex-shrink: 0;
 }
-.nav-logo-box svg { 
-  width: 24px; 
-  height: 24px; }
 
 .nav-title { display: flex; flex-direction: column; }
 
