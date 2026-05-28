@@ -43,14 +43,7 @@
         <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
-    <div class="nav-logo-box">
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M32 14L6 26L32 38L58 26L32 14Z" fill="#F5A623"/>
-        <path d="M20 32V44C20 44 25 50 32 50C39 50 44 44 44 44V32L32 38L20 32Z" fill="#F5A623"/>
-        <line x1="52" y1="26" x2="52" y2="42" stroke="#F5A623" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="52" cy="44" r="3" fill="#F5A623"/>
-      </svg>
-    </div>
+    <img src="../Logo.jpg" alt="School Logo" class="nav-logo-img"/>
     <div class="nav-title">
       <span class="nav-school">Mindful School of Berlyn Achievers</span>
       <span class="nav-sub">Exam Management System</span>
@@ -148,6 +141,15 @@
       Print
     </a>
   </nav>
+  <div class="sidebar-qr">
+    <div class="sidebar-qr-label">📱 Mobile Scanner App</div>
+    <img
+      src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://mobileexamscanner.netlify.app"
+      alt="Scan to open mobile app"
+      class="sidebar-qr-img"
+    />
+    <div class="sidebar-qr-caption">Scan to open the<br>mobile scanner</div>
+  </div>
 </aside>
 `;
 
