@@ -93,20 +93,25 @@ ion-content {
 
 .password-wrap {
   position: relative;
-
-  .field-input { padding-right: 44px; }
 }
 
-.eye-btn {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
+.show-pass-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
   cursor: pointer;
-  font-size: 18px;
-  padding: 0;
+}
+
+.show-pass-check {
+  width: 18px;
+  height: 18px;
+  accent-color: #1a2eaa;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .error-text {

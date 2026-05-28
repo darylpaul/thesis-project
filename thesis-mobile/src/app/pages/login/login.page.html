@@ -32,10 +32,11 @@
             placeholder="Enter your password"
             [(ngModel)]="password"
           />
-          <button class="eye-btn" (click)="showPass = !showPass">
-            {{ showPass ? '🙈' : '👁️' }}
-          </button>
         </div>
+        <label class="show-pass-label">
+          <input type="checkbox" class="show-pass-check" [(ngModel)]="showPass"/>
+          Show Password
+        </label>
       </div>
 
       <p class="error-text" *ngIf="errorMsg">{{ errorMsg }}</p>
