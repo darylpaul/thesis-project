@@ -37,7 +37,6 @@ document.querySelectorAll('.sidebar-btn').forEach(btn => {
     if (btn.dataset.tab === 'teachers') loadTeachers();
     if (btn.dataset.tab === 'logs')     loadAllLogs();
     if (btn.dataset.tab === 'archive')  loadArchive();
-    if (btn.dataset.tab === 'subjects') loadSubjects();
   });
 });
 
@@ -45,119 +44,6 @@ document.querySelectorAll('.sidebar-btn').forEach(btn => {
 loadStats();
 loadRecentLogs();
 
-// ═══════════════════════════════════════
-// SUBJECTS
-// ═══════════════════════════════════════
-let editingSubjectId = null;
-
-function filterSubjects() {
-  const q     = (document.getElementById('subjectSearch')?.value || '').toLowerCase();
-  const rows  = document.querySelectorAll('#subjectsBody tr');
-  rows.forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-  });
-}
-
-async function loadSubjects() {
-  try {
-    const res  = await fetch(`${API}/subjects`, { headers });
-    const data = await res.json();
-    const tbody = document.getElementById('subjectsBody');
-    if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:32px;color:#9ca3af;">No subjects yet. Click + Add Subject to create one.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = data.map((s, i) => `
-      <tr>
-        <td style="color:#9ca3af;font-weight:700;">${i+1}</td>
-        <td style="font-weight:700;color:#1e2d6b;">${escHtml(s.name)}</td>
-        <td><span style="background:#f3f4f6;color:#374151;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;">${escHtml(s.code||'—')}</span></td>
-        <td>
-          <div style="display:flex;gap:6px;">
-            <button onclick="openEditSubject(${s.id},'${escHtml(s.name)}','${escHtml(s.code||'')}')"
-              style="padding:5px 12px;background:#eff2ff;color:#1a2eaa;border:1.5px solid #c7d2fe;
-              border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
-              ✏️ Edit
-            </button>
-            <button onclick="deleteSubject(${s.id},'${escHtml(s.name)}')"
-              style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;
-              border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
-              🗑 Delete
-            </button>
-          </div>
-        </td>
-      </tr>`).join('');
-  } catch { showToast('Could not load subjects.', 'error'); }
-}
-
-document.getElementById('addSubjectBtn').addEventListener('click', () => {
-  editingSubjectId = null;
-  document.getElementById('subjectModalTitle').textContent = 'Add Subject';
-  document.getElementById('subjectName').value  = '';
-  document.getElementById('subjectCode').value  = '';
-  document.getElementById('subjectError').textContent = '';
-  document.getElementById('subjectOverlay').style.display = 'flex';
-  setTimeout(() => document.getElementById('subjectName').focus(), 100);
-});
-
-function openEditSubject(id, name, code) {
-  editingSubjectId = id;
-  document.getElementById('subjectModalTitle').textContent = 'Edit Subject';
-  document.getElementById('subjectName').value  = name;
-  document.getElementById('subjectCode').value  = code;
-  document.getElementById('subjectError').textContent = '';
-  document.getElementById('subjectOverlay').style.display = 'flex';
-}
-
-function closeSubjectModal() {
-  document.getElementById('subjectOverlay').style.display = 'none';
-  editingSubjectId = null;
-}
-
-document.getElementById('subjectSaveBtn').addEventListener('click', async () => {
-  const name  = document.getElementById('subjectName').value.trim();
-  const code  = document.getElementById('subjectCode').value.trim();
-  const errEl = document.getElementById('subjectError');
-  if (!name) { errEl.textContent = 'Subject name is required.'; return; }
-
-  const url    = editingSubjectId ? `${API}/subjects/${editingSubjectId}` : `${API}/subjects`;
-  const method = editingSubjectId ? 'PUT' : 'POST';
-
-  try {
-    const res  = await fetch(url, { method, headers, body: JSON.stringify({ name, code }) });
-    const data = await res.json();
-    if (res.ok) {
-      closeSubjectModal();
-      loadSubjects();
-      showToast(editingSubjectId ? 'Subject updated!' : 'Subject added!', 'success');
-    } else { errEl.textContent = data.error || 'Could not save subject.'; }
-  } catch { errEl.textContent = 'Server error.'; }
-});
-
-let deleteSubjectId = null;
-
-function deleteSubject(id, name) {
-  deleteSubjectId = id;
-  document.getElementById('deleteSubjectName').textContent = name;
-  document.getElementById('deleteSubjectOverlay').style.display = 'flex';
-}
-
-document.getElementById('deleteSubjectCancelBtn').addEventListener('click', () => {
-  document.getElementById('deleteSubjectOverlay').style.display = 'none';
-  deleteSubjectId = null;
-});
-
-document.getElementById('deleteSubjectConfirmBtn').addEventListener('click', async () => {
-  if (!deleteSubjectId) return;
-  const name = document.getElementById('deleteSubjectName').textContent;
-  document.getElementById('deleteSubjectOverlay').style.display = 'none';
-  try {
-    const res = await fetch(`${API}/subjects/${deleteSubjectId}`, { method: 'DELETE', headers });
-    if (res.ok) { showToast(`"${name}" deleted.`, 'success'); loadSubjects(); }
-    else showToast('Could not delete subject.', 'error');
-  } catch { showToast('Server error.', 'error'); }
-  deleteSubjectId = null;
-});
 
 // ═══════════════════════════════════════
 // ARCHIVE

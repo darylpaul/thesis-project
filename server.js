@@ -165,7 +165,7 @@ app.get('/api/archives', async (req, res) => {
 const RESTORE_COLUMNS = {
   sections:       ['id','name','grade','adviser','user_id','created_at'],
   students:       ['id','first_name','last_name','student_id','section_id','user_id','created_at'],
-  subjects:       ['id','name','code','created_at'],
+  subjects:       ['id','name','code','user_id','created_at'],
   questionnaires: ['id','title','type','section_id','subject_id','questions','user_id','created_at'],
   answerkeys:     ['id','title','type','section_id','subject_id','answers','user_id','questionnaire_id','created_at'],
   records:        ['id','student_id_fk','section_id','subject_id','answer_key_id','score','total','percentage','user_id','created_at'],
@@ -330,7 +330,7 @@ app.get('/api/teacher/stats', async (req, res) => {
     const [[questionnaires]] = await db.query('SELECT COUNT(*) as count FROM questionnaires WHERE user_id=?', [user.id]);
     const [[answerkeys]]     = await db.query('SELECT COUNT(*) as count FROM answerkeys WHERE user_id=?',     [user.id]);
     const [[records]]        = await db.query('SELECT COUNT(*) as count FROM records WHERE user_id=?',        [user.id]);
-    const [[subjects]]       = await db.query('SELECT COUNT(*) as count FROM subjects');
+    const [[subjects]]       = await db.query('SELECT COUNT(*) as count FROM subjects WHERE user_id=?',       [user.id]);
     res.json({ sections: sections.count, students: students.count, questionnaires: questionnaires.count, answerkeys: answerkeys.count, records: records.count, subjects: subjects.count });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -530,23 +530,21 @@ app.delete('/api/students/:id', async (req, res) => {
 // ===========================
 // SUBJECTS ROUTES
 // ===========================
-// ── SUBJECTS — All teachers can view, only admin can add/edit/delete ──
+// ── SUBJECTS — Each teacher manages their own subjects ──
 app.get('/api/subjects', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    // All teachers see all subjects (school-wide)
-    const [rows] = await db.query('SELECT * FROM subjects ORDER BY name ASC');
+    const [rows] = await db.query('SELECT * FROM subjects WHERE user_id=? ORDER BY name ASC', [user.id]);
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 app.post('/api/subjects', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Only admin can add subjects.' });
   const { name, code } = req.body;
   try {
-    await db.query('INSERT INTO subjects (name, code) VALUES (?,?)', [name, code]);
+    await db.query('INSERT INTO subjects (name, code, user_id) VALUES (?,?,?)', [name, code, user.id]);
     await logActivity(user.id, user.fullname, 'CREATE_SUBJECT', `Created subject: ${name}`, req.body.platform||'web');
     res.json({ message: 'Subject added!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
@@ -554,19 +552,17 @@ app.post('/api/subjects', async (req, res) => {
 app.put('/api/subjects/:id', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Only admin can edit subjects.' });
   const { name, code } = req.body;
   try {
-    await db.query('UPDATE subjects SET name=?, code=? WHERE id=?', [name, code, req.params.id]);
+    await db.query('UPDATE subjects SET name=?, code=? WHERE id=? AND user_id=?', [name, code, req.params.id, user.id]);
     res.json({ message: 'Subject updated!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 app.delete('/api/subjects/:id', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Only admin can delete subjects.' });
   try {
-    await db.query('DELETE FROM subjects WHERE id=?', [req.params.id]);
+    await db.query('DELETE FROM subjects WHERE id=? AND user_id=?', [req.params.id, user.id]);
     res.json({ message: 'Subject deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
