@@ -6,17 +6,10 @@
 // Then refresh all web pages (Ctrl+Shift+R)
 // ═══════════════════════════════════════════════════
 
-const CONFIG = {
-  // ── CHANGE THIS LINE ONLY ──
-  API_URL: 'https://thesis-project-production-0338.up.railway.app/api',
+const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-  // Examples:
-  // Railway:     'https://thesis-project-production-0338.up.railway.app/api'
-  // Local WiFi:  'http://192.168.18.123:3000/api'
-  // ngrok:       'https://abc123.ngrok-free.app/api'
-  // localhost:   'http://localhost:3000/api'
-};
+window.API_URL = isLocal
+  ? 'http://localhost:3000/api'
+  : 'https://thesis-project-production-0338.up.railway.app/api';
 
-// Make available globally
-window.API_URL = CONFIG.API_URL;
 console.log('API URL:', window.API_URL);

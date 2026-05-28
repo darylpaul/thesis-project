@@ -875,6 +875,9 @@ async function initDB() {
   } catch (err) { console.log('DB init warning:', err.message); }
 }
 
+// Serve frontend static files — lets you open the site at http://localhost:3000
+app.use(express.static(__dirname));
+
 initDB().then(() => {
   app.listen(3000, '0.0.0.0', () => console.log('Server running on http://localhost:3000'));
 });
