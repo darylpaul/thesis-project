@@ -28,19 +28,14 @@ body::before {
 }
 
 /* ===========================
-   CARD
+   LAYOUT WRAPPER
 =========================== */
-.card {
-  background: #fff;
-  border-radius: 16px;
-  border: 2.5px solid #e8b800;
-  padding: 48px 52px 40px;
-  width: 100%;
-  max-width: 460px;
+.login-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 8px 48px rgba(10, 20, 90, 0.35);
+  width: 100%;
+  padding: 40px 24px;
   animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -50,35 +45,59 @@ body::before {
 }
 
 /* ===========================
-   LOGO
+   FORM CARD
 =========================== */
-.logo-wrap { position: relative; margin-bottom: 22px; }
-.logo-img {
-  width: 92px; height: 92px;
-  border-radius: 50%; object-fit: cover;
-  box-shadow: 0 4px 18px rgba(26,46,170,0.25);
+.form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 36px 28px;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
 }
-.logo-badge {
-  position: absolute; bottom: -4px; right: -4px;
-  width: 26px; height: 26px; background: #1a2eaa;
-  border: 2.5px solid #fff; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+
+.form-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: #1e2d6b;
+  margin: 0 0 4px;
+  text-align: center;
 }
-.logo-badge::after {
-  content: ''; width: 10px; height: 10px;
-  border-radius: 50%; border: 2px solid #4fc3f7; background: transparent;
+
+.form-sub {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin: 0 0 22px;
+  text-align: center;
 }
 
 /* ===========================
-   HEADING
+   LOGO SECTION (on blue background)
 =========================== */
+.logo-section {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-wrap { position: relative; display: inline-block; margin-bottom: 14px; }
+
+.logo-img {
+  width: 90px; height: 90px;
+  border-radius: 50%; object-fit: cover;
+  display: block;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
 h1 {
   font-family: 'Montserrat', sans-serif; font-weight: 800;
-  font-size: 1.35rem; color: #1a2eaa; text-align: center;
-  letter-spacing: 0.5px; line-height: 1.35;
-  margin-bottom: 6px; text-transform: uppercase;
+  font-size: 1.25rem; color: #fff; text-align: center;
+  line-height: 1.35; margin: 0 0 6px;
 }
-.subtitle { font-size: 0.88rem; color: #6b7280; margin-bottom: 28px; letter-spacing: 0.2px; }
+.subtitle { font-size: 0.88rem; color: #e8b800; letter-spacing: 0.2px; margin: 0; }
 
 /* ===========================
    FORM
@@ -253,6 +272,7 @@ input.input-error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,
    RESPONSIVE
 =========================== */
 @media (max-width: 500px) {
-  .card { padding: 36px 24px 30px; margin: 16px; }
-  h1 { font-size: 1.15rem; }
+  .form-card { padding: 28px 20px 24px; }
+  h1 { font-size: 1.1rem; }
+  .login-wrapper { padding: 32px 16px; }
 }

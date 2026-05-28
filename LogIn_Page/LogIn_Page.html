@@ -10,42 +10,52 @@
 </head>
 <body>
 
-  <div class="card">
-    <div class="logo-wrap">
-      <img src="../Logo.jpg" alt="School Logo" class="logo-img"/>
+  <div class="login-wrapper">
+
+    <!-- Logo section — on the blue background, above the card -->
+    <div class="logo-section">
+      <div class="logo-wrap">
+        <img src="../Logo.jpg" alt="School Logo" class="logo-img"/>
+      </div>
+      <h1>Mindful School of<br/>Berlyn Achievers</h1>
+      <p class="subtitle">Exam Management System</p>
     </div>
 
-    <h1>Mindful School of<br/>Berlyn Achievers</h1>
-    <p class="subtitle">Exam Management System</p>
+    <!-- Form card -->
+    <div class="form-card">
+      <h2 class="form-title">Welcome Back</h2>
+      <p class="form-sub">Sign in to your account</p>
 
-    <form id="loginForm" novalidate>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="teacher@school.edu" autocomplete="email" required/>
-        <span class="error-msg" id="emailError" role="alert"></span>
-      </div>
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="teacher@school.edu" autocomplete="email" required/>
+          <span class="error-msg" id="emailError" role="alert"></span>
+        </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required/>
-        <span class="error-msg" id="passwordError" role="alert"></span>
-        <label class="show-pass-label">
-          <input type="checkbox" id="showPass" />
-          Show Password
-        </label>
-      </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required/>
+          <span class="error-msg" id="passwordError" role="alert"></span>
+          <label class="show-pass-label">
+            <input type="checkbox" id="showPass" />
+            Show Password
+          </label>
+        </div>
 
-      <button type="submit" class="btn-login" id="loginBtn">Log In</button>
-    </form>
+        <button type="submit" class="btn-login" id="loginBtn">Log In</button>
+      </form>
 
-    <p class="signup-text">
-      Contact your admin to get an account.
-    </p>
+      <p class="signup-text">
+        Contact your admin to get an account.
+      </p>
 
-    <!-- Admin Portal Link -->
-    <a href="../Admin_Page/Admin_Login.html" class="admin-link">
-      🛡️ Admin Portal
-    </a>
+      <!-- Admin Portal Link -->
+      <a href="../Admin_Page/Admin_Login.html" class="admin-link">
+        🛡️ Admin Portal
+      </a>
+    </div>
+
   </div>
 
   <button class="help-btn" title="Help" id="helpBtn">?</button>
