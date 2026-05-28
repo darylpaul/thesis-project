@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const path = require('path');
 const db = require('./db');
 require('dotenv').config();
 
@@ -875,8 +876,9 @@ async function initDB() {
   } catch (err) { console.log('DB init warning:', err.message); }
 }
 
-// Serve frontend static files — lets you open the site at http://localhost:3000
-app.use(express.static(__dirname));
+// Serve frontend static files
+app.use(express.static(path.join(__dirname)));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'LogIn_Page', 'LogIn_Page.html')));
 
 initDB().then(() => {
   app.listen(3000, '0.0.0.0', () => console.log('Server running on http://localhost:3000'));
