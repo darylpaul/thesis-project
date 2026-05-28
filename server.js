@@ -102,7 +102,7 @@ async function logActivity(userId, userName, action, details = '', platform = 'w
 // ===========================
 // TEST ROUTE
 // ===========================
-app.get('/', (req, res) => res.json({ message: 'Server is running!' }));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'LogIn_Page', 'LogIn_Page.html')));
 
 // ===========================
 // AUTH ROUTES
@@ -500,21 +500,21 @@ app.get('/api/students', async (req, res) => {
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 app.post('/api/students', async (req, res) => {
-  const { first_name, last_name, student_id, section_id } = req.body;
+  const { first_name, last_name, student_id, section_id, gender } = req.body;
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    await db.query('INSERT INTO students (first_name, last_name, student_id, section_id, user_id) VALUES (?,?,?,?,?)', [first_name, last_name, student_id, section_id, user.id]);
+    await db.query('INSERT INTO students (first_name, last_name, student_id, section_id, gender, user_id) VALUES (?,?,?,?,?,?)', [first_name, last_name, student_id, section_id, gender || null, user.id]);
     await logActivity(user.id, user.fullname, 'CREATE_STUDENT', `Added student: ${first_name} ${last_name}`, req.body.platform||'web');
     res.json({ message: 'Student added!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 app.put('/api/students/:id', async (req, res) => {
-  const { first_name, last_name, student_id, section_id } = req.body;
+  const { first_name, last_name, student_id, section_id, gender } = req.body;
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    await db.query('UPDATE students SET first_name=?, last_name=?, student_id=?, section_id=? WHERE id=? AND user_id=?', [first_name, last_name, student_id, section_id, req.params.id, user.id]);
+    await db.query('UPDATE students SET first_name=?, last_name=?, student_id=?, section_id=?, gender=? WHERE id=? AND user_id=?', [first_name, last_name, student_id, section_id, gender || null, req.params.id, user.id]);
     res.json({ message: 'Student updated!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -878,7 +878,6 @@ async function initDB() {
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname)));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'LogIn_Page', 'LogIn_Page.html')));
 
 initDB().then(() => {
   app.listen(3000, '0.0.0.0', () => console.log('Server running on http://localhost:3000'));
