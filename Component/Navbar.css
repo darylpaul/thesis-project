@@ -236,6 +236,12 @@
   color: #93c5fd;
   line-height: 1.5;
 }
+.sidebar-qr-link {
+  color: #e8b800;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.sidebar-qr-link:hover { color: #fff; }
 
 @media (max-width: 480px) {
   .navbar { padding: 0 12px; }

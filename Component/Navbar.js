@@ -143,12 +143,14 @@
   </nav>
   <div class="sidebar-qr">
     <div class="sidebar-qr-label">📱 Mobile Scanner App</div>
-    <img
-      src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://mobileexamscanner.netlify.app"
-      alt="Scan to open mobile app"
-      class="sidebar-qr-img"
-    />
-    <div class="sidebar-qr-caption">Scan to open the<br>mobile scanner</div>
+    <a href="https://mobileexamscanner.netlify.app" target="_blank" rel="noopener noreferrer">
+      <img
+        src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://mobileexamscanner.netlify.app"
+        alt="Scan to open mobile app"
+        class="sidebar-qr-img"
+      />
+    </a>
+    <div class="sidebar-qr-caption">Scan or <a href="https://mobileexamscanner.netlify.app" target="_blank" rel="noopener noreferrer" class="sidebar-qr-link">click here</a> to open<br>the mobile scanner</div>
   </div>
 </aside>
 `;
