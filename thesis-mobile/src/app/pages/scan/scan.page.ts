@@ -562,8 +562,7 @@ export class ScanPage implements OnInit {
     this.scanStatus  = 'Preparing image for AI...';
     this.scanProgress = 20;
 
-    const base64Data = await this.fileToBase64(this.imageFile!);
-    const mimeType   = this.imageFile!.type || 'image/jpeg';
+    const { base64Data, mimeType } = await this.compressImage(this.imageFile!);
 
     const qTypes = correctAnswers.map((ans, i) => {
       const up = ans.toUpperCase();
@@ -634,12 +633,23 @@ export class ScanPage implements OnInit {
       this.toast('AI scan complete! Review then Calculate Score.', 'success');
   }
 
-  private fileToBase64(file: File): Promise<string> {
+  private compressImage(file: File): Promise<{ base64Data: string; mimeType: string }> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload  = () => resolve((reader.result as string).split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const maxW = 1200;
+        const scale = img.width > maxW ? maxW / img.width : 1;
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        resolve({ base64Data: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+      };
+      img.onerror = reject;
+      img.src = url;
     });
   }
 
