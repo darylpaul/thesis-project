@@ -877,6 +877,22 @@ async function initDB() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
     console.log('DB ready: archives table exists');
   } catch (err) { console.log('DB init warning:', err.message); }
+  try {
+    await db.query(`CREATE TABLE IF NOT EXISTS test_bank (
+      id            INT AUTO_INCREMENT PRIMARY KEY,
+      subject_id    INT NOT NULL,
+      topic         VARCHAR(255) NOT NULL,
+      type          ENUM('multiple_choice','true_false','identification','essay') NOT NULL,
+      question_text TEXT NOT NULL,
+      choices       JSON DEFAULT NULL,
+      answer        TEXT DEFAULT NULL,
+      status        ENUM('pending','approved') DEFAULT 'pending',
+      suggested_by  INT NOT NULL,
+      created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    console.log('DB ready: test_bank table exists');
+  } catch (err) { console.log('DB init warning (test_bank):', err.message); }
 }
 
 // ===========================
