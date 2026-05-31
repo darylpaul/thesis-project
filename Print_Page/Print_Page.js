@@ -191,45 +191,49 @@ document.getElementById('answerSheetBtn').addEventListener('click', () => {
 function openAnswerSheet(q, parts, section, subject) {
   const win = window.open('', '_blank');
 
-  // Build bubble rows
+  // Build OCR-optimized answer rows
   let rows = '';
   let qNum = 1;
-  const questionTypes = {}; // track type per question number
 
   parts.forEach(part => {
-    part.questions.forEach(qt => {
-      questionTypes[qNum] = part.type;
-
+    part.questions.forEach(() => {
       if (part.type === 'multiple_choice') {
         rows += `<tr>
           <td class="qn">${qNum}</td>
-          <td class="bubbles">
-            <span class="bub" id="b${qNum}A">A</span>
-            <span class="bub" id="b${qNum}B">B</span>
-            <span class="bub" id="b${qNum}C">C</span>
-            <span class="bub" id="b${qNum}D">D</span>
+          <td class="ans-cell mc-cell">
+            <div class="mc-options">
+              <span class="mc-opt">A <div class="write-box"></div></span>
+              <span class="mc-opt">B <div class="write-box"></div></span>
+              <span class="mc-opt">C <div class="write-box"></div></span>
+              <span class="mc-opt">D <div class="write-box"></div></span>
+            </div>
+            <div class="write-answer"></div>
           </td>
           <td class="typ">MC</td>
         </tr>`;
       } else if (part.type === 'true_false') {
         rows += `<tr>
           <td class="qn">${qNum}</td>
-          <td class="bubbles">
-            <span class="bub tf" id="b${qNum}T">T</span>
-            <span class="bub tf" id="b${qNum}F">F</span>
+          <td class="ans-cell">
+            <div class="tf-options">
+              <span class="tf-opt">TRUE <div class="write-box tf-box"></div></span>
+              <span class="tf-opt">FALSE <div class="write-box tf-box"></div></span>
+            </div>
           </td>
           <td class="typ">T/F</td>
         </tr>`;
       } else if (part.type === 'identification') {
         rows += `<tr>
           <td class="qn">${qNum}</td>
-          <td class="id-cell"><div class="id-line"></div></td>
+          <td class="ans-cell id-ans">
+            <div class="id-write-line"></div>
+          </td>
           <td class="typ">ID</td>
         </tr>`;
       } else {
         rows += `<tr>
           <td class="qn">${qNum}</td>
-          <td class="id-cell" style="font-size:10px;color:#888;font-style:italic;">See back of paper</td>
+          <td class="ans-cell" style="font-size:10px;color:#888;font-style:italic;padding:8px;">See back of paper</td>
           <td class="typ">ES</td>
         </tr>`;
       }
@@ -243,89 +247,83 @@ function openAnswerSheet(q, parts, section, subject) {
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>OMR Answer Sheet – ${escHtml(q.title)}</title>
+<title>OCR Answer Sheet – ${escHtml(q.title)}</title>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:Arial,sans-serif; background:#fff; padding:10mm; }
-
-/* ── CORNER ANCHORS ── used by scanner to align bubble grid */
-.anchor {
-  position:fixed; width:18px; height:18px;
-  background:#000; border-radius:2px;
-}
-.anchor.tl { top:6mm;  left:6mm;  }
-.anchor.tr { top:6mm;  right:6mm; }
-.anchor.bl { bottom:6mm; left:6mm; }
-.anchor.br { bottom:6mm; right:6mm; }
+body { font-family:Arial,sans-serif; background:#fff; padding:10mm; color:#000; }
 
 /* ── HEADER ── */
-.hdr { text-align:center; border-bottom:3px solid #000; padding-bottom:8px; margin-bottom:10px; }
-.school { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; }
-.title  { font-size:17px; font-weight:900; margin:3px 0; }
-.badge  { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:2px 14px; border-radius:20px; display:inline-block; }
+.hdr { text-align:center; border-bottom:3px solid #1a2eaa; padding-bottom:8px; margin-bottom:10px; }
+.school { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#1a2eaa; }
+.title  { font-size:18px; font-weight:900; margin:4px 0 2px; color:#000; }
+.badge  { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:2px 14px; border-radius:20px; display:inline-block; margin-top:2px; }
+.ocr-tag { font-size:9px; color:#666; margin-top:3px; letter-spacing:0.5px; }
 
 /* ── INFO ROW ── */
-.info { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+.info { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; margin-bottom:6px; }
+.info2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
 .ifield { display:flex; align-items:flex-end; gap:5px; font-size:10px; font-weight:700; }
-.iline { flex:1; border-bottom:1.5px solid #000; height:14px; }
+.iline { flex:1; border-bottom:2px solid #000; height:16px; }
 
 /* ── INSTRUCTIONS ── */
-.instr { border:2px solid #1a2eaa; border-radius:6px; padding:7px 12px; margin-bottom:10px; background:#f0f4ff; }
-.instr p { font-size:10px; color:#000; line-height:1.7; }
+.instr { border:2px solid #1a2eaa; border-radius:6px; padding:8px 12px; margin-bottom:10px; background:#f0f4ff; }
+.instr p { font-size:10px; color:#000; line-height:1.8; }
 
 /* ── TABLE ── */
 table { width:100%; border-collapse:collapse; }
-th { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:5px; text-align:center; border:1px solid #000; }
-td { border:1px solid #ccc; padding:4px 6px; vertical-align:middle; }
+th { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:6px; text-align:center; border:1px solid #1a2eaa; }
+td { border:1px solid #ccc; vertical-align:middle; }
 tr:nth-child(even) { background:#f8f9ff; }
 
 /* ── QUESTION NUMBER ── */
-.qn { font-weight:900; font-size:13px; text-align:center; width:32px; color:#000; }
+.qn { font-weight:900; font-size:14px; text-align:center; width:34px; color:#1a2eaa; padding:6px 4px; }
 
-/* ── BUBBLES ── */
-.bubbles { text-align:center; padding:5px 8px !important; }
-.bub {
-  display:inline-flex; align-items:center; justify-content:center;
+/* ── ANSWER CELL ── */
+.ans-cell { padding:6px 10px; }
+
+/* ── MC: write-in boxes with letter labels ── */
+.mc-options { display:flex; gap:8px; align-items:center; }
+.mc-opt { display:flex; align-items:center; gap:3px; font-size:10px; font-weight:700; color:#555; }
+.write-box {
   width:28px; height:28px;
-  border:2.5px solid #000; border-radius:50%;
-  font-size:12px; font-weight:900; color:#000;
-  margin:0 3px; cursor:default;
-  /* scanner reads darkness inside this circle */
+  border:2px solid #000; border-radius:4px;
+  background:#fff;
 }
-.bub.tf { width:34px; height:28px; border-radius:6px; }
+.tf-options { display:flex; gap:12px; align-items:center; }
+.tf-opt { display:flex; align-items:center; gap:4px; font-size:10px; font-weight:700; color:#555; }
+.tf-box { width:38px; height:28px; }
 
-/* ── IDENTIFICATION LINE ── */
-.id-cell { padding:4px 10px !important; }
-.id-line { border-bottom:2px solid #000; height:24px; margin-top:4px; }
+/* ── IDENTIFICATION WRITE LINE ── */
+.id-ans { padding:4px 10px 6px !important; }
+.id-write-line {
+  border-bottom:2px solid #000;
+  height:28px;
+  margin-top:4px;
+  width:100%;
+}
 
 /* ── TYPE LABEL ── */
-.typ { font-size:9px; color:#888; text-align:center; width:30px; font-weight:700; }
+.typ { font-size:9px; color:#888; text-align:center; width:32px; font-weight:700; padding:4px; }
 
 /* ── SCORE BOX ── */
-.score-wrap { display:flex; justify-content:flex-end; margin-top:12px; }
-.score-box { border:3px solid #000; border-radius:8px; padding:8px 20px; text-align:center; min-width:110px; }
-.score-lbl { font-size:9px; font-weight:700; color:#000; letter-spacing:1.5px; text-transform:uppercase; }
+.score-wrap { display:flex; justify-content:flex-end; margin-top:14px; }
+.score-box { border:3px solid #1a2eaa; border-radius:8px; padding:8px 24px; text-align:center; min-width:120px; }
+.score-lbl { font-size:9px; font-weight:700; color:#1a2eaa; letter-spacing:1.5px; text-transform:uppercase; }
 .score-val { font-size:20px; font-weight:900; color:#000; margin-top:4px; }
 
 @media print {
   body { padding:8mm; }
   @page { size:A4; margin:8mm; }
-  .anchor { position:fixed !important; }
 }
 </style>
 </head>
 <body>
 
-<!-- Corner anchors — DO NOT REMOVE — used for scanner alignment -->
-<div class="anchor tl" id="anchor-tl"></div>
-<div class="anchor tr" id="anchor-tr"></div>
-<div class="anchor bl" id="anchor-bl"></div>
-<div class="anchor br" id="anchor-br"></div>
-
 <div class="hdr">
   <div class="school">Mindful School of Berlyn Achievers</div>
-  <div class="title">OMR Answer Sheet</div>
+  <div class="title">OCR Answer Sheet</div>
   <span class="badge">${escHtml(q.title)}</span>
+  <div class="ocr-tag">AI-Powered Optical Character Recognition</div>
 </div>
 
 <div class="info">
@@ -333,7 +331,7 @@ tr:nth-child(even) { background:#f8f9ff; }
   <div class="ifield">Section: <strong>${escHtml(section)}</strong></div>
   <div class="ifield">Date: <div class="iline"></div></div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:10px;font-weight:700;">
+<div class="info2">
   <div class="ifield">Subject: <strong>${escHtml(subject)}</strong></div>
   <div class="ifield">Total Items: <strong>${total}</strong></div>
 </div>
@@ -341,19 +339,19 @@ tr:nth-child(even) { background:#f8f9ff; }
 <div class="instr">
   <p>
     <strong>Instructions:</strong><br/>
-    • <strong>Multiple Choice (MC):</strong> Fill the circle completely: <strong>●</strong> Use BLACK pen or pencil<br/>
-    • <strong>True/False (T/F):</strong> Fill <strong>T</strong> for True or <strong>F</strong> for False<br/>
-    • <strong>Identification (ID):</strong> Write your answer CLEARLY in PRINT letters<br/>
-    • Fill bubbles completely — do not use check marks or X
+    • <strong>Multiple Choice (MC):</strong> Write the letter of your answer (A, B, C, or D) inside the box next to your chosen option<br/>
+    • <strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> inside the box<br/>
+    • <strong>Identification (ID):</strong> Write your answer CLEARLY in PRINT letters on the line<br/>
+    • Use BLACK pen or pencil — write LARGE and CLEAR for accurate scanning
   </p>
 </div>
 
 <table>
   <thead>
     <tr>
-      <th style="width:32px;">#</th>
+      <th style="width:34px;">#</th>
       <th>Answer</th>
-      <th style="width:30px;">Type</th>
+      <th style="width:32px;">Type</th>
     </tr>
   </thead>
   <tbody>${rows}</tbody>
