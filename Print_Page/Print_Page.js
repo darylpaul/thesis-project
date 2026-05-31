@@ -173,19 +173,25 @@ document.getElementById('answerSheetBtn').addEventListener('click', () => {
   const section = document.getElementById('previewSection').textContent;
   const subject = document.getElementById('previewSubject').textContent;
   if (!title) { alert('Please select a questionnaire first.'); return; }
-
-  // Get current questionnaire data
   const qId = document.getElementById('questionnaireSelect').value;
   if (!qId) { alert('Please select a questionnaire first.'); return; }
+  fetch(`${API}/questionnaires/${qId}`, { headers: { 'Authorization': localStorage.getItem('token') } })
+    .then(r => r.json())
+    .then(q => { const parts = parseParts(q); openAnswerSheet(q, parts, section, subject); });
+});
 
-  fetch(`http://localhost:3000/api/questionnaires/${qId}`, {
-    headers: { 'Authorization': localStorage.getItem('token') }
-  })
-  .then(r => r.json())
-  .then(q => {
-    const parts = parseParts(q);
-    openAnswerSheet(q, parts, section, subject);
-  });
+document.getElementById('printBothBtn').addEventListener('click', () => {
+  const title   = document.getElementById('previewTitle').textContent;
+  const section = document.getElementById('previewSection').textContent;
+  const subject = document.getElementById('previewSubject').textContent;
+  if (!title) { alert('Please select a questionnaire first.'); return; }
+  const qId = document.getElementById('questionnaireSelect').value;
+  if (!qId) { alert('Please select a questionnaire first.'); return; }
+  // Print exam first, then answer sheet after a short delay
+  document.getElementById('printBtn').click();
+  fetch(`${API}/questionnaires/${qId}`, { headers: { 'Authorization': localStorage.getItem('token') } })
+    .then(r => r.json())
+    .then(q => { const parts = parseParts(q); setTimeout(() => openAnswerSheet(q, parts, section, subject), 800); });
 });
 
 function openAnswerSheet(q, parts, section, subject) {
