@@ -589,14 +589,14 @@ export class ScanPage implements OnInit {
     }).join('\n');
 
     const prompt =
-      `This is a student exam answer sheet with ${correctAnswers.length} questions.\n\n` +
+      `This is a student OCR answer sheet with ${correctAnswers.length} questions.\n\n` +
       `Question types:\n${qTypes}\n\n` +
-      `For each question, identify the student's answer:\n` +
-      `- Multiple Choice: which bubble (A, B, C, or D) is filled/shaded\n` +
-      `- True/False: which bubble (True or False) is filled/shaded\n` +
-      `- Identification: the handwritten text on the answer line\n\n` +
+      `How the answer sheet works:\n` +
+      `- Multiple Choice: there are 4 small boxes labeled A, B, C, D. The student wrote a letter INSIDE one box. Read which box has a letter written in it.\n` +
+      `- True/False: there are 2 boxes labeled TRUE and FALSE. The student wrote inside one box. Return "True" or "False".\n` +
+      `- Identification: the student wrote their answer on a blank line. Read the handwritten text.\n\n` +
       `Return ONLY a JSON array of exactly ${correctAnswers.length} strings in order.\n` +
-      `Use "?" for any answer that is unclear.\n` +
+      `Use "?" for any answer that is blank or completely unreadable.\n` +
       `Example: ["A","True","photosynthesis","B","C","False","?"]`;
 
     this.scanStatus  = 'Analyzing with OpenAI Vision...';
