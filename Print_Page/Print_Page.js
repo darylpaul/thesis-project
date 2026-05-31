@@ -201,46 +201,14 @@ function openAnswerSheet(q, parts, section, subject) {
 
   parts.forEach(part => {
     part.questions.forEach(() => {
-      if (part.type === 'multiple_choice') {
-        rows += `<tr>
-          <td class="qn">${qNum}</td>
-          <td class="ans-cell mc-cell">
-            <div class="mc-options">
-              <span class="mc-opt">A <div class="write-box"></div></span>
-              <span class="mc-opt">B <div class="write-box"></div></span>
-              <span class="mc-opt">C <div class="write-box"></div></span>
-              <span class="mc-opt">D <div class="write-box"></div></span>
-            </div>
-            <div class="write-answer"></div>
-          </td>
-          <td class="typ">MC</td>
-        </tr>`;
-      } else if (part.type === 'true_false') {
-        rows += `<tr>
-          <td class="qn">${qNum}</td>
-          <td class="ans-cell">
-            <div class="tf-options">
-              <span class="tf-opt">TRUE <div class="write-box tf-box"></div></span>
-              <span class="tf-opt">FALSE <div class="write-box tf-box"></div></span>
-            </div>
-          </td>
-          <td class="typ">T/F</td>
-        </tr>`;
-      } else if (part.type === 'identification') {
-        rows += `<tr>
-          <td class="qn">${qNum}</td>
-          <td class="ans-cell id-ans">
-            <div class="id-write-line"></div>
-          </td>
-          <td class="typ">ID</td>
-        </tr>`;
-      } else {
-        rows += `<tr>
-          <td class="qn">${qNum}</td>
-          <td class="ans-cell" style="font-size:10px;color:#888;font-style:italic;padding:8px;">See back of paper</td>
-          <td class="typ">ES</td>
-        </tr>`;
-      }
+      const typ = part.type === 'multiple_choice' ? 'MC'
+                : part.type === 'true_false'      ? 'T/F'
+                : part.type === 'essay'           ? 'ES' : 'ID';
+      rows += `<tr>
+        <td class="qn">${qNum}</td>
+        <td class="ans-cell"><div class="write-line"></div></td>
+        <td class="typ">${typ}</td>
+      </tr>`;
       qNum++;
     });
   });
@@ -306,6 +274,9 @@ tr:nth-child(even) { background:#f8f9ff; }
   width:100%;
 }
 
+/* ── WRITE LINE ── */
+.write-line { border-bottom:2px solid #000; height:30px; width:100%; }
+
 /* ── TYPE LABEL ── */
 .typ { font-size:9px; color:#888; text-align:center; width:32px; font-weight:700; padding:4px; }
 
@@ -343,10 +314,10 @@ tr:nth-child(even) { background:#f8f9ff; }
 <div class="instr">
   <p>
     <strong>Instructions:</strong><br/>
-    • <strong>Multiple Choice (MC):</strong> Write the letter of your answer (A, B, C, or D) inside the box next to your chosen option<br/>
-    • <strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> inside the box<br/>
-    • <strong>Identification (ID):</strong> Write your answer CLEARLY in PRINT letters on the line<br/>
-    • Use BLACK pen or pencil — write LARGE and CLEAR for accurate scanning
+    • <strong>Multiple Choice (MC):</strong> Write only the letter — <strong>A, B, C, or D</strong> — on the line<br/>
+    • <strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> on the line<br/>
+    • <strong>Identification (ID):</strong> Write your answer clearly in PRINT letters on the line<br/>
+    • Use BLACK pen or pencil — write LARGE and CLEAR for accurate AI scanning
   </p>
 </div>
 

@@ -894,21 +894,18 @@ app.post('/api/scan', async (req, res) => {
   if (!apiKey) return res.status(500).json({ error: 'OpenAI API key not configured on server' });
 
   const prompt =
-    `You are reading a student OCR answer sheet. It is a table with 3 columns: question number (#), answer area, and type (MC/T/F/ID).\n\n` +
-    `There are ${totalQuestions} questions. Read each row carefully in order.\n\n` +
-    `Question types for each row:\n${questionTypes}\n\n` +
-    `HOW TO READ EACH ANSWER TYPE:\n` +
-    `- Multiple Choice (MC): The row has 4 small square boxes labeled A, B, C, D. Look inside each box. One box has a handwritten letter in it. Return that letter (A, B, C, or D). Ignore empty boxes.\n` +
-    `- True/False (T/F): The row has 2 boxes labeled TRUE and FALSE. One box has handwriting inside. Return exactly "True" or "False".\n` +
-    `- Identification (ID): The row has a long blank line. Read the handwritten text written on that line. Return exactly what is written.\n` +
-    `- Essay: Return "ESSAY".\n\n` +
-    `IMPORTANT RULES:\n` +
-    `- Read questions strictly in order from top to bottom\n` +
-    `- For MC, only return A, B, C, or D — a single letter\n` +
-    `- For ID, return the exact handwritten text even if it looks like a number\n` +
-    `- Use "?" only if the answer area is completely blank or totally unreadable\n` +
-    `- Do NOT skip any question\n\n` +
-    `Return ONLY a valid JSON array of exactly ${totalQuestions} strings. No explanation, no markdown.\n` +
+    `You are reading a student OCR answer sheet. It is a table with columns: # (question number), Answer (a blank line where the student wrote), and Type.\n\n` +
+    `There are ${totalQuestions} questions. Each question has ONE blank line where the student handwrote their answer.\n\n` +
+    `Question types:\n${questionTypes}\n\n` +
+    `INSTRUCTIONS:\n` +
+    `- Read the handwritten text on each answer line, row by row from top to bottom\n` +
+    `- MC answers will be a single letter: A, B, C, or D\n` +
+    `- True/False answers will be: TRUE or FALSE\n` +
+    `- Identification answers will be a word, phrase, or number\n` +
+    `- Essay: return "ESSAY"\n` +
+    `- Use "?" only if the line is completely blank or totally unreadable\n` +
+    `- Do NOT skip any row\n\n` +
+    `Return ONLY a valid JSON array of exactly ${totalQuestions} strings. No explanation.\n` +
     `Example: ["A","B","True","8","False","photosynthesis","C"]`;
 
   try {
