@@ -136,44 +136,63 @@
 
         <div *ngFor="let item of detectedAnswers" class="answer-row"
           [class.row-correct]="item.isCorrect"
-          [class.row-wrong]="!item.isCorrect && item.detected !== '?'"
-          [class.row-missing]="item.detected === '?'">
+          [class.row-wrong]="!item.isCorrect && item.detected !== '?' && !item.isEssay"
+          [class.row-missing]="item.detected === '?'"
+          [class.row-essay]="item.isEssay">
 
           <div class="answer-num">{{ item.num }}</div>
 
-          <div class="answer-info">
-            <div class="answer-label">Student</div>
-            <div class="answer-val" [class.missing]="item.detected === '?'">
-              {{ item.detected === '?' ? '—' : item.detected }}
+          <!-- Essay row -->
+          <ng-container *ngIf="item.isEssay">
+            <div class="answer-info" style="flex:1;">
+              <div class="answer-label">Essay</div>
+              <div class="answer-val" style="font-size:12px;color:#7c3aed;">Manual Score</div>
             </div>
-          </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              <input class="fix-input" type="number" min="0" [max]="item.essayMax"
+                [(ngModel)]="item.essayScore"
+                (input)="onEssayScoreChange(item)"
+                style="width:60px;text-align:center;" />
+              <span style="font-size:12px;color:#6b7280;font-weight:600;">/ {{ item.essayMax }}</span>
+            </div>
+          </ng-container>
 
-          <div class="answer-method" *ngIf="item.method">
-            <span class="method-badge"
-              [class.omr]="item.method === 'OMR'"
-              [class.ocr]="item.method === 'OCR'"
-              [class.ai-omr]="item.method === 'AI-OMR'"
-              [class.ai-ocr]="item.method === 'AI-OCR'">
-              {{ item.method }}
-            </span>
-          </div>
+          <!-- Normal row -->
+          <ng-container *ngIf="!item.isEssay">
+            <div class="answer-info">
+              <div class="answer-label">Student</div>
+              <div class="answer-val" [class.missing]="item.detected === '?'">
+                {{ item.detected === '?' ? '—' : item.detected }}
+              </div>
+            </div>
 
-          <div class="answer-key-col">
-            <div class="answer-label">Key</div>
-            <div class="key-val">{{ item.correct }}</div>
-          </div>
+            <div class="answer-method" *ngIf="item.method">
+              <span class="method-badge"
+                [class.omr]="item.method === 'OMR'"
+                [class.ocr]="item.method === 'OCR'"
+                [class.ai-omr]="item.method === 'AI-OMR'"
+                [class.ai-ocr]="item.method === 'AI-OCR'">
+                {{ item.method }}
+              </span>
+            </div>
 
-          <div class="match-icon">
-            <span *ngIf="item.isCorrect">✅</span>
-            <span *ngIf="!item.isCorrect && item.detected !== '?'">❌</span>
-            <span *ngIf="item.detected === '?'">❓</span>
-          </div>
+            <div class="answer-key-col">
+              <div class="answer-label">Key</div>
+              <div class="key-val">{{ item.correct }}</div>
+            </div>
 
-          <input class="fix-input" type="text"
-            [(ngModel)]="item.detected"
-            (input)="onAnswerChange(item)"
-            placeholder="Type answer"
-            maxlength="20" />
+            <div class="match-icon">
+              <span *ngIf="item.isCorrect">✅</span>
+              <span *ngIf="!item.isCorrect && item.detected !== '?'">❌</span>
+              <span *ngIf="item.detected === '?'">❓</span>
+            </div>
+
+            <input class="fix-input" type="text"
+              [(ngModel)]="item.detected"
+              (input)="onAnswerChange(item)"
+              placeholder="Type answer"
+              maxlength="20" />
+          </ng-container>
         </div>
       </div>
     </div>

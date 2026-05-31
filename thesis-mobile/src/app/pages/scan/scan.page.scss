@@ -76,6 +76,7 @@ ion-content  { --background: #f0f2f7; }
   &.row-correct { background: #f0fdf4; border-color: #86efac; }
   &.row-wrong   { background: #fef2f2; border-color: #fca5a5; }
   &.row-missing { background: #fefce8; border-color: #fde68a; }
+  &.row-essay   { background: #faf5ff; border-color: #d8b4fe; }
 }
 .answer-num {
   width: 26px; height: 26px; background: #1a2eaa; color: #fff;

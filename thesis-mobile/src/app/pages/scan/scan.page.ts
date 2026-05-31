@@ -48,6 +48,7 @@ export class ScanPage implements OnInit {
 
   detectedAnswers: {
     num: number; detected: string; correct: string; isCorrect: boolean; method?: string;
+    isEssay?: boolean; essayScore?: number; essayMax?: number;
   }[] = [];
 
   score = 0; total = 0; percentage = 0; scored = false; isSaving = false;
@@ -103,7 +104,10 @@ export class ScanPage implements OnInit {
     if (!this.selectedAnswerKey?.answers) return [];
     try {
       const parsed = JSON.parse(this.selectedAnswerKey.answers);
-      return parsed.map((a: any) => (a.answer || a).toString().trim().toUpperCase());
+      return parsed.map((a: any) => {
+        const ans = (typeof a === 'object' ? (a.answer || '') : a).toString().trim().toUpperCase();
+        return ans || 'ESSAY';
+      });
     } catch { return []; }
   }
 
@@ -177,12 +181,18 @@ export class ScanPage implements OnInit {
       this.scanProgress = 90;
       this.scanStatus   = 'Building results...';
 
-      this.detectedAnswers = correctAnswers.map((correct, i) => ({
-        num: i + 1,
-        detected: detected[i] || '?',
-        correct,
-        isCorrect: detected[i] !== '?' && detected[i].toUpperCase() === correct.toUpperCase()
-      }));
+      this.detectedAnswers = correctAnswers.map((correct, i) => {
+        const isEssay = correct === 'ESSAY';
+        return {
+          num: i + 1,
+          detected: isEssay ? 'ESSAY' : (detected[i] || '?'),
+          correct,
+          isCorrect: !isEssay && detected[i] !== '?' && detected[i].toUpperCase() === correct.toUpperCase(),
+          isEssay,
+          essayScore: isEssay ? 0 : undefined,
+          essayMax:   isEssay ? 10 : undefined
+        };
+      });
 
       this.scanProgress = 100;
       this.isScanning   = false;
@@ -476,13 +486,25 @@ export class ScanPage implements OnInit {
   }
 
   calculateScore() {
+    let autoScore = 0;
+    let essayScore = 0;
     this.detectedAnswers.forEach(a => {
-      a.isCorrect = a.detected !== '?' && a.detected.toUpperCase() === a.correct.toUpperCase();
+      if (a.isEssay) {
+        essayScore += (a.essayScore || 0);
+      } else {
+        a.isCorrect = a.detected !== '?' && a.detected.toUpperCase() === a.correct.toUpperCase();
+        if (a.isCorrect) autoScore++;
+      }
     });
-    this.score      = this.detectedAnswers.filter(a => a.isCorrect).length;
+    this.score      = autoScore + essayScore;
     this.total      = this.detectedAnswers.length;
     this.percentage = this.total > 0 ? Math.round((this.score / this.total) * 100) : 0;
     this.scored     = true;
+  }
+
+  onEssayScoreChange(item: any) {
+    if (item.essayScore < 0)            item.essayScore = 0;
+    if (item.essayScore > item.essayMax) item.essayScore = item.essayMax;
   }
 
   getMissingCount()  { return this.detectedAnswers.filter(a => a.detected === '?').length; }
@@ -560,6 +582,7 @@ export class ScanPage implements OnInit {
 
     const qTypes = correctAnswers.map((ans, i) => {
       const up = ans.toUpperCase();
+      if (up === 'ESSAY')                  return `Q${i + 1}: Essay (skip — return "ESSAY")`;
       if (up === 'TRUE' || up === 'FALSE') return `Q${i + 1}: True/False`;
       if (['A','B','C','D'].includes(up))  return `Q${i + 1}: Multiple Choice (A, B, C, or D)`;
       return `Q${i + 1}: Identification (read the handwritten text on the answer line)`;
@@ -617,15 +640,19 @@ export class ScanPage implements OnInit {
     this.scanStatus   = 'Building results...';
 
     this.detectedAnswers = correctAnswers.map((correct, i) => {
-      const det = (detected[i] || '?').toString().trim();
-      const up  = correct.toUpperCase();
-      const isId = !['A','B','C','D','TRUE','FALSE'].includes(up);
+      const isEssay = correct === 'ESSAY';
+      const det     = isEssay ? 'ESSAY' : (detected[i] || '?').toString().trim();
+      const up      = correct.toUpperCase();
+      const isId    = !['A','B','C','D','TRUE','FALSE','ESSAY'].includes(up);
       return {
         num: i + 1,
         detected: det,
         correct,
-        isCorrect: det !== '?' && det.toUpperCase() === correct.toUpperCase(),
-        method: isId ? 'AI-OCR' : 'AI-OMR'
+        isCorrect: !isEssay && det !== '?' && det.toUpperCase() === correct.toUpperCase(),
+        method:    isEssay ? undefined : (isId ? 'AI-OCR' : 'AI-OMR'),
+        isEssay,
+        essayScore: isEssay ? 0 : undefined,
+        essayMax:   isEssay ? 10 : undefined
       };
     });
 
