@@ -259,6 +259,16 @@ function renderParts() {
   });
   container.querySelectorAll('.id-answer-input').forEach(inp => {
     inp.addEventListener('input', e => { parts[+e.target.dataset.pi].questions[+e.target.dataset.qi].answer = e.target.value; });
+    inp.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      inp.style.borderColor = '#16a34a';
+      inp.style.background  = '#f0fdf4';
+      const msg = inp.parentElement.querySelector('.id-saved-msg');
+      if (msg) { msg.style.opacity = '1'; setTimeout(() => { msg.style.opacity = '0'; inp.style.borderColor = ''; inp.style.background = ''; }, 1500); }
+      const next = inp.closest('.question-card')?.nextElementSibling?.querySelector('.id-answer-input');
+      if (next) setTimeout(() => next.focus(), 100);
+    });
   });
 }
 
@@ -286,9 +296,12 @@ function renderQuestionHTML(pi, qi, type, q) {
   } else if (type === 'identification') {
     answerHTML = `
       <div class="id-answer">
-        <label style="font-size:0.78rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Correct Answer</label>
-        <input type="text" class="id-answer-input" data-pi="${pi}" data-qi="${qi}"
-          value="${escHtml(q.answer||'')}" placeholder="Type the correct answer..." />
+        <label style="font-size:0.78rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Correct Answer <span style="font-size:0.72rem;color:#6b7280;font-weight:400;">(press Enter to confirm)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" class="id-answer-input" data-pi="${pi}" data-qi="${qi}"
+            value="${escHtml(q.answer||'')}" placeholder="Type the correct answer..." style="flex:1;" />
+          <span class="id-saved-msg" style="font-size:0.78rem;font-weight:700;color:#16a34a;opacity:0;transition:opacity 0.3s;white-space:nowrap;">✓ Saved!</span>
+        </div>
       </div>`;
   } else if (type === 'essay') {
     answerHTML = `<div class="essay-note">✏️ Essay — manually graded, no answer key needed.</div>`;
