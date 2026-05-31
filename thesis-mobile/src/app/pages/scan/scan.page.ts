@@ -638,7 +638,7 @@ export class ScanPage implements OnInit {
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
-        const maxW = 1200;
+        const maxW = 1600;
         const scale = img.width > maxW ? maxW / img.width : 1;
         const canvas = document.createElement('canvas');
         canvas.width  = Math.round(img.width  * scale);

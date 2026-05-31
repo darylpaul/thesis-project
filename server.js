@@ -894,15 +894,22 @@ app.post('/api/scan', async (req, res) => {
   if (!apiKey) return res.status(500).json({ error: 'OpenAI API key not configured on server' });
 
   const prompt =
-    `This is a student OCR answer sheet with ${totalQuestions} questions.\n\n` +
-    `Question types:\n${questionTypes}\n\n` +
-    `How the answer sheet works:\n` +
-    `- Multiple Choice: there are 4 small boxes labeled A, B, C, D. The student wrote a letter INSIDE one box. Read which box has a letter written in it.\n` +
-    `- True/False: there are 2 boxes labeled TRUE and FALSE. The student wrote inside one box. Return "True" or "False".\n` +
-    `- Identification: the student wrote their answer on a blank line. Read the handwritten text.\n\n` +
-    `Return ONLY a JSON array of exactly ${totalQuestions} strings in order.\n` +
-    `Use "?" for any answer that is blank or completely unreadable.\n` +
-    `Example: ["A","True","photosynthesis","B","C","False","?"]`;
+    `You are reading a student OCR answer sheet. It is a table with 3 columns: question number (#), answer area, and type (MC/T/F/ID).\n\n` +
+    `There are ${totalQuestions} questions. Read each row carefully in order.\n\n` +
+    `Question types for each row:\n${questionTypes}\n\n` +
+    `HOW TO READ EACH ANSWER TYPE:\n` +
+    `- Multiple Choice (MC): The row has 4 small square boxes labeled A, B, C, D. Look inside each box. One box has a handwritten letter in it. Return that letter (A, B, C, or D). Ignore empty boxes.\n` +
+    `- True/False (T/F): The row has 2 boxes labeled TRUE and FALSE. One box has handwriting inside. Return exactly "True" or "False".\n` +
+    `- Identification (ID): The row has a long blank line. Read the handwritten text written on that line. Return exactly what is written.\n` +
+    `- Essay: Return "ESSAY".\n\n` +
+    `IMPORTANT RULES:\n` +
+    `- Read questions strictly in order from top to bottom\n` +
+    `- For MC, only return A, B, C, or D — a single letter\n` +
+    `- For ID, return the exact handwritten text even if it looks like a number\n` +
+    `- Use "?" only if the answer area is completely blank or totally unreadable\n` +
+    `- Do NOT skip any question\n\n` +
+    `Return ONLY a valid JSON array of exactly ${totalQuestions} strings. No explanation, no markdown.\n` +
+    `Example: ["A","B","True","8","False","photosynthesis","C"]`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -918,7 +925,7 @@ app.post('/api/scan', async (req, res) => {
           role: 'user',
           content: [
             { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}`, detail: 'auto' } }
+            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}`, detail: 'high' } }
           ]
         }]
       })
