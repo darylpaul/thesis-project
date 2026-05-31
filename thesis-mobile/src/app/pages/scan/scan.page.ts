@@ -53,7 +53,7 @@ export class ScanPage implements OnInit {
   score = 0; total = 0; percentage = 0; scored = false; isSaving = false;
 
   // OpenAI Vision
-  useAI        = false;
+  useAI        = true;
   showApiSetup = false;
   openaiApiKey = localStorage.getItem('openai_api_key') || '';
 
