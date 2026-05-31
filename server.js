@@ -879,6 +879,68 @@ async function initDB() {
   } catch (err) { console.log('DB init warning:', err.message); }
 }
 
+// ===========================
+// AI SCAN PROXY
+// ===========================
+app.post('/api/scan', async (req, res) => {
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { imageBase64, mimeType, questionTypes, totalQuestions } = req.body;
+  if (!imageBase64 || !questionTypes || !totalQuestions)
+    return res.status(400).json({ error: 'Missing required fields' });
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'OpenAI API key not configured on server' });
+
+  const prompt =
+    `This is a student OCR answer sheet with ${totalQuestions} questions.\n\n` +
+    `Question types:\n${questionTypes}\n\n` +
+    `How the answer sheet works:\n` +
+    `- Multiple Choice: there are 4 small boxes labeled A, B, C, D. The student wrote a letter INSIDE one box. Read which box has a letter written in it.\n` +
+    `- True/False: there are 2 boxes labeled TRUE and FALSE. The student wrote inside one box. Return "True" or "False".\n` +
+    `- Identification: the student wrote their answer on a blank line. Read the handwritten text.\n\n` +
+    `Return ONLY a JSON array of exactly ${totalQuestions} strings in order.\n` +
+    `Use "?" for any answer that is blank or completely unreadable.\n` +
+    `Example: ["A","True","photosynthesis","B","C","False","?"]`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}`, detail: 'high' } }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: err.error?.message || 'OpenAI API error' });
+    }
+
+    const data    = await response.json();
+    const content = (data.choices[0]?.message?.content || '').trim();
+    const match   = content.match(/\[[\s\S]*?\]/);
+    if (!match) return res.status(500).json({ error: 'Could not parse AI response' });
+
+    const detected = JSON.parse(match[0]);
+    res.json({ detected });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Scan failed' });
+  }
+});
+
 // Serve frontend static files
 app.use(express.static(path.join(__dirname)));
 

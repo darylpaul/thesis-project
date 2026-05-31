@@ -53,10 +53,7 @@ export class ScanPage implements OnInit {
 
   score = 0; total = 0; percentage = 0; scored = false; isSaving = false;
 
-  // OpenAI Vision
-  useAI        = true;
-  showApiSetup = false;
-  openaiApiKey = localStorage.getItem('openai_api_key') || '';
+  useAI = true;
 
   constructor(
     private api: ApiService,
@@ -142,12 +139,6 @@ export class ScanPage implements OnInit {
 
     const correctAnswers = this.getCorrectAnswers();
     if (!correctAnswers.length) { this.toast('Answer key has no answers', 'warning'); return; }
-
-    if (this.useAI && !this.openaiApiKey) {
-      this.toast('Please enter your OpenAI API key first', 'warning');
-      this.showApiSetup = true;
-      return;
-    }
 
     this.isScanning = true; this.ocrDone = false;
     this.scored = false; this.scanProgress = 0;
@@ -564,14 +555,8 @@ export class ScanPage implements OnInit {
     t.present();
   }
 
-  saveApiKey() {
-    localStorage.setItem('openai_api_key', this.openaiApiKey.trim());
-    this.showApiSetup = false;
-    this.toast('OpenAI API key saved!', 'success');
-  }
-
   // ══════════════════════════════════════════════════
-  // AI SCAN — Sends image to OpenAI Vision API
+  // AI SCAN — Calls backend proxy (key stored on Railway)
   // ══════════════════════════════════════════════════
   async scanWithOpenAI(correctAnswers: string[]): Promise<void> {
     this.scanStatus  = 'Preparing image for AI...';
@@ -588,53 +573,35 @@ export class ScanPage implements OnInit {
       return `Q${i + 1}: Identification (read the handwritten text on the answer line)`;
     }).join('\n');
 
-    const prompt =
-      `This is a student OCR answer sheet with ${correctAnswers.length} questions.\n\n` +
-      `Question types:\n${qTypes}\n\n` +
-      `How the answer sheet works:\n` +
-      `- Multiple Choice: there are 4 small boxes labeled A, B, C, D. The student wrote a letter INSIDE one box. Read which box has a letter written in it.\n` +
-      `- True/False: there are 2 boxes labeled TRUE and FALSE. The student wrote inside one box. Return "True" or "False".\n` +
-      `- Identification: the student wrote their answer on a blank line. Read the handwritten text.\n\n` +
-      `Return ONLY a JSON array of exactly ${correctAnswers.length} strings in order.\n` +
-      `Use "?" for any answer that is blank or completely unreadable.\n` +
-      `Example: ["A","True","photosynthesis","B","C","False","?"]`;
-
     this.scanStatus  = 'Analyzing with OpenAI Vision...';
     this.scanProgress = 50;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const apiUrl = (window as any).API_URL || 'https://thesis-project-production-0338.up.railway.app/api';
+    const token  = localStorage.getItem('token') || '';
+
+    const response = await fetch(`${apiUrl}/scan`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.openaiApiKey.trim()}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Data}`, detail: 'high' } }
-          ]
-        }]
+        imageBase64:    base64Data,
+        mimeType,
+        questionTypes:  qTypes,
+        totalQuestions: correctAnswers.length
       })
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw new Error((err as any).error?.message || `OpenAI API error: ${response.status}`);
+      throw new Error((err as any).error || `Scan error: ${response.status}`);
     }
 
-    const data    = await response.json();
-    const content = (data.choices[0]?.message?.content || '').trim();
-
-    const match = content.match(/\[[\s\S]*?\]/);
-    if (!match) throw new Error('Could not parse AI response. Try again.');
-
-    const detected: string[] = JSON.parse(match[0]);
-    if (detected.length !== correctAnswers.length)
-      throw new Error(`AI returned ${detected.length} answers, expected ${correctAnswers.length}.`);
+    const data = await response.json();
+    const detected: string[] = data.detected;
+    if (!detected || detected.length !== correctAnswers.length)
+      throw new Error(`AI returned ${detected?.length ?? 0} answers, expected ${correctAnswers.length}.`);
 
     this.scanProgress = 90;
     this.scanStatus   = 'Building results...';
