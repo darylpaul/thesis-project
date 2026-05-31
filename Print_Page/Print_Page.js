@@ -195,25 +195,36 @@ document.getElementById('printBothBtn').addEventListener('click', () => {
 function openAnswerSheet(q, parts, section, subject) {
   const win = window.open('', '_blank');
 
-  // Build OCR-optimized answer rows
-  let rows = '';
-  let qNum = 1;
-
+  // Build answer items list
+  const items = [];
   parts.forEach(part => {
     part.questions.forEach(() => {
       const typ = part.type === 'multiple_choice' ? 'MC'
                 : part.type === 'true_false'      ? 'T/F'
                 : part.type === 'essay'           ? 'ES' : 'ID';
-      rows += `<tr>
-        <td class="qn">${qNum}</td>
-        <td class="ans-cell"><div class="write-line"></div></td>
-        <td class="typ">${typ}</td>
-      </tr>`;
-      qNum++;
+      items.push({ num: items.length + 1, typ });
     });
   });
 
-  const total = qNum - 1;
+  const total = items.length;
+  const half  = Math.ceil(total / 2);
+
+  // Build two-column rows
+  let rows = '';
+  for (let i = 0; i < half; i++) {
+    const left  = items[i];
+    const right = items[i + half];
+    rows += `<tr>
+      <td class="qn">${left.num}</td>
+      <td class="ans-cell"><div class="write-line"></div></td>
+      <td class="typ">${left.typ}</td>
+      <td class="col-gap"></td>
+      ${right ? `
+      <td class="qn">${right.num}</td>
+      <td class="ans-cell"><div class="write-line"></div></td>
+      <td class="typ">${right.typ}</td>` : `<td colspan="3"></td>`}
+    </tr>`;
+  }
 
   win.document.write(`<!DOCTYPE html>
 <html>
@@ -245,13 +256,16 @@ body { font-family:Arial,sans-serif; background:#fff; padding:10mm; color:#000; 
 table { width:100%; border-collapse:collapse; }
 th { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:6px; text-align:center; border:1px solid #1a2eaa; }
 td { border:1px solid #ccc; vertical-align:middle; }
-tr:nth-child(even) { background:#f8f9ff; }
+tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
 
 /* ── QUESTION NUMBER ── */
-.qn { font-weight:900; font-size:14px; text-align:center; width:34px; color:#1a2eaa; padding:6px 4px; }
+.qn { font-weight:900; font-size:14px; text-align:center; width:28px; color:#1a2eaa; padding:5px 3px; }
 
 /* ── ANSWER CELL ── */
-.ans-cell { padding:6px 10px; }
+.ans-cell { padding:5px 8px; }
+
+/* ── COLUMN DIVIDER ── */
+.col-gap { width:10px; background:#fff !important; border:none; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; }
 
 /* ── MC: write-in boxes with letter labels ── */
 .mc-options { display:flex; gap:8px; align-items:center; }
@@ -324,9 +338,13 @@ tr:nth-child(even) { background:#f8f9ff; }
 <table>
   <thead>
     <tr>
-      <th style="width:34px;">#</th>
+      <th style="width:28px;">#</th>
       <th>Answer</th>
-      <th style="width:32px;">Type</th>
+      <th style="width:30px;">Type</th>
+      <th style="width:10px;background:#fff;border:none;"></th>
+      <th style="width:28px;">#</th>
+      <th>Answer</th>
+      <th style="width:30px;">Type</th>
     </tr>
   </thead>
   <tbody>${rows}</tbody>
