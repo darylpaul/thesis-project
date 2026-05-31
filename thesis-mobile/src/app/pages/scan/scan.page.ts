@@ -609,13 +609,12 @@ export class ScanPage implements OnInit {
       const isEssay = correct === 'ESSAY';
       const det     = isEssay ? 'ESSAY' : (detected[i] || '?').toString().trim();
       const up      = correct.toUpperCase();
-      const isId    = !['A','B','C','D','TRUE','FALSE','ESSAY'].includes(up);
       return {
         num: i + 1,
         detected: det,
         correct,
         isCorrect: !isEssay && det !== '?' && det.toUpperCase() === correct.toUpperCase(),
-        method:    isEssay ? undefined : (isId ? 'AI-OCR' : 'AI-OMR'),
+        method:    isEssay ? undefined : 'AI-OCR',
         isEssay,
         essayScore: isEssay ? 0 : undefined,
         essayMax:   isEssay ? 10 : undefined
