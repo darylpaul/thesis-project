@@ -47,10 +47,15 @@ export class ScanPage implements OnInit {
   imageQualityTips: string[] = [];
 
   detectedAnswers: {
-    num: number; detected: string; correct: string; isCorrect: boolean;
+    num: number; detected: string; correct: string; isCorrect: boolean; method?: string;
   }[] = [];
 
   score = 0; total = 0; percentage = 0; scored = false; isSaving = false;
+
+  // OpenAI Vision
+  useAI        = false;
+  showApiSetup = false;
+  openaiApiKey = localStorage.getItem('openai_api_key') || '';
 
   constructor(
     private api: ApiService,
@@ -134,10 +139,21 @@ export class ScanPage implements OnInit {
     const correctAnswers = this.getCorrectAnswers();
     if (!correctAnswers.length) { this.toast('Answer key has no answers', 'warning'); return; }
 
+    if (this.useAI && !this.openaiApiKey) {
+      this.toast('Please enter your OpenAI API key first', 'warning');
+      this.showApiSetup = true;
+      return;
+    }
+
     this.isScanning = true; this.ocrDone = false;
     this.scored = false; this.scanProgress = 0;
 
     try {
+      if (this.useAI) {
+        await this.scanWithOpenAI(correctAnswers);
+        return;
+      }
+
       this.scanStatus = 'Loading image...';
       this.scanProgress = 10;
       const canvas = await this.loadImageToCanvas(this.imageFile);
@@ -524,6 +540,113 @@ export class ScanPage implements OnInit {
   async toast(msg: string, color: string) {
     const t = await this.toastCtrl.create({ message: msg, duration: 4000, color, position: 'bottom' });
     t.present();
+  }
+
+  saveApiKey() {
+    localStorage.setItem('openai_api_key', this.openaiApiKey.trim());
+    this.showApiSetup = false;
+    this.toast('OpenAI API key saved!', 'success');
+  }
+
+  // ══════════════════════════════════════════════════
+  // AI SCAN — Sends image to OpenAI Vision API
+  // ══════════════════════════════════════════════════
+  async scanWithOpenAI(correctAnswers: string[]): Promise<void> {
+    this.scanStatus  = 'Preparing image for AI...';
+    this.scanProgress = 20;
+
+    const base64Data = await this.fileToBase64(this.imageFile!);
+    const mimeType   = this.imageFile!.type || 'image/jpeg';
+
+    const qTypes = correctAnswers.map((ans, i) => {
+      const up = ans.toUpperCase();
+      if (up === 'TRUE' || up === 'FALSE') return `Q${i + 1}: True/False`;
+      if (['A','B','C','D'].includes(up))  return `Q${i + 1}: Multiple Choice (A, B, C, or D)`;
+      return `Q${i + 1}: Identification (read the handwritten text on the answer line)`;
+    }).join('\n');
+
+    const prompt =
+      `This is a student exam answer sheet with ${correctAnswers.length} questions.\n\n` +
+      `Question types:\n${qTypes}\n\n` +
+      `For each question, identify the student's answer:\n` +
+      `- Multiple Choice: which bubble (A, B, C, or D) is filled/shaded\n` +
+      `- True/False: which bubble (True or False) is filled/shaded\n` +
+      `- Identification: the handwritten text on the answer line\n\n` +
+      `Return ONLY a JSON array of exactly ${correctAnswers.length} strings in order.\n` +
+      `Use "?" for any answer that is unclear.\n` +
+      `Example: ["A","True","photosynthesis","B","C","False","?"]`;
+
+    this.scanStatus  = 'Analyzing with OpenAI Vision...';
+    this.scanProgress = 50;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.openaiApiKey.trim()}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Data}`, detail: 'high' } }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error((err as any).error?.message || `OpenAI API error: ${response.status}`);
+    }
+
+    const data    = await response.json();
+    const content = (data.choices[0]?.message?.content || '').trim();
+
+    const match = content.match(/\[[\s\S]*?\]/);
+    if (!match) throw new Error('Could not parse AI response. Try again.');
+
+    const detected: string[] = JSON.parse(match[0]);
+    if (detected.length !== correctAnswers.length)
+      throw new Error(`AI returned ${detected.length} answers, expected ${correctAnswers.length}.`);
+
+    this.scanProgress = 90;
+    this.scanStatus   = 'Building results...';
+
+    this.detectedAnswers = correctAnswers.map((correct, i) => {
+      const det = (detected[i] || '?').toString().trim();
+      const up  = correct.toUpperCase();
+      const isId = !['A','B','C','D','TRUE','FALSE'].includes(up);
+      return {
+        num: i + 1,
+        detected: det,
+        correct,
+        isCorrect: det !== '?' && det.toUpperCase() === correct.toUpperCase(),
+        method: isId ? 'AI-OCR' : 'AI-OMR'
+      };
+    });
+
+    this.scanProgress = 100;
+    this.isScanning   = false;
+    this.ocrDone      = true;
+
+    const missing = this.detectedAnswers.filter(a => a.detected === '?').length;
+    if (missing > 0)
+      this.toast(`AI scan done. ${missing} unclear — fix using text boxes.`, 'warning');
+    else
+      this.toast('AI scan complete! Review then Calculate Score.', 'success');
+  }
+
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve((reader.result as string).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
   goBack() { this.router.navigate(['/dashboard']); }

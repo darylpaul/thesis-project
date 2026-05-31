@@ -149,7 +149,11 @@
           </div>
 
           <div class="answer-method" *ngIf="item.method">
-            <span class="method-badge" [class.omr]="item.method === 'OMR'" [class.ocr]="item.method === 'OCR'">
+            <span class="method-badge"
+              [class.omr]="item.method === 'OMR'"
+              [class.ocr]="item.method === 'OCR'"
+              [class.ai-omr]="item.method === 'AI-OMR'"
+              [class.ai-ocr]="item.method === 'AI-OCR'">
               {{ item.method }}
             </span>
           </div>
@@ -188,6 +192,41 @@
       <button class="save-btn" (click)="saveRecord()" [disabled]="isSaving">
         {{ isSaving ? 'Saving...' : '💾 Save to Records' }}
       </button>
+    </div>
+
+    <!-- Scan Mode Toggle -->
+    <div class="step-card" *ngIf="!ocrDone">
+      <div class="step-header">
+        <div class="step-num">⚙</div>
+        <div class="step-title">Scan Mode</div>
+      </div>
+
+      <div class="mode-toggle">
+        <button class="mode-btn" [class.active]="!useAI" (click)="useAI=false; showApiSetup=false">
+          <span class="mode-icon">📊</span>
+          <span class="mode-label">OMR (Offline)</span>
+          <span class="mode-desc">Bubble detection only</span>
+        </button>
+        <button class="mode-btn" [class.active]="useAI" (click)="useAI=true">
+          <span class="mode-icon">🤖</span>
+          <span class="mode-label">AI Vision</span>
+          <span class="mode-desc">Reads bubbles + handwriting</span>
+        </button>
+      </div>
+
+      <!-- API Key Setup (shown when AI mode selected) -->
+      <div *ngIf="useAI" class="api-key-section">
+        <div class="api-key-hint">
+          OpenAI API key is required for AI mode.
+          <span class="api-key-link" (click)="showApiSetup=!showApiSetup">
+            {{ openaiApiKey ? '✅ Key saved — tap to update' : '⚠️ No key — tap to add' }}
+          </span>
+        </div>
+        <div *ngIf="showApiSetup" style="margin-top:10px;">
+          <input class="field-input" type="password" placeholder="sk-..." [(ngModel)]="openaiApiKey" />
+          <button class="save-key-btn" (click)="saveApiKey()">Save Key</button>
+        </div>
+      </div>
     </div>
 
     <!-- Action buttons -->
