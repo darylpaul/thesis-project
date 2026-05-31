@@ -114,13 +114,11 @@ function renderPreview(q) {
         const c = qt.choices || {};
         answerHTML = `
           <div class="mc-choices-ocr">
-            <div class="mc-row">
-              <span class="mc-label">A.</span><span class="mc-text">${escHtml(c.A||'')}</span>
-              <span class="mc-label">B.</span><span class="mc-text">${escHtml(c.B||'')}</span>
-            </div>
-            <div class="mc-row">
-              <span class="mc-label">C.</span><span class="mc-text">${escHtml(c.C||'')}</span>
-              <span class="mc-label">D.</span><span class="mc-text">${escHtml(c.D||'')}</span>
+            <div class="mc-row-4">
+              <span class="mc-item"><span class="mc-label">A.</span>${escHtml(c.A||'')}</span>
+              <span class="mc-item"><span class="mc-label">B.</span>${escHtml(c.B||'')}</span>
+              <span class="mc-item"><span class="mc-label">C.</span>${escHtml(c.C||'')}</span>
+              <span class="mc-item"><span class="mc-label">D.</span>${escHtml(c.D||'')}</span>
             </div>
           </div>`;
 

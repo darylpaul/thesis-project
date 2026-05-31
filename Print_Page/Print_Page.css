@@ -45,11 +45,10 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
 .exam-paper {
   background: #fff;
   border-radius: 12px;
-  padding: 32px 40px;
+  padding: 24px 32px;
   max-width: 780px;
   margin: 0 auto;
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  /* Use a clean font that OCR reads well */
   font-family: 'Open Sans', Arial, sans-serif;
 }
 
@@ -79,7 +78,7 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
 .info-val   { font-weight: 700; color: #000; font-size: 12px; }
 
 /* PARTS */
-.print-part { margin-bottom: 16px; }
+.print-part { margin-bottom: 10px; }
 
 .part-header {
   display: flex; align-items: center; gap: 6px;
@@ -94,11 +93,11 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
 }
 .part-direction {
   font-size: 11px; color: #374151; font-style: italic;
-  padding: 4px 0 6px 16px; border-left: 3px solid #000; margin-bottom: 8px;
+  padding: 3px 0 4px 10px; border-left: 3px solid #000; margin-bottom: 5px;
 }
 
 /* QUESTIONS */
-.print-question { margin-bottom: 10px; }
+.print-question { margin-bottom: 6px; }
 .print-q-row    { display: flex; gap: 8px; align-items: flex-start; }
 .print-q-num {
   /* LARGE clear number for OCR anchor */
@@ -111,26 +110,15 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
   margin-bottom: 6px; line-height: 1.5;
 }
 
-/* ── MULTIPLE CHOICE — OCR optimized ──
-   Large boxed letters A B C D
-   Student circles the letter
-   OCR reads: circled letter = answer */
-.mc-choices-ocr { margin-top: 4px; }
-.mc-row {
-  display: flex; align-items: center; gap: 20px;
-  margin-bottom: 4px;
+/* ── MULTIPLE CHOICE — 4-column single row ── */
+.mc-choices-ocr { margin-top: 3px; }
+.mc-row-4 {
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 2px 6px;
 }
-.mc-bubble {
-  /* Bold boxed letter — easy for OCR to detect when circled */
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px;
-  border: 2px solid #000; border-radius: 50%;
-  font-size: 12px; font-weight: 800; color: #000;
-  flex-shrink: 0; margin-right: 4px;
-  /* OCR tip: when student circles this, the circle gets darker */
-}
-.mc-text {
-  font-size: 12px; color: #000; margin-right: 24px; flex: 1;
+.mc-item {
+  display: flex; align-items: flex-start; gap: 4px;
+  font-size: 12px; color: #000; line-height: 1.4;
 }
 
 /* ── TRUE OR FALSE — OMR optimized ──
