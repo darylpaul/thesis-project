@@ -22,6 +22,7 @@
               "base": "www",
               "browser": ""
             },
+            "baseHref": "/thesis-project/thesis-mobile/www/",
             "index": "src/index.html",
             "polyfills": [
               "src/polyfills.ts"
