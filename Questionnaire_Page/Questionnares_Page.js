@@ -229,8 +229,10 @@ function renderParts() {
   container.querySelectorAll('.btn-remove-question').forEach(btn => {
     btn.addEventListener('click', e => {
       const pi = +e.target.dataset.pi, qi = +e.target.dataset.qi;
-      if (parts[pi].questions.length > 1) { parts[pi].questions.splice(qi, 1); renderParts(); }
-      else showToast('Each part needs at least 1 question.', 'error');
+      if (parts[pi].questions.length > 1) {
+        if (!confirm(`Remove question ${qi + 1}? This cannot be undone.`)) return;
+        parts[pi].questions.splice(qi, 1); renderParts();
+      } else showToast('Each part needs at least 1 question.', 'error');
     });
   });
   container.querySelectorAll('.btn-save-bank').forEach(btn => {
@@ -678,6 +680,8 @@ document.getElementById('saveBankConfirm').addEventListener('click', async () =>
     answer:        q.answer || null,
     choices:       part.type === 'multiple_choice' ? q.choices : null
   };
+
+  if (!confirm(`Save this question to the Test Bank under topic "${topic}"?`)) return;
 
   const btn = document.getElementById('saveBankConfirm');
   btn.disabled = true; btn.textContent = 'Saving...';
