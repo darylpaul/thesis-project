@@ -177,8 +177,7 @@ function openViewModal(ak) {
       }
       div.innerHTML = `
         <span class="view-answer-num">${i + 1}.</span>
-        ${ansHTML}
-        ${a.question ? `<span class="view-answer-label" title="${escHtml(a.question)}">${escHtml(a.question)}</span>` : ''}`;
+        ${ansHTML}`;
       grid.appendChild(div);
     });
     body.appendChild(grid);
