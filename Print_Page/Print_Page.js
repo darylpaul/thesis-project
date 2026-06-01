@@ -31,6 +31,8 @@ async function loadDropdowns() {
     const subEl = document.getElementById('subjectSelect');
     subEl.innerHTML = '<option value="" disabled hidden>Select subject</option>';
     subjects.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; subEl.appendChild(o); });
+
+    setTimeout(loadQuestionnaires, 0);
   } catch { showToast('Could not load data.', 'error'); }
 }
 

@@ -62,6 +62,7 @@ async function populateFilters() {
       pf.appendChild(o);
     });
 
+    setTimeout(renderRecords, 0);
   } catch (err) {
     showToast('Could not load filters.', 'error');
   }

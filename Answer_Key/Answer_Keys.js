@@ -24,6 +24,7 @@ async function populateDropdowns() {
     subEl.innerHTML = '<option value="" disabled hidden>Select subject</option>';
     subjects.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; subEl.appendChild(o); });
 
+    setTimeout(renderAnswerKeys, 0);
   } catch (err) {
     showToast('Could not load data. Is the server running?', 'error');
   }

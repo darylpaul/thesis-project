@@ -24,6 +24,8 @@ async function populateFilterDropdowns() {
       el.innerHTML = '<option value="" disabled hidden>Select subject</option>';
       subjects.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; el.appendChild(o); });
     });
+    // Wait one tick so the browser can restore form state before we render
+    setTimeout(renderQuestionnaires, 0);
   } catch { showToast('Could not load data.', 'error'); }
 }
 
