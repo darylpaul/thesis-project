@@ -153,6 +153,8 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
 }
 .question-inputs input:focus, .question-inputs select:focus { border-color: #1a2eaa; background: #fff; }
 .btn-remove-question { width: 28px; height: 28px; background: #fef2f2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 10px; flex-shrink: 0; font-size: 13px; }
+.btn-save-bank { width: 28px; height: 28px; background: #eff6ff; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 10px; flex-shrink: 0; font-size: 14px; }
+.btn-save-bank:hover { background: #dbeafe; }
 
 .choices-builder { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
 .choice-row-select { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1.5px solid #e5e7eb; border-radius: 8px; cursor: pointer; background: #f9fafb; transition: all 0.15s; }

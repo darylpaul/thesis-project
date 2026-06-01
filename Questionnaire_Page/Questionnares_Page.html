@@ -198,6 +198,29 @@
     </div>
   </div>
 
+  <!-- SAVE TO TEST BANK MODAL -->
+  <div class="modal-overlay" id="saveBankOverlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Save to Test Bank</h3>
+        <button class="modal-close" id="saveBankClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.82rem;color:#6b7280;margin-bottom:10px;">Question to save:</p>
+        <div id="saveBankPreview" style="background:#f8faff;border:1.5px solid #dde3ff;border-radius:10px;padding:12px;font-size:0.875rem;color:#1e2d6b;margin-bottom:16px;line-height:1.5;"></div>
+        <div class="form-group">
+          <label for="saveBankTopic">Topic Name <span class="required">*</span></label>
+          <input type="text" id="saveBankTopic" placeholder="e.g. Photosynthesis, World War 2..." />
+          <span style="font-size:0.75rem;color:#9ca3af;margin-top:4px;display:block;">Group questions by topic so they can be imported later.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="saveBankCancel">Cancel</button>
+        <button class="btn-save" id="saveBankConfirm">Save to Test Bank</button>
+      </div>
+    </div>
+  </div>
+
   <!-- DELETE MODAL -->
   <div class="modal-overlay" id="deleteOverlay">
     <div class="modal modal-sm">
