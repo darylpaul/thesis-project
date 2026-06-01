@@ -20,29 +20,13 @@ async function loadStats() {
   });
 
   try {
-    const isAdmin = localStorage.getItem('role') === 'admin';
-    const requests = [
+    const [statsRes, recordsRes] = await Promise.all([
       fetch(`${API}/teacher/stats`, { headers: { 'Authorization': localStorage.getItem('token') } }),
       fetch(`${API}/records`,       { headers: { 'Authorization': localStorage.getItem('token') } })
-    ];
-    if (isAdmin) requests.push(
-      fetch(`${API}/test-bank?status=pending`, { headers: { 'Authorization': localStorage.getItem('token') } })
-    );
-
-    const [statsRes, recordsRes, pendingRes] = await Promise.all(requests);
+    ]);
 
     const stats   = await statsRes.json();
     const records = await recordsRes.json();
-
-    if (isAdmin && pendingRes) {
-      const pending = await pendingRes.json();
-      const count   = Array.isArray(pending) ? pending.length : 0;
-      if (count > 0) {
-        document.getElementById('pendingBankCount').textContent  = count;
-        document.getElementById('pendingBankPlural').textContent = count === 1 ? '' : 's';
-        document.getElementById('pendingBankAlert').style.display = 'flex';
-      }
-    }
 
     setStat('sections',       stats.sections);
     setStat('students',       stats.students);
