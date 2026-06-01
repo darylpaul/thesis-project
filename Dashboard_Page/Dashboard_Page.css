@@ -18,7 +18,6 @@ html, body {
   font-family: 'Open Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 14px;
 }
 
 /* ===== MAIN CONTENT ===== */
