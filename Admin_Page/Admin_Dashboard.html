@@ -38,6 +38,9 @@
       <button class="sidebar-btn" data-tab="logs">
         <span class="sb-icon">📋</span> Activity Logs
       </button>
+      <button class="sidebar-btn" data-tab="testbank">
+        <span class="sb-icon">🏦</span> Test Bank
+      </button>
       <button class="sidebar-btn" data-tab="archive">
         <span class="sb-icon">🗄️</span> Archive
       </button>
@@ -82,6 +85,11 @@
             <div class="stat-icon">👨‍🎓</div>
             <div class="stat-num" id="stat-students">—</div>
             <div class="stat-label">Students</div>
+          </div>
+          <div class="stat-card amber" id="pendingBankCard" style="cursor:pointer;" onclick="document.querySelector('[data-tab=testbank]').click()">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-num" id="stat-pending-testbank">—</div>
+            <div class="stat-label">Pending Test Bank</div>
           </div>
         </div>
         <div class="section-card">
@@ -182,6 +190,9 @@
               <option value="SAVE_RECORD">Save Record</option>
               <option value="CREATE_STUDENT">Create Student</option>
               <option value="CREATE_SECTION">Create Section</option>
+              <option value="SUGGEST_TESTBANK">Suggest Test Bank</option>
+              <option value="CREATE_TESTBANK">Add to Test Bank</option>
+              <option value="APPROVE_TESTBANK">Approve Test Bank</option>
             </select>
             <select id="platformFilter">
               <option value="">All Platforms</option>
@@ -191,6 +202,37 @@
             <button class="refresh-btn" id="refreshLogs">🔄 Refresh</button>
           </div>
           <div id="allLogs" class="logs-list"></div>
+        </div>
+      </div>
+
+      <!-- TEST BANK TAB -->
+      <div class="tab-content" id="tab-testbank">
+        <div class="tab-header">
+          <h2 class="tab-title">Test Bank</h2>
+          <p class="tab-sub">Review and approve questions suggested by teachers</p>
+        </div>
+        <div class="section-card">
+          <div class="logs-filters">
+            <input type="text" id="tbSearch" placeholder="🔍 Search questions..."
+              style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;outline:none;flex:1;min-width:200px;"
+              oninput="filterTestBank()" />
+            <select id="tbStatusFilter" onchange="filterTestBank()">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+            </select>
+            <select id="tbTypeFilter" onchange="filterTestBank()">
+              <option value="">All Types</option>
+              <option value="multiple_choice">Multiple Choice</option>
+              <option value="true_false">True or False</option>
+              <option value="identification">Identification</option>
+              <option value="essay">Essay</option>
+            </select>
+            <button class="refresh-btn" onclick="loadTestBank()">🔄 Refresh</button>
+          </div>
+          <div id="tbList">
+            <div style="text-align:center;padding:48px;color:#9ca3af;">Click the Test Bank tab to load questions.</div>
+          </div>
         </div>
       </div>
 

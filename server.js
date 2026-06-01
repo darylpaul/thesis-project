@@ -347,13 +347,14 @@ app.get('/api/teacher/stats', async (req, res) => {
 // ===========================
 app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   try {
-    const [[teachers]]       = await db.query('SELECT COUNT(*) as count FROM users WHERE role = "teacher"');
-    const [[questionnaires]] = await db.query('SELECT COUNT(*) as count FROM questionnaires');
-    const [[answerkeys]]     = await db.query('SELECT COUNT(*) as count FROM answerkeys');
-    const [[records]]        = await db.query('SELECT COUNT(*) as count FROM records');
-    const [[sections]]       = await db.query('SELECT COUNT(*) as count FROM sections');
-    const [[students]]       = await db.query('SELECT COUNT(*) as count FROM students');
-    res.json({ teachers: teachers.count, questionnaires: questionnaires.count, answerkeys: answerkeys.count, records: records.count, sections: sections.count, students: students.count });
+    const [[teachers]]        = await db.query('SELECT COUNT(*) as count FROM users WHERE role = "teacher"');
+    const [[questionnaires]]  = await db.query('SELECT COUNT(*) as count FROM questionnaires');
+    const [[answerkeys]]      = await db.query('SELECT COUNT(*) as count FROM answerkeys');
+    const [[records]]         = await db.query('SELECT COUNT(*) as count FROM records');
+    const [[sections]]        = await db.query('SELECT COUNT(*) as count FROM sections');
+    const [[students]]        = await db.query('SELECT COUNT(*) as count FROM students');
+    const [[pending_testbank]]= await db.query('SELECT COUNT(*) as count FROM test_bank WHERE status = "pending"');
+    res.json({ teachers: teachers.count, questionnaires: questionnaires.count, answerkeys: answerkeys.count, records: records.count, sections: sections.count, students: students.count, pending_testbank: pending_testbank.count });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 

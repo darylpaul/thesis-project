@@ -37,6 +37,7 @@ document.querySelectorAll('.sidebar-btn').forEach(btn => {
     if (btn.dataset.tab === 'teachers') loadTeachers();
     if (btn.dataset.tab === 'logs')     loadAllLogs();
     if (btn.dataset.tab === 'archive')  loadArchive();
+    if (btn.dataset.tab === 'testbank') loadTestBank();
   });
 });
 
@@ -224,12 +225,17 @@ async function loadStats() {
   try {
     const res  = await fetch(`${API}/admin/stats`, { headers });
     const data = await res.json();
-    document.getElementById('stat-teachers').textContent       = data.teachers;
-    document.getElementById('stat-questionnaires').textContent = data.questionnaires;
-    document.getElementById('stat-answerkeys').textContent     = data.answerkeys;
-    document.getElementById('stat-records').textContent        = data.records;
-    document.getElementById('stat-sections').textContent       = data.sections;
-    document.getElementById('stat-students').textContent       = data.students;
+    document.getElementById('stat-teachers').textContent           = data.teachers;
+    document.getElementById('stat-questionnaires').textContent     = data.questionnaires;
+    document.getElementById('stat-answerkeys').textContent         = data.answerkeys;
+    document.getElementById('stat-records').textContent            = data.records;
+    document.getElementById('stat-sections').textContent           = data.sections;
+    document.getElementById('stat-students').textContent           = data.students;
+    document.getElementById('stat-pending-testbank').textContent   = data.pending_testbank ?? '0';
+    // Highlight pending card if there are items waiting
+    if (data.pending_testbank > 0) {
+      document.getElementById('pendingBankCard').style.outline = '2px solid #f59e0b';
+    }
   } catch { console.error('Could not load stats'); }
 }
 
@@ -288,6 +294,9 @@ function renderLogs(container, logs) {
     'CREATE_STUDENT':       { bg:'#eff6ff', color:'#2563eb', icon:'👨‍🎓' },
     'CREATE_SECTION':       { bg:'#fff7ed', color:'#ea580c', icon:'🏫' },
     'CREATE_SUBJECT':       { bg:'#f5f3ff', color:'#7c3aed', icon:'📚' },
+    'SUGGEST_TESTBANK':     { bg:'#fffbeb', color:'#d97706', icon:'💡' },
+    'CREATE_TESTBANK':      { bg:'#f0fdf4', color:'#16a34a', icon:'🏦' },
+    'APPROVE_TESTBANK':     { bg:'#f0fdf4', color:'#16a34a', icon:'✅' },
   };
   container.innerHTML = logs.map(log => {
     const s    = actionColors[log.action] || { bg:'#f3f4f6', color:'#6b7280', icon:'📋' };
@@ -586,3 +595,130 @@ document.getElementById('deleteConfirmBtn').addEventListener('click', async () =
   } catch { showToast('Could not delete teacher.', 'error'); }
   deleteTeacherId = null;
 });
+
+// ═══════════════════════════════════════
+// TEST BANK TAB
+// ═══════════════════════════════════════
+let allTestBankData = [];
+
+async function loadTestBank() {
+  const list = document.getElementById('tbList');
+  list.innerHTML = '<div style="text-align:center;padding:24px;color:#9ca3af;">Loading...</div>';
+  try {
+    const res  = await fetch(`${API}/test-bank`, { headers });
+    allTestBankData = await res.json();
+    filterTestBank();
+  } catch {
+    list.innerHTML = '<div style="text-align:center;padding:24px;color:#dc2626;">Could not load test bank.</div>';
+  }
+}
+
+function filterTestBank() {
+  const search = (document.getElementById('tbSearch')?.value || '').toLowerCase();
+  const status = document.getElementById('tbStatusFilter').value;
+  const type   = document.getElementById('tbTypeFilter').value;
+  let filtered = allTestBankData;
+  if (status) filtered = filtered.filter(q => q.status === status);
+  if (type)   filtered = filtered.filter(q => q.type === type);
+  if (search) filtered = filtered.filter(q =>
+    (q.question_text||'').toLowerCase().includes(search) ||
+    (q.topic||'').toLowerCase().includes(search) ||
+    (q.subject_name||'').toLowerCase().includes(search) ||
+    (q.suggested_by_name||'').toLowerCase().includes(search)
+  );
+  renderTestBank(filtered);
+}
+
+function renderTestBank(data) {
+  const list = document.getElementById('tbList');
+  if (!data.length) {
+    list.innerHTML = '<div style="text-align:center;padding:48px;color:#9ca3af;">No questions found.</div>';
+    return;
+  }
+
+  const typeLabels = { multiple_choice:'MC', true_false:'T/F', identification:'ID', essay:'Essay' };
+  const typeColors = {
+    multiple_choice:'#eff6ff;color:#2563eb',
+    true_false:'#f0fdf4;color:#16a34a',
+    identification:'#fefce8;color:#ca8a04',
+    essay:'#f5f3ff;color:#7c3aed'
+  };
+
+  list.innerHTML = `
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Type</th>
+            <th>Topic</th>
+            <th>Subject</th>
+            <th>Suggested By</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(q => {
+            const tc  = typeColors[q.type] || '#f3f4f6;color:#374151';
+            const isPending = q.status === 'pending';
+            return `
+              <tr>
+                <td style="max-width:260px;font-size:13px;color:#111827;">${escHtml(q.question_text)}</td>
+                <td>
+                  <span style="background:${tc.split(';')[0]};${tc.split(';')[1]};
+                    font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;">
+                    ${typeLabels[q.type] || q.type}
+                  </span>
+                </td>
+                <td style="font-size:13px;color:#374151;">${escHtml(q.topic)}</td>
+                <td style="font-size:13px;color:#374151;">${escHtml(q.subject_name||'—')}</td>
+                <td style="font-size:13px;color:#374151;">${escHtml(q.suggested_by_name||'—')}</td>
+                <td>
+                  <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;
+                    background:${isPending?'#fffbeb':'#f0fdf4'};color:${isPending?'#d97706':'#16a34a'};">
+                    ${isPending ? '⏳ Pending' : '✓ Approved'}
+                  </span>
+                </td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    ${isPending ? `
+                    <button onclick="tbApprove(${q.id})"
+                      style="padding:5px 12px;background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;
+                      border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
+                      ✓ Approve
+                    </button>` : ''}
+                    <button onclick="tbDelete(${q.id}, '${escHtml(q.question_text).substring(0,30)}...')"
+                      style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;
+                      border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
+                      🗑 Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 16px;font-size:12px;color:#9ca3af;border-top:1px solid #f1f5f9;">
+      ${data.length} question${data.length !== 1 ? 's' : ''}
+    </div>`;
+}
+
+async function tbApprove(id) {
+  if (!confirm('Approve this question? It will be visible to all teachers.')) return;
+  try {
+    const res = await fetch(`${API}/test-bank/${id}/approve`, { method: 'PUT', headers });
+    if (res.ok) { showToast('Question approved!', 'success'); loadTestBank(); loadStats(); }
+    else showToast('Could not approve.', 'error');
+  } catch { showToast('Server error.', 'error'); }
+}
+
+async function tbDelete(id, name) {
+  if (!confirm(`Permanently delete this question?\n"${name}"\nThis cannot be undone.`)) return;
+  try {
+    const res = await fetch(`${API}/test-bank/${id}`, { method: 'DELETE', headers });
+    if (res.ok) { showToast('Question deleted.', 'success'); loadTestBank(); loadStats(); }
+    else showToast('Could not delete.', 'error');
+  } catch { showToast('Server error.', 'error'); }
+}
