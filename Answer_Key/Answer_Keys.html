@@ -103,16 +103,13 @@
 
   <!-- ===== VIEW ANSWER KEY MODAL ===== -->
   <div class="modal-overlay" id="viewOverlay">
-    <div class="modal modal-lg">
-      <div class="modal-header">
-        <div>
-          <h3 id="viewTitle">Answer Key</h3>
-          <div class="view-meta" id="viewMeta"></div>
-        </div>
+    <div class="ak-pdf-wrapper">
+      <div class="ak-pdf-toolbar">
+        <span id="viewToolbarTitle" style="font-weight:700;font-size:0.875rem;color:#1e2d6b;"></span>
         <button class="modal-close" id="viewClose">&times;</button>
       </div>
-      <div class="modal-body" id="viewBody"></div>
-      <div class="modal-footer">
+      <div class="ak-pdf-page" id="viewBody"></div>
+      <div class="ak-pdf-footer">
         <button class="btn-cancel" id="viewCloseBtn">Close</button>
       </div>
     </div>

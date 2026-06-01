@@ -148,43 +148,50 @@ function escHtml(str) {
 const viewOverlay = document.getElementById('viewOverlay');
 
 function openViewModal(ak) {
-  document.getElementById('viewTitle').textContent = ak.title;
-  document.getElementById('viewMeta').innerHTML =
-    `${ak.type} &nbsp;·&nbsp; ${ak.section_name} &nbsp;·&nbsp; ${ak.subject_name}`;
+  document.getElementById('viewToolbarTitle').textContent = ak.title;
 
   const body = document.getElementById('viewBody');
-  body.innerHTML = '';
   const answers = ak.answers ? JSON.parse(ak.answers) : [];
 
-  if (!answers.length) {
-    body.innerHTML = '<p style="color:#9ca3af;font-size:0.875rem;padding:8px 0">No answer items in this key.</p>';
-  } else {
-    const grid = document.createElement('div');
-    grid.className = 'view-answer-grid';
-    answers.forEach((a, i) => {
-      const div = document.createElement('div');
-      div.className = 'view-answer-item';
+  const ITEMS_PER_COL = 10;
+  const colCount = Math.max(1, Math.ceil(answers.length / ITEMS_PER_COL));
+
+  let colsHTML = '';
+  for (let c = 0; c < colCount; c++) {
+    const start = c * ITEMS_PER_COL;
+    const slice = answers.slice(start, start + ITEMS_PER_COL);
+    let rowsHTML = slice.map((a, j) => {
+      const num = start + j + 1;
       const ans = (a.answer || '').toUpperCase();
       const isMC = ['A','B','C','D'].includes(ans);
       const isTF = ans === 'TRUE' || ans === 'FALSE';
-      let ansHTML = '';
-      if (isMC) {
-        ansHTML = `<span class="ak-bubble">${escHtml(a.answer)}</span>`;
-      } else if (isTF) {
-        ansHTML = `<span class="ak-tf-badge">${escHtml(a.answer)}</span>`;
-      } else {
-        ansHTML = `<span class="ak-text-ans">${escHtml(a.answer)}</span>`;
-      }
-      div.innerHTML = `
-        <span class="view-answer-num">${i + 1}.</span>
-        ${ansHTML}`;
-      grid.appendChild(div);
-    });
-    body.appendChild(grid);
+      let ansHTML = isMC
+        ? `<span class="ak-bubble">${escHtml(a.answer)}</span>`
+        : isTF
+          ? `<span class="ak-tf-badge">${escHtml(a.answer)}</span>`
+          : `<span class="ak-text-ans">${escHtml(a.answer)}</span>`;
+      return `<div class="pdf-row"><span class="pdf-num">${num}.</span>${ansHTML}</div>`;
+    }).join('');
+    colsHTML += `<div class="pdf-col">${rowsHTML}</div>`;
   }
+
+  body.innerHTML = `
+    <div class="pdf-header">
+      <div class="pdf-school">MINDFUL SCHOOL OF BERLYN ACHIEVERS</div>
+      <div class="pdf-title">${escHtml(ak.title)}</div>
+      <div class="pdf-meta-row">
+        <span><strong>Section:</strong> ${escHtml(ak.section_name)}</span>
+        <span><strong>Subject:</strong> ${escHtml(ak.subject_name)}</span>
+        <span><strong>Type:</strong> ${escHtml(ak.type)}</span>
+        <span><strong>Items:</strong> ${answers.length}</span>
+      </div>
+      <div class="pdf-divider"></div>
+      <div class="pdf-label">ANSWER KEY</div>
+    </div>
+    ${answers.length ? `<div class="pdf-cols">${colsHTML}</div>` : '<p class="pdf-empty">No answer items in this key.</p>'}`;
+
   viewOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  window.scrollTo(0,0);
 }
 
 document.getElementById('viewClose').addEventListener('click',    () => { viewOverlay.classList.remove('open'); document.body.style.overflow = ''; });
