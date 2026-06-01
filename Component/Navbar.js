@@ -153,6 +153,25 @@
     <div class="sidebar-qr-caption">Scan or <a href="https://darylpaul.github.io/thesis-project/thesis-mobile/" target="_blank" rel="noopener noreferrer" class="sidebar-qr-link">click here</a> to open<br>the mobile scanner</div>
   </div>
 </aside>
+
+<!-- LOGOUT CONFIRMATION MODAL -->
+<div class="logout-modal-overlay" id="logoutModalOverlay">
+  <div class="logout-modal-box">
+    <div class="logout-modal-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#1a2eaa" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </div>
+    <h3 class="logout-modal-title">Log Out</h3>
+    <p class="logout-modal-msg">Are you sure you want to log out of your account?</p>
+    <div class="logout-modal-actions">
+      <button class="logout-modal-cancel" id="logoutCancelBtn">Cancel</button>
+      <button class="logout-modal-confirm" id="logoutConfirmBtn">Log Out</button>
+    </div>
+  </div>
+</div>
 `;
 
   // ── Pages that DON'T need login check ──────────────────
@@ -215,16 +234,28 @@
   }
 
   function wireLogout() {
-    const btn = document.getElementById('logoutBtn');
-    if (!btn) return;
+    const btn        = document.getElementById('logoutBtn');
+    const overlay    = document.getElementById('logoutModalOverlay');
+    const cancelBtn  = document.getElementById('logoutCancelBtn');
+    const confirmBtn = document.getElementById('logoutConfirmBtn');
+    if (!btn || !overlay) return;
+
     btn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to log out?')) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('fullname');
-        localStorage.removeItem('email');
-        localStorage.removeItem('gender');
-        window.location.href = '../LogIn_Page/LogIn_Page.html';
-      }
+      overlay.classList.add('open');
+    });
+    cancelBtn.addEventListener('click', () => {
+      overlay.classList.remove('open');
+    });
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+    confirmBtn.addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('fullname');
+      localStorage.removeItem('email');
+      localStorage.removeItem('role');
+      localStorage.removeItem('gender');
+      window.location.href = '../LogIn_Page/LogIn_Page.html';
     });
   }
 
