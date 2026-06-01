@@ -54,6 +54,12 @@ textarea.field-input { resize: none; font-family: inherit; }
   background: #fef2f2; color: #dc2626; border: none;
   border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 12px;
 }
+.save-bank-btn {
+  background: #eff6ff; border: none;
+  border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 13px;
+  margin-right: 4px;
+  &:active { background: #dbeafe; }
+}
 
 /* Multiple choice */
 .choices-builder { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }

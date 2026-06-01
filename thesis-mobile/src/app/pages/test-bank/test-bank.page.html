@@ -125,7 +125,7 @@
           <div class="field-group">
             <label class="field-label">Subject *</label>
             <select class="field-input" [(ngModel)]="form.subject_id">
-              <option value="">Select subject</option>
+              <option value="" disabled hidden>Select subject</option>
               <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
             </select>
           </div>

@@ -47,7 +47,7 @@ async function populateFilters() {
     const subjects  = await subjectsRes.json();
 
     const sf = document.getElementById('sectionFilter');
-    sf.innerHTML = '<option value="">Select Section</option>';
+    sf.innerHTML = '<option value="" disabled hidden>Select Section</option>';
     sections.forEach(s => {
       const o = document.createElement('option');
       o.value = s.id; o.textContent = s.name;
@@ -55,7 +55,7 @@ async function populateFilters() {
     });
 
     const pf = document.getElementById('subjectFilter');
-    pf.innerHTML = '<option value="">Select Subject</option>';
+    pf.innerHTML = '<option value="" disabled hidden>Select Subject</option>';
     subjects.forEach(s => {
       const o = document.createElement('option');
       o.value = s.id; o.textContent = s.name;

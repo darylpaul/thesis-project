@@ -17,11 +17,11 @@ async function populateDropdowns() {
     const subjects = await subRes.json();
 
     const secEl = document.getElementById('sectionFilter');
-    secEl.innerHTML = '<option value="">Select section</option>';
+    secEl.innerHTML = '<option value="" disabled hidden>Select section</option>';
     sections.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; secEl.appendChild(o); });
 
     const subEl = document.getElementById('subjectFilter');
-    subEl.innerHTML = '<option value="">Select subject</option>';
+    subEl.innerHTML = '<option value="" disabled hidden>Select subject</option>';
     subjects.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; subEl.appendChild(o); });
 
   } catch (err) {

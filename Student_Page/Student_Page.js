@@ -35,7 +35,7 @@ async function populateSectionDropdowns() {
     const modalSection = document.getElementById('studentSection');
 
     filterSelect.innerHTML = '<option value="">All Sections</option>';
-    modalSection.innerHTML = '<option value="">Select section</option>';
+    modalSection.innerHTML = '<option value="" disabled hidden>Select section</option>';
 
     sections.forEach(sec => {
       const opt1 = document.createElement('option');

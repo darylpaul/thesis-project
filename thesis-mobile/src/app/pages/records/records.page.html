@@ -29,11 +29,11 @@
 
   <div style="padding:14px 16px 0;display:flex;gap:10px;">
     <select class="field-input" [(ngModel)]="selectedSection" (change)="onFilterChange()">
-      <option value="">Select Section</option>
+      <option value="" disabled hidden>Select Section</option>
       <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
     </select>
     <select class="field-input" [(ngModel)]="selectedSubject" (change)="onFilterChange()">
-      <option value="">Select Subject</option>
+      <option value="" disabled hidden>Select Subject</option>
       <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
     </select>
   </div>

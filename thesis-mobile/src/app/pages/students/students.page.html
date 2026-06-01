@@ -85,14 +85,14 @@
         <div class="field-group">
           <label class="field-label">Gender</label>
           <select class="field-input" [(ngModel)]="form.gender">
-            <option value="">Select gender</option>
+            <option value="" disabled hidden>Select gender</option>
             <option>Male</option><option>Female</option>
           </select>
         </div>
         <div class="field-group">
           <label class="field-label">Section *</label>
           <select class="field-input" [(ngModel)]="form.section_id">
-            <option value="">Select section</option>
+            <option value="" disabled hidden>Select section</option>
             <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
           </select>
         </div>

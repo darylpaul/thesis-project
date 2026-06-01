@@ -31,14 +31,14 @@
       <div class="field-group">
         <label class="field-label">Section *</label>
         <select class="field-input" [(ngModel)]="selectedSection" (change)="onSectionChange()">
-          <option value="">Select section</option>
+          <option value="" disabled hidden>Select section</option>
           <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
         </select>
       </div>
       <div class="field-group">
         <label class="field-label">Subject *</label>
         <select class="field-input" [(ngModel)]="selectedSubject" (change)="onSubjectChange()">
-          <option value="">Select subject</option>
+          <option value="" disabled hidden>Select subject</option>
           <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
         </select>
       </div>

@@ -125,14 +125,14 @@
           <div class="field-group">
             <label class="field-label">Section *</label>
             <select class="field-input" [(ngModel)]="form.section_id">
-              <option value="">Select section</option>
+              <option value="" disabled hidden>Select section</option>
               <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
             </select>
           </div>
           <div class="field-group">
             <label class="field-label">Subject *</label>
             <select class="field-input" [(ngModel)]="form.subject_id">
-              <option value="">Select subject</option>
+              <option value="" disabled hidden>Select subject</option>
               <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
             </select>
           </div>
@@ -177,6 +177,7 @@
               <div *ngFor="let q of part.questions; let qi = index" class="question-item-builder">
                 <div class="q-header-row">
                   <div class="q-num-badge">{{ qi + 1 }}</div>
+                  <button class="save-bank-btn" (click)="openSaveToBankModal(part, q)" title="Save to Test Bank">🏦</button>
                   <button class="remove-q-btn" (click)="removeQuestion(part, qi)">✕</button>
                 </div>
 
@@ -251,7 +252,7 @@
           <div class="field-group">
             <label class="field-label">Subject</label>
             <select class="field-input" [(ngModel)]="importSubjectId" (change)="onImportSubjectChange()">
-              <option value="">Select subject</option>
+              <option value="" disabled hidden>Select subject</option>
               <option *ngFor="let s of subjects" [value]="s.id">{{ s.name }}</option>
             </select>
           </div>
@@ -259,7 +260,7 @@
             <label class="field-label">Topic</label>
             <div *ngIf="isLoadingTopics" style="padding:10px;text-align:center;font-size:13px;color:#6b7280;">Loading topics...</div>
             <select *ngIf="!isLoadingTopics" class="field-input" [(ngModel)]="importSelectedTopic" (change)="onImportTopicChange()">
-              <option value="">Select a topic</option>
+              <option value="" disabled hidden>Select a topic</option>
               <option *ngFor="let t of importTopics" [value]="t.topic">{{ t.topic }} ({{ t.count }} questions)</option>
             </select>
             <p *ngIf="!isLoadingTopics && importTopics.length === 0" style="font-size:12px;color:#9ca3af;margin-top:4px;">No approved topics for this subject yet.</p>
@@ -283,6 +284,43 @@
           class="submit-btn" type="button" (click)="doImport()">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
           Import {{ importPreview.length }} Question{{ importPreview.length !== 1 ? 's' : '' }}
+        </button>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- ===================== SAVE TO TEST BANK MODAL ===================== -->
+<ion-modal [isOpen]="showSaveToBank" (didDismiss)="closeSaveToBankModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeSaveToBankModal()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>Save to Test Bank</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content style="--background:#f0f2f7;">
+      <div style="padding:16px;">
+
+        <div class="form-section">
+          <div class="form-section-title">Question Preview</div>
+          <div style="background:#fff;border-radius:10px;padding:14px;font-size:14px;color:#1f2937;line-height:1.5;">
+            {{ saveToBankQuestion?.q?.text }}
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Topic Name *</div>
+          <p style="font-size:12px;color:#6b7280;margin-bottom:8px;">Enter the topic this question belongs to (e.g. "Photosynthesis", "World War 2")</p>
+          <input class="field-input" [(ngModel)]="saveToBankTopic" placeholder="e.g. Photosynthesis" />
+        </div>
+
+        <button class="submit-btn" type="button" (click)="doSaveToBank()" [disabled]="isSavingToBank">
+          <ion-icon name="library-outline"></ion-icon>
+          {{ isSavingToBank ? 'Saving...' : 'Save to Test Bank' }}
         </button>
 
       </div>

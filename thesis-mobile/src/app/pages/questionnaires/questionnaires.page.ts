@@ -334,6 +334,44 @@ export class QuestionnairesPage implements OnInit {
     });
   }
 
+  // ── Save Question to Test Bank ────────────────────────
+  showSaveToBank     = false;
+  saveToBankTopic    = '';
+  saveToBankQuestion: { q: QuestionItem; part: ExamPart } | null = null;
+  isSavingToBank     = false;
+
+  openSaveToBankModal(part: ExamPart, q: QuestionItem) {
+    if (!this.form.subject_id) { this.toast('Please select a subject first', 'warning'); return; }
+    if (!q.text.trim())        { this.toast('Question text is empty', 'warning'); return; }
+    this.saveToBankQuestion = { q, part };
+    this.saveToBankTopic    = '';
+    this.showSaveToBank     = true;
+  }
+
+  closeSaveToBankModal() { this.showSaveToBank = false; this.saveToBankQuestion = null; }
+
+  doSaveToBank() {
+    if (!this.saveToBankTopic.trim()) { this.toast('Topic is required', 'warning'); return; }
+    const { q, part } = this.saveToBankQuestion!;
+    const payload: any = {
+      subject_id:    this.form.subject_id,
+      topic:         this.saveToBankTopic.trim(),
+      type:          part.type,
+      question_text: q.text,
+      answer:        q.answer || null,
+      choices:       part.type === 'multiple_choice' ? q.choices : null
+    };
+    this.isSavingToBank = true;
+    this.api.suggestTestBank(payload).subscribe({
+      next: (res: any) => {
+        this.isSavingToBank = false;
+        this.closeSaveToBankModal();
+        this.toast(res.message || 'Question saved to Test Bank!', 'success');
+      },
+      error: () => { this.isSavingToBank = false; this.toast('Failed to save to bank', 'danger'); }
+    });
+  }
+
   // ── Import from Test Bank ─────────────────────────────
   showImportModal    = false;
   importSubjectId    = '';

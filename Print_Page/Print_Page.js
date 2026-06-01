@@ -25,11 +25,11 @@ async function loadDropdowns() {
     const subjects = await subRes.json();
 
     const sEl = document.getElementById('sectionSelect');
-    sEl.innerHTML = '<option value="">Select section</option>';
+    sEl.innerHTML = '<option value="" disabled hidden>Select section</option>';
     sections.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; sEl.appendChild(o); });
 
     const subEl = document.getElementById('subjectSelect');
-    subEl.innerHTML = '<option value="">Select subject</option>';
+    subEl.innerHTML = '<option value="" disabled hidden>Select subject</option>';
     subjects.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; subEl.appendChild(o); });
   } catch { showToast('Could not load data.', 'error'); }
 }
@@ -41,7 +41,7 @@ async function loadQuestionnaires() {
   const sId  = document.getElementById('sectionSelect').value;
   const subId = document.getElementById('subjectSelect').value;
   const qSel  = document.getElementById('questionnaireSelect');
-  qSel.innerHTML = '<option value="">Select questionnaire</option>';
+  qSel.innerHTML = '<option value="" disabled hidden>Select questionnaire</option>';
   document.getElementById('previewArea').style.display = 'none';
   document.getElementById('promptState').style.display = 'flex';
   if (!sId || !subId) return;

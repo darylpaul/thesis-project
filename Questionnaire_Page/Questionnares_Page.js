@@ -16,12 +16,12 @@ async function populateFilterDropdowns() {
 
     ['sectionFilter','qSection'].forEach(id => {
       const el = document.getElementById(id);
-      el.innerHTML = '<option value="">Select section</option>';
+      el.innerHTML = '<option value="" disabled hidden>Select section</option>';
       sections.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; el.appendChild(o); });
     });
     ['subjectFilter','qSubject'].forEach(id => {
       const el = document.getElementById(id);
-      el.innerHTML = '<option value="">Select subject</option>';
+      el.innerHTML = '<option value="" disabled hidden>Select subject</option>';
       subjects.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; el.appendChild(o); });
     });
   } catch { showToast('Could not load data.', 'error'); }
