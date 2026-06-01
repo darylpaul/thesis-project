@@ -9,9 +9,6 @@
 
 body {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-family: 'Open Sans', sans-serif;
   background: radial-gradient(ellipse at 70% 40%, #2a4fd6 0%, #1a2eaa 40%, #0d1a7a 100%);
   position: relative;
@@ -34,6 +31,8 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 100vh;
   width: 100%;
   padding: 40px 24px;
   animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
