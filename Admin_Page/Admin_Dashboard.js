@@ -20,6 +20,16 @@ if (!adminToken) { window.location.href = '../Admin_Page/Admin_Login.html'; }
 
 document.getElementById('adminName').textContent = adminName || 'Admin';
 document.getElementById('logoutBtn').addEventListener('click', () => {
+  document.getElementById('logoutModalOverlay').classList.add('open');
+});
+document.getElementById('logoutCancelBtn').addEventListener('click', () => {
+  document.getElementById('logoutModalOverlay').classList.remove('open');
+});
+document.getElementById('logoutModalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('logoutModalOverlay'))
+    document.getElementById('logoutModalOverlay').classList.remove('open');
+});
+document.getElementById('logoutConfirmBtn').addEventListener('click', () => {
   localStorage.removeItem('adminToken');
   localStorage.removeItem('adminName');
   window.location.href = '../Admin_Page/Admin_Login.html';
