@@ -366,6 +366,151 @@ tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
 }
 
 
+document.getElementById('savePdfBtn').addEventListener('click', () => {
+  const title   = document.getElementById('previewTitle').textContent;
+  const section = document.getElementById('previewSection').textContent;
+  if (!title) { alert('Please select a questionnaire first.'); return; }
+  const btn = document.getElementById('savePdfBtn');
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+  html2pdf().set({
+    margin: 10,
+    filename: `${title}${section ? ' - ' + section : ''}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(document.getElementById('examPaper')).save().then(() => {
+    btn.textContent = '📥 Save Exam PDF';
+    btn.disabled = false;
+  });
+});
+
+document.getElementById('saveAnswerPdfBtn').addEventListener('click', () => {
+  const title   = document.getElementById('previewTitle').textContent;
+  const section = document.getElementById('previewSection').textContent;
+  const subject = document.getElementById('previewSubject').textContent;
+  if (!title) { alert('Please select a questionnaire first.'); return; }
+  const qId = document.getElementById('questionnaireSelect').value;
+  if (!qId) { alert('Please select a questionnaire first.'); return; }
+  const btn = document.getElementById('saveAnswerPdfBtn');
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+  fetch(`${API}/questionnaires/${qId}`, { headers: { 'Authorization': localStorage.getItem('token') } })
+    .then(r => r.json())
+    .then(q => {
+      const parts = parseParts(q);
+      generateAnswerSheetPDF(q, parts, section, subject, btn);
+    });
+});
+
+function generateAnswerSheetPDF(q, parts, section, subject, btn) {
+  const items = [];
+  parts.forEach(part => {
+    part.questions.forEach(() => {
+      const typ = part.type === 'multiple_choice' ? 'MC'
+                : part.type === 'true_false'      ? 'T/F'
+                : part.type === 'essay'           ? 'ES' : 'ID';
+      items.push({ num: items.length + 1, typ });
+    });
+  });
+  const total = items.length;
+  const half  = Math.ceil(total / 2);
+
+  let rows = '';
+  for (let i = 0; i < half; i++) {
+    const left  = items[i];
+    const right = items[i + half];
+    rows += `<tr>
+      <td class="qn">${left.num}</td>
+      <td class="ans-cell"><div class="write-line"></div></td>
+      <td class="typ">${left.typ}</td>
+      <td class="col-gap"></td>
+      ${right ? `<td class="qn">${right.num}</td><td class="ans-cell"><div class="write-line"></div></td><td class="typ">${right.typ}</td>` : `<td colspan="3"></td>`}
+    </tr>`;
+  }
+
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;font-family:Arial,sans-serif;padding:20px;color:#000;';
+  container.innerHTML = `
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+.hdr { text-align:center; border-bottom:3px solid #1a2eaa; padding-bottom:8px; margin-bottom:10px; }
+.school { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#1a2eaa; }
+.title  { font-size:18px; font-weight:900; margin:4px 0 2px; color:#000; }
+.badge  { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:2px 14px; border-radius:20px; display:inline-block; margin-top:2px; }
+.ocr-tag { font-size:9px; color:#666; margin-top:3px; letter-spacing:0.5px; }
+.info { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; margin-bottom:6px; }
+.info2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+.ifield { display:flex; align-items:flex-end; gap:5px; font-size:10px; font-weight:700; }
+.iline { flex:1; border-bottom:2px solid #000; height:16px; }
+.instr { border:2px solid #1a2eaa; border-radius:6px; padding:8px 12px; margin-bottom:10px; background:#f0f4ff; }
+.instr p { font-size:10px; color:#000; line-height:1.8; }
+table { width:100%; border-collapse:collapse; }
+th { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:6px; text-align:center; border:1px solid #1a2eaa; }
+td { border:1px solid #ccc; vertical-align:middle; }
+tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
+.qn { font-weight:900; font-size:14px; text-align:center; width:28px; color:#1a2eaa; padding:5px 3px; }
+.ans-cell { padding:5px 8px; }
+.col-gap { width:10px; background:#fff !important; border:none; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; }
+.write-line { border-bottom:2px solid #000; height:30px; width:100%; }
+.typ { font-size:9px; color:#888; text-align:center; width:32px; font-weight:700; padding:4px; }
+.score-wrap { display:flex; justify-content:flex-end; margin-top:14px; }
+.score-box { border:3px solid #1a2eaa; border-radius:8px; padding:8px 24px; text-align:center; min-width:120px; }
+.score-lbl { font-size:9px; font-weight:700; color:#1a2eaa; letter-spacing:1.5px; text-transform:uppercase; }
+.score-val { font-size:20px; font-weight:900; color:#000; margin-top:4px; }
+</style>
+<div class="hdr">
+  <div class="school">Mindful School of Berlyn Achievers</div>
+  <div class="title">OCR Answer Sheet</div>
+  <span class="badge">${escHtml(q.title)}</span>
+  <div class="ocr-tag">AI-Powered Optical Character Recognition</div>
+</div>
+<div class="info">
+  <div class="ifield">Name: <div class="iline"></div></div>
+  <div class="ifield">Section: <strong>${escHtml(section)}</strong></div>
+  <div class="ifield">Date: <div class="iline"></div></div>
+</div>
+<div class="info2">
+  <div class="ifield">Subject: <strong>${escHtml(subject)}</strong></div>
+  <div class="ifield">Total Items: <strong>${total}</strong></div>
+</div>
+<div class="instr">
+  <p><strong>Instructions:</strong><br/>
+  • <strong>Multiple Choice (MC):</strong> Write only the letter — <strong>A, B, C, or D</strong> — on the line<br/>
+  • <strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> on the line<br/>
+  • <strong>Identification (ID):</strong> Write your answer clearly in PRINT letters on the line<br/>
+  • Use BLACK pen or pencil — write LARGE and CLEAR for accurate AI scanning</p>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width:28px;">#</th><th>Answer</th><th style="width:30px;">Type</th>
+      <th style="width:10px;background:#fff;border:none;"></th>
+      <th style="width:28px;">#</th><th>Answer</th><th style="width:30px;">Type</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="score-wrap">
+  <div class="score-box">
+    <div class="score-lbl">Score</div>
+    <div class="score-val">_____ / ${total}</div>
+  </div>
+</div>`;
+
+  document.body.appendChild(container);
+  html2pdf().set({
+    margin: 8,
+    filename: `Answer_Sheet - ${q.title} - ${section}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(container).save().then(() => {
+    document.body.removeChild(container);
+    if (btn) { btn.textContent = '📥 Save Answer Sheet PDF'; btn.disabled = false; }
+  });
+}
+
 document.getElementById('printBtn').addEventListener('click', () => {
   const qTitle   = document.getElementById('previewTitle').textContent || 'Questionnaire';
   const section  = document.getElementById('previewSection').textContent || '';

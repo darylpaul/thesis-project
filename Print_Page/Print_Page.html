@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../Component/Navbar.css?v=2"/>
   <link rel="stylesheet" href="Print_Page.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body data-page="print">
   <div id="navbar-placeholder"></div>
@@ -28,8 +29,14 @@
             </svg>
             Print Exam
           </button>
+          <button class="btn-save-pdf no-print" id="savePdfBtn">
+            📥 Save Exam PDF
+          </button>
           <button class="btn-answer-sheet no-print" id="answerSheetBtn">
             📋 Print Answer Sheet
+          </button>
+          <button class="btn-save-answer-pdf no-print" id="saveAnswerPdfBtn">
+            📥 Save Answer Sheet PDF
           </button>
           <button class="btn-print-both no-print" id="printBothBtn">
             🖨️ Print Both
