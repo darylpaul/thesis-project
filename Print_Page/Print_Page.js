@@ -235,7 +235,31 @@ function openAnswerSheet(q, parts, section, subject) {
 <title>OCR Answer Sheet – ${escHtml(q.title)}</title>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:Arial,sans-serif; background:#fff; padding:10mm; color:#000; }
+body { font-family:Arial,sans-serif; background:#f3f4f6; color:#000; padding-top:56px; }
+
+/* ── FLOATING TOOLBAR ── */
+#as-toolbar {
+  position:fixed; top:0; left:0; right:0; height:56px;
+  background:#1e2d6b; display:flex; align-items:center;
+  justify-content:flex-end; gap:10px; padding:0 20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.25); z-index:1000;
+}
+#as-toolbar .tb-label {
+  flex:1; color:rgba(255,255,255,0.75); font-size:12px; font-weight:600;
+}
+.tb-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 18px; border-radius:8px; border:none;
+  font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+}
+.tb-btn-print { background:rgba(255,255,255,0.15); color:#fff; }
+.tb-btn-print:hover { background:rgba(255,255,255,0.25); }
+.tb-btn-pdf { background:#fff; color:#1e2d6b; }
+.tb-btn-pdf:hover { background:#e8eeff; }
+.tb-btn:disabled { opacity:0.6; cursor:not-allowed; }
+
+/* ── PAPER ── */
+#as-paper { background:#fff; max-width:860px; margin:20px auto; padding:10mm; box-shadow:0 2px 16px rgba(0,0,0,0.1); }
 
 /* ── HEADER ── */
 .hdr { text-align:center; border-bottom:3px solid #1a2eaa; padding-bottom:8px; margin-bottom:10px; }
@@ -259,41 +283,10 @@ table { width:100%; border-collapse:collapse; }
 th { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:6px; text-align:center; border:1px solid #1a2eaa; }
 td { border:1px solid #ccc; vertical-align:middle; }
 tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
-
-/* ── QUESTION NUMBER ── */
 .qn { font-weight:900; font-size:14px; text-align:center; width:28px; color:#1a2eaa; padding:5px 3px; }
-
-/* ── ANSWER CELL ── */
 .ans-cell { padding:5px 8px; }
-
-/* ── COLUMN DIVIDER ── */
 .col-gap { width:10px; background:#fff !important; border:none; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; }
-
-/* ── MC: write-in boxes with letter labels ── */
-.mc-options { display:flex; gap:8px; align-items:center; }
-.mc-opt { display:flex; align-items:center; gap:3px; font-size:10px; font-weight:700; color:#555; }
-.write-box {
-  width:28px; height:28px;
-  border:2px solid #000; border-radius:4px;
-  background:#fff;
-}
-.tf-options { display:flex; gap:12px; align-items:center; }
-.tf-opt { display:flex; align-items:center; gap:4px; font-size:10px; font-weight:700; color:#555; }
-.tf-box { width:38px; height:28px; }
-
-/* ── IDENTIFICATION WRITE LINE ── */
-.id-ans { padding:4px 10px 6px !important; }
-.id-write-line {
-  border-bottom:2px solid #000;
-  height:28px;
-  margin-top:4px;
-  width:100%;
-}
-
-/* ── WRITE LINE ── */
 .write-line { border-bottom:2px solid #000; height:30px; width:100%; }
-
-/* ── TYPE LABEL ── */
 .typ { font-size:9px; color:#888; text-align:center; width:32px; font-weight:700; padding:4px; }
 
 /* ── SCORE BOX ── */
@@ -303,63 +296,92 @@ tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
 .score-val { font-size:20px; font-weight:900; color:#000; margin-top:4px; }
 
 @media print {
-  body { padding:8mm; }
+  #as-toolbar { display:none; }
+  body { background:#fff; padding-top:0; }
+  #as-paper { box-shadow:none; margin:0; padding:8mm; max-width:100%; }
   @page { size:A4; margin:8mm; }
 }
 </style>
 </head>
 <body>
 
-<div class="hdr">
-  <div class="school">Mindful School of Berlyn Achievers</div>
-  <div class="title">OCR Answer Sheet</div>
-  <span class="badge">${escHtml(q.title)}</span>
-  <div class="ocr-tag">AI-Powered Optical Character Recognition</div>
+<!-- TOOLBAR (right-side buttons) -->
+<div id="as-toolbar">
+  <span class="tb-label">OCR Answer Sheet · ${escHtml(q.title)}</span>
+  <button class="tb-btn tb-btn-print" onclick="window.print()">🖨️ Print</button>
+  <button class="tb-btn tb-btn-pdf" id="tbtnPdf">📥 Save as PDF</button>
 </div>
 
-<div class="info">
-  <div class="ifield">Name: <div class="iline"></div></div>
-  <div class="ifield">Section: <strong>${escHtml(section)}</strong></div>
-  <div class="ifield">Date: <div class="iline"></div></div>
-</div>
-<div class="info2">
-  <div class="ifield">Subject: <strong>${escHtml(subject)}</strong></div>
-  <div class="ifield">Total Items: <strong>${total}</strong></div>
-</div>
+<!-- PAPER -->
+<div id="as-paper">
+  <div class="hdr">
+    <div class="school">Mindful School of Berlyn Achievers</div>
+    <div class="title">OCR Answer Sheet</div>
+    <span class="badge">${escHtml(q.title)}</span>
+    <div class="ocr-tag">AI-Powered Optical Character Recognition</div>
+  </div>
 
-<div class="instr">
-  <p>
-    <strong>Instructions:</strong><br/>
-    • <strong>Multiple Choice (MC):</strong> Write only the letter — <strong>A, B, C, or D</strong> — on the line<br/>
-    • <strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> on the line<br/>
-    • <strong>Identification (ID):</strong> Write your answer clearly in PRINT letters on the line<br/>
-    • Use BLACK pen or pencil — write LARGE and CLEAR for accurate AI scanning
-  </p>
-</div>
+  <div class="info">
+    <div class="ifield">Name: <div class="iline"></div></div>
+    <div class="ifield">Section: <strong>${escHtml(section)}</strong></div>
+    <div class="ifield">Date: <div class="iline"></div></div>
+  </div>
+  <div class="info2">
+    <div class="ifield">Subject: <strong>${escHtml(subject)}</strong></div>
+    <div class="ifield">Total Items: <strong>${total}</strong></div>
+  </div>
 
-<table>
-  <thead>
-    <tr>
-      <th style="width:28px;">#</th>
-      <th>Answer</th>
-      <th style="width:30px;">Type</th>
-      <th style="width:10px;background:#fff;border:none;"></th>
-      <th style="width:28px;">#</th>
-      <th>Answer</th>
-      <th style="width:30px;">Type</th>
-    </tr>
-  </thead>
-  <tbody>${rows}</tbody>
-</table>
+  <div class="instr">
+    <p>
+      <strong>Instructions:</strong><br/>
+      • <strong>Multiple Choice (MC):</strong> Write only the letter — <strong>A, B, C, or D</strong> — on the line<br/>
+      • <strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> on the line<br/>
+      • <strong>Identification (ID):</strong> Write your answer clearly in PRINT letters on the line<br/>
+      • Use BLACK pen or pencil — write LARGE and CLEAR for accurate AI scanning
+    </p>
+  </div>
 
-<div class="score-wrap">
-  <div class="score-box">
-    <div class="score-lbl">Score</div>
-    <div class="score-val">_____ / ${total}</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:28px;">#</th>
+        <th>Answer</th>
+        <th style="width:30px;">Type</th>
+        <th style="width:10px;background:#fff;border:none;"></th>
+        <th style="width:28px;">#</th>
+        <th>Answer</th>
+        <th style="width:30px;">Type</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+
+  <div class="score-wrap">
+    <div class="score-box">
+      <div class="score-lbl">Score</div>
+      <div class="score-val">_____ / ${total}</div>
+    </div>
   </div>
 </div>
 
-<script>window.onload = () => window.print();</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+document.getElementById('tbtnPdf').addEventListener('click', function() {
+  var btn = this;
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+  html2pdf().set({
+    margin: 8,
+    filename: 'Answer_Sheet - ${escHtml(q.title)} - ${escHtml(section)}.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(document.getElementById('as-paper')).save().then(function() {
+    btn.textContent = '📥 Save as PDF';
+    btn.disabled = false;
+  });
+});
+</script>
 </body>
 </html>`);
   win.document.close();
