@@ -1,0 +1,143 @@
+{
+  "configVersion": 1,
+  "timestamp": 1780367164388,
+  "index": "C:/Program Files/Git/thesis-project/thesis-mobile-web/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-2NIBOUWM.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-3JCP6T6L.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-3PU4YELJ.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-42CWOZM3.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-4CLCTAJ7.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-5WPTOAEA.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-6MYFKIEP.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-AZ3DWLIH.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-CASEXNPQ.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-D3NTZDRW.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-E5CV4UEX.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-FAFP4QHP.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-GMOPNOWG.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-I547WOKC.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-J26QWD4P.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-JC6Q4NMR.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-JDO3B7WQ.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-JKGLRG4Q.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-LGXRN6RX.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-M6SF6KTN.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-MAI2K6TZ.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-MMLA5WQY.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-NMFL75IO.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-OBOA576Q.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-OHYYDC2B.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-PAKCECR5.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-QVBUX3KO.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-RUACNE2X.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-UDK23YPQ.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-VQYJPFXT.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-VWM4Y5BR.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-WNWLIZUN.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-WRXKLKCU.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YASFHDXT.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YC42HYP6.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YEHXPPG7.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YJ5TA4PT.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YUNOCBLG.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YXOAFFXD.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/index.html",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/main-J4DH2VQ7.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/polyfills-TDCRLYKL.js",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/styles-6KTEQGYX.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/assets/icon/favicon.png",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/assets/icon/logo.jpg",
+        "C:/Program Files/Git/thesis-project/thesis-mobile-web/assets/shapes.svg"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/assets/icon/favicon.png": "7798b8e0eb61d7375c245af78bbf5c916932bf13",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/assets/icon/logo.jpg": "66cfc6d6de265496e6d198cd519c9b53e8ea5a73",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/assets/shapes.svg": "5413e95adabcb2cb639970051f55e0ddb64ace53",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-2NIBOUWM.js": "f16eb48e9f2ef011e2b4266be3596d112cabd53d",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-3JCP6T6L.js": "0c01f0d2649fcb5d69f9a8046f5c6c426756f5fc",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-3PU4YELJ.js": "658df04610c6f758b401fd2e5fad6494c78ed9f1",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-42CWOZM3.js": "4e1201e7cbffd5dbcd9e6f61ce62b77c62285de5",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-4CLCTAJ7.js": "6cdb544d58baffeddb11018aac3c5c4ebcd615a3",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-5WPTOAEA.js": "df2037aca01df3b7082f05796fc04d00e8f5acb7",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-6MYFKIEP.js": "e4681bf2f48af2059ef25594db7dd296428270df",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-AZ3DWLIH.js": "80292362dd036069cb79230904611253195ace30",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-CASEXNPQ.js": "16b6707b75e20630f22cfcc9e544b6802d60bf93",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-D3NTZDRW.js": "8a11ff752650798f2ac3edaa1905e10fd3a16fb8",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-E5CV4UEX.js": "4b1be4b8a5e4eb9f183b224433de90c637622f9f",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-FAFP4QHP.js": "cf41e843bf9112c36233fb59ef98acad582ae29c",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-GMOPNOWG.js": "6a62d0a122901df8fef73d2266af409fd1e024c5",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-I547WOKC.js": "92261aefdb83402ebba27fbaefdf4427960a73b5",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-J26QWD4P.js": "f8b90170d90b07c310c3354c5ca6a1c36edf19a0",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-JC6Q4NMR.js": "f8212af998dca8881118732643179106fdc4efe8",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-JDO3B7WQ.js": "1613a8e8c29d2142b3e6e47982b8981bfdf2ca66",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-JKGLRG4Q.js": "a244f57c121bfecba1961af6e3a06176daadd1cd",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-LGXRN6RX.js": "d32418179b96d2021b7fb5aff459fa7942591d83",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-M6SF6KTN.js": "408d65cce28c137dfa075fc365cd0f81dddc6e20",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-MAI2K6TZ.js": "b96cd6c9f7f5b7049378e4c2862cc1261dd81889",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-MMLA5WQY.js": "c4119ef53ed93b17f1f436604fbb569bf87c32e8",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-NMFL75IO.js": "474d4da78c6df98c5979a2dab41ed174f171cc39",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-OBOA576Q.js": "fe257eb02f608f7c74859bc684974defb1414944",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-OHYYDC2B.js": "4133acda7f42a698b8e5d3950912b1bf1856dbc1",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-PAKCECR5.js": "324c200fef6fac4435a4ae83981d22e6f48e2e5f",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-QVBUX3KO.js": "c2161fb4ba65a9dca013712c0de07b66b3154714",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-RUACNE2X.js": "34d9a3403296b74c7d2440541949e0dda77c1332",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-UDK23YPQ.js": "c8f679b60ec31cdaa6d5241289b85510313ab09e",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-VQYJPFXT.js": "7833303563d61d2438393c8e2dccb2a0ca35ed73",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-VWM4Y5BR.js": "66582baf45d7042b4090feebb17d4769a764b71e",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-WNWLIZUN.js": "580dd6bdccdbaf7e1368956a99723f8969cfda8d",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-WRXKLKCU.js": "c109a76ca03bf45334f57b64bf61ced30148dbce",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YASFHDXT.js": "208bb2b2734f7d381ff3f45ac0d3230889804e94",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YC42HYP6.js": "a649ed85643f790cba47f98b989718256490c1fb",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YEHXPPG7.js": "d61d422dd1c3b663dc2a8d071570f66f2d4d4a1e",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YJ5TA4PT.js": "3588f144b673886efc030c76678ca4feee860e22",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YUNOCBLG.js": "e2d1b2b8fe6ae2d6a5f5b8ae3d404a0300831fb4",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/chunk-YXOAFFXD.js": "8b06dcd7c3f8be725dd0a5bfeec590efc3e53fad",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/index.html": "2e34bac40956a5aec4327a553b4211ed2bbb3b75",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/main-J4DH2VQ7.js": "10c9199199cda81091da3e53fe06c53edb9e7270",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/polyfills-TDCRLYKL.js": "454f6db4230cc7ab61b24fe465dcc92bf041737d",
+    "C:/Program Files/Git/thesis-project/thesis-mobile-web/styles-6KTEQGYX.css": "17b3b370b6b6202072398ab0aece94733ee11279"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
