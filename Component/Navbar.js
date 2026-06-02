@@ -143,14 +143,14 @@
   </nav>
   <div class="sidebar-qr">
     <div class="sidebar-qr-label">📱 Mobile Scanner App</div>
-    <a href="https://darylpaul.github.io/thesis-project/Print_Page/Print_Page.html" target="_blank" rel="noopener noreferrer">
+    <a href="https://darylpaul.github.io/thesis-project/LogIn_Page/LogIn_Page.html" target="_blank" rel="noopener noreferrer">
       <img
-        src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://darylpaul.github.io/thesis-project/Print_Page/Print_Page.html"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://darylpaul.github.io/thesis-project/LogIn_Page/LogIn_Page.html"
         alt="Scan to open mobile app"
         class="sidebar-qr-img"
       />
     </a>
-    <div class="sidebar-qr-caption">Scan or <a href="https://darylpaul.github.io/thesis-project/Print_Page/Print_Page.html" target="_blank" rel="noopener noreferrer" class="sidebar-qr-link">click here</a> to open<br>the mobile scanner</div>
+    <div class="sidebar-qr-caption">Scan or <a href="https://darylpaul.github.io/thesis-project/LogIn_Page/LogIn_Page.html" target="_blank" rel="noopener noreferrer" class="sidebar-qr-link">click here</a> to open<br>the mobile scanner</div>
   </div>
 </aside>
 
