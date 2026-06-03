@@ -38,7 +38,7 @@ app.use(cors({
     await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS is_archived TINYINT(1) DEFAULT 0`);
     await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
     await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
-    await db.query(`ALTER TABLE subjects ADD COLUMN IF NOT EXISTS is_global TINYINT(1) DEFAULT 0`);
+    await db.query(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
   } catch (e) { console.log('Migration note:', e.message); }
 })();
 
@@ -677,7 +677,7 @@ app.post('/api/admin/subjects', requireAdmin, async (req, res) => {
   const { name, code } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Subject name is required' });
   try {
-    await db.query('INSERT INTO subjects (name, code, is_global, user_id) VALUES (?,?,1,NULL)', [name.trim(), code||null]);
+    await db.query('INSERT INTO subjects (name, code, is_global, user_id) VALUES (?,?,1,0)', [name.trim(), code||null]);
     res.json({ message: 'Subject created!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
