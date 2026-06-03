@@ -215,7 +215,7 @@
   }
 
   function loadUserInfo() {
-    const fullname = localStorage.getItem('fullname') || 'User';
+    const fullname = (localStorage.getItem('fullname') || 'User').toUpperCase();
     const email    = localStorage.getItem('email')    || 'user@gmail.com';
     const nameEl   = document.getElementById('navUsername');
     const emailEl  = document.getElementById('navEmail');
