@@ -823,10 +823,10 @@ app.get('/api/answerkeys', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    let query = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE answerkeys.user_id=? ORDER BY answerkeys.title ASC`;
+    let query = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE answerkeys.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY answerkeys.title ASC`;
     let params = [user.id];
     if (req.query.section_id && req.query.subject_id) {
-      query = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE answerkeys.section_id=? AND answerkeys.subject_id=? AND answerkeys.user_id=? ORDER BY answerkeys.title ASC`;
+      query = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE answerkeys.section_id=? AND answerkeys.subject_id=? AND answerkeys.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY answerkeys.title ASC`;
       params = [req.query.section_id, req.query.subject_id, user.id];
     }
     const [rows] = await db.query(query, params);
