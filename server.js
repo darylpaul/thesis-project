@@ -39,8 +39,6 @@ app.use(cors({
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
   await migrate(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
-  // Un-archive all questionnaires so nothing is hidden
-  await migrate(`UPDATE questionnaires SET is_archived=0, archived_at=NULL, archived_by_name=NULL`);
 })();
 
 // ===========================
@@ -725,7 +723,7 @@ app.get('/api/questionnaires', async (req, res) => {
   const userQ = getUser(req);
   if (!userQ) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE 1=1`;
+    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE (questionnaires.is_archived=0 OR questionnaires.is_archived IS NULL)`;
     let query = base + ` ORDER BY questionnaires.title ASC`;
     let params = [];
     if (req.query.section_id && req.query.subject_id) {
