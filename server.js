@@ -718,18 +718,18 @@ app.get('/api/questionnaires', async (req, res) => {
   const userQ = getUser(req);
   if (!userQ) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
+    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
     let query = base + ` ORDER BY questionnaires.title ASC`;
-    let params = [userQ.id];
+    let params = [];
     if (req.query.section_id && req.query.subject_id) {
       query = base + ` AND questionnaires.section_id=? AND questionnaires.subject_id=? ORDER BY questionnaires.title ASC`;
-      params = [userQ.id, req.query.section_id, req.query.subject_id];
+      params = [req.query.section_id, req.query.subject_id];
     } else if (req.query.section_id) {
       query = base + ` AND questionnaires.section_id=? ORDER BY questionnaires.title ASC`;
-      params = [userQ.id, req.query.section_id];
+      params = [req.query.section_id];
     } else if (req.query.subject_id) {
       query = base + ` AND questionnaires.subject_id=? ORDER BY questionnaires.title ASC`;
-      params = [userQ.id, req.query.subject_id];
+      params = [req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
     res.json(rows);
@@ -774,7 +774,7 @@ app.post('/api/questionnaires/:id/duplicate', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const [[original]] = await db.query('SELECT * FROM questionnaires WHERE id=? AND user_id=?', [req.params.id, user.id]);
+    const [[original]] = await db.query('SELECT * FROM questionnaires WHERE id=?', [req.params.id]);
     if (!original) return res.status(404).json({ error: 'Not found' });
     const newTitle = original.title + ' (Copy)';
     const [result] = await db.query(
@@ -817,8 +817,8 @@ app.put('/api/questionnaires/:id', async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   const { title, type, section_id, subject_id, questions } = req.body;
   try {
-    await db.query('UPDATE questionnaires SET title=?, type=?, section_id=?, subject_id=?, questions=? WHERE id=? AND user_id=?',
-      [title, type, section_id, subject_id, questions, req.params.id, user.id]);
+    await db.query('UPDATE questionnaires SET title=?, type=?, section_id=?, subject_id=?, questions=? WHERE id=?',
+      [title, type, section_id, subject_id, questions, req.params.id]);
     await logActivity(user.id, user.fullname, 'UPDATE_QUESTIONNAIRE', `Updated: ${title}`, req.body.platform || 'web');
     res.json({ message: 'Questionnaire updated!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
@@ -828,8 +828,8 @@ app.delete('/api/questionnaires/:id', async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
     await db.query(
-      'UPDATE questionnaires SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=? AND user_id=?',
-      [user.fullname, req.params.id, user.id]
+      'UPDATE questionnaires SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=?',
+      [user.fullname, req.params.id]
     );
     await logActivity(user.id, user.fullname, 'ARCHIVE_QUESTIONNAIRE', `Archived ID: ${req.params.id}`, req.body?.platform || 'web');
     res.json({ message: 'Questionnaire moved to archive.' });
@@ -843,18 +843,18 @@ app.get('/api/answerkeys', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE answerkeys.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
+    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
     let query = akBase + ` ORDER BY answerkeys.title ASC`;
-    let params = [user.id];
+    let params = [];
     if (req.query.section_id && req.query.subject_id) {
       query = akBase + ` AND answerkeys.section_id=? AND answerkeys.subject_id=? ORDER BY answerkeys.title ASC`;
-      params = [user.id, req.query.section_id, req.query.subject_id];
+      params = [req.query.section_id, req.query.subject_id];
     } else if (req.query.section_id) {
       query = akBase + ` AND answerkeys.section_id=? ORDER BY answerkeys.title ASC`;
-      params = [user.id, req.query.section_id];
+      params = [req.query.section_id];
     } else if (req.query.subject_id) {
       query = akBase + ` AND answerkeys.subject_id=? ORDER BY answerkeys.title ASC`;
-      params = [user.id, req.query.subject_id];
+      params = [req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
     res.json(rows);
@@ -915,7 +915,7 @@ app.delete('/api/answerkeys/:id', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    await db.query('DELETE FROM answerkeys WHERE id=? AND user_id=?', [req.params.id, user.id]);
+    await db.query('DELETE FROM answerkeys WHERE id=?', [req.params.id]);
     res.json({ message: 'Answer key deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
