@@ -44,10 +44,11 @@ document.querySelectorAll('.sidebar-btn').forEach(btn => {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
-    if (btn.dataset.tab === 'teachers') loadTeachers();
-    if (btn.dataset.tab === 'logs')     loadAllLogs();
-    if (btn.dataset.tab === 'archive')  loadArchive();
-    if (btn.dataset.tab === 'testbank') loadTestBank();
+    if (btn.dataset.tab === 'teachers')    loadTeachers();
+    if (btn.dataset.tab === 'logs')        loadAllLogs();
+    if (btn.dataset.tab === 'archive')     loadArchive();
+    if (btn.dataset.tab === 'testbank')    loadTestBank();
+    if (btn.dataset.tab === 'assignments') loadAssignments();
   });
 });
 
@@ -741,3 +742,137 @@ async function archiveDelete(id, title) {
 
 // Keep loadTestBank as alias so tab-switch still works
 function loadTestBank() { loadArchive(); }
+
+// ═══════════════════════════════════════
+// SECTION ASSIGNMENTS
+// ═══════════════════════════════════════
+let allAssignments = [];
+
+async function loadAssignments() {
+  const list = document.getElementById('assignmentsList');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:32px;color:#9ca3af;">Loading...</div>';
+  try {
+    // Load assignments + teachers + sections in parallel
+    const [aRes, tRes, sRes] = await Promise.all([
+      fetch(`${API}/admin/section-assignments`, { headers }),
+      fetch(`${API}/admin/teachers`, { headers }),
+      fetch(`${API}/admin/all-sections`, { headers })
+    ]);
+    allAssignments = await aRes.json();
+    const teachers = await tRes.json();
+    const sections = await sRes.json();
+
+    // Populate teacher dropdown
+    const tSel = document.getElementById('assignTeacher');
+    tSel.innerHTML = '<option value="">Select teacher...</option>' +
+      teachers.map(t => `<option value="${t.id}">${escHtml(t.fullname)}</option>`).join('');
+
+    // Populate section dropdown
+    const sSel = document.getElementById('assignSection');
+    sSel.innerHTML = '<option value="">Select section...</option>' +
+      sections.map(s => `<option value="${s.id}">${escHtml(s.name)} (${escHtml(s.grade||'')}) — Adviser: ${escHtml(s.adviser_name||'')}</option>`).join('');
+
+    renderAssignments(allAssignments);
+  } catch {
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:#dc2626;">Could not load assignments.</div>';
+  }
+}
+
+async function onAssignTeacherChange() {
+  const teacherId = document.getElementById('assignTeacher').value;
+  const subSel    = document.getElementById('assignSubject');
+  const hint      = document.getElementById('assignSubjectHint');
+  subSel.innerHTML = '<option value="">Loading...</option>';
+  if (!teacherId) {
+    subSel.innerHTML = '<option value="">Select subject...</option>';
+    hint.textContent = '(select teacher first)';
+    return;
+  }
+  try {
+    const res  = await fetch(`${API}/admin/teacher-subjects/${teacherId}`, { headers });
+    const subs = await res.json();
+    hint.textContent = '';
+    subSel.innerHTML = '<option value="">Select subject...</option>' +
+      (subs.length
+        ? subs.map(s => `<option value="${s.id}">${escHtml(s.name)}${s.code ? ' ('+escHtml(s.code)+')' : ''}</option>`).join('')
+        : '<option value="" disabled>No subjects found for this teacher</option>');
+  } catch {
+    subSel.innerHTML = '<option value="">Could not load subjects</option>';
+  }
+}
+
+async function doAddAssignment() {
+  const teacherId = document.getElementById('assignTeacher').value;
+  const sectionId = document.getElementById('assignSection').value;
+  const subjectId = document.getElementById('assignSubject').value;
+  if (!teacherId || !sectionId || !subjectId) {
+    showToast('Please select a teacher, section, and subject.', 'error'); return;
+  }
+  try {
+    const res  = await fetch(`${API}/admin/section-assignments`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ teacher_id: teacherId, section_id: sectionId, subject_id: subjectId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showToast('Assignment created!', 'success');
+    loadAssignments();
+  } catch (err) { showToast(err.message || 'Could not create assignment.', 'error'); }
+}
+
+async function removeAssignment(id) {
+  if (!confirm('Remove this subject teacher assignment?')) return;
+  try {
+    const res = await fetch(`${API}/admin/section-assignments/${id}`, { method: 'DELETE', headers });
+    if (!res.ok) throw new Error('Failed');
+    showToast('Assignment removed.', 'success');
+    loadAssignments();
+  } catch { showToast('Could not remove assignment.', 'error'); }
+}
+
+function renderAssignments(data) {
+  const list = document.getElementById('assignmentsList');
+  if (!data.length) {
+    list.innerHTML = `
+      <div style="text-align:center;padding:48px;color:#9ca3af;">
+        <div style="font-size:32px;margin-bottom:8px;">🔗</div>
+        <div style="font-weight:700;margin-bottom:4px;">No assignments yet</div>
+        <div style="font-size:13px;">Use the form above to assign subject teachers to sections</div>
+      </div>`;
+    return;
+  }
+  list.innerHTML = `
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Teacher</th><th>Section</th><th>Grade</th><th>Subject</th><th>Assigned On</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          ${data.map(a => `
+            <tr>
+              <td style="font-weight:700;color:#1e3a5f;">${escHtml(a.teacher_name)}</td>
+              <td style="color:#374151;">${escHtml(a.section_name)}</td>
+              <td style="color:#6b7280;font-size:13px;">${escHtml(a.grade||'—')}</td>
+              <td>
+                <span style="background:#eff6ff;color:#2563eb;font-size:11px;font-weight:700;
+                  padding:3px 10px;border-radius:12px;">
+                  ${escHtml(a.subject_name||'—')}
+                </span>
+              </td>
+              <td style="color:#6b7280;font-size:13px;">${new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+              <td>
+                <button onclick="removeAssignment(${a.id})"
+                  style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;
+                  border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                  ✕ Remove
+                </button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 16px;font-size:12px;color:#9ca3af;border-top:1px solid #f1f5f9;">
+      ${data.length} assignment${data.length !== 1 ? 's' : ''}
+    </div>`;
+}

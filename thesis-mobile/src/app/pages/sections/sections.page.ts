@@ -55,7 +55,6 @@ export class SectionsPage implements OnInit {
 
   load() {
     this.isLoading = true;
-    // Load sections and students together to show student count
     Promise.all([
       this.api.getSections().toPromise(),
       this.api.getStudents().toPromise()
@@ -71,6 +70,8 @@ export class SectionsPage implements OnInit {
       this.isLoading = false;
     }).catch(() => { this.isLoading = false; this.toast('Could not load sections', 'danger'); });
   }
+
+  isAssigned(s: any): boolean { return !!s.is_assigned; }
 
   getAdviserName(): string {
     const rawName   = localStorage.getItem('fullname') || '';

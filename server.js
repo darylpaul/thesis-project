@@ -438,6 +438,75 @@ app.delete('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
 });
 
 // ===========================
+// ADMIN — SECTION ASSIGNMENTS
+// ===========================
+app.get('/api/admin/section-assignments', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT st.id, st.section_id, st.teacher_id, st.subject_id, st.created_at,
+              u.fullname AS teacher_name, s.name AS section_name, s.grade,
+              sub.name AS subject_name
+       FROM section_teachers st
+       JOIN users u ON st.teacher_id = u.id
+       JOIN sections s ON st.section_id = s.id
+       LEFT JOIN subjects sub ON st.subject_id = sub.id
+       ORDER BY u.fullname ASC, s.name ASC`
+    );
+    res.json(rows);
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/admin/all-sections', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT sections.*, u.fullname AS adviser_name
+       FROM sections JOIN users u ON sections.user_id = u.id
+       ORDER BY sections.name ASC`
+    );
+    res.json(rows);
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.get('/api/admin/teacher-subjects/:id', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM subjects WHERE user_id = ? ORDER BY name ASC',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/admin/section-assignments', requireAdmin, async (req, res) => {
+  const { section_id, teacher_id, subject_id } = req.body;
+  if (!section_id || !teacher_id || !subject_id)
+    return res.status(400).json({ error: 'section_id, teacher_id, and subject_id are required' });
+  try {
+    await db.query(
+      'INSERT INTO section_teachers (section_id, teacher_id, subject_id) VALUES (?, ?, ?)',
+      [section_id, teacher_id, subject_id]
+    );
+    const admin = getUser(req);
+    await logActivity(admin.id, admin.fullname, 'ASSIGN_TEACHER',
+      `Assigned teacher ID ${teacher_id} to section ID ${section_id}`, 'web');
+    res.json({ message: 'Assignment created!' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: 'This assignment already exists.' });
+    console.log(err); res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/admin/section-assignments/:id', requireAdmin, async (req, res) => {
+  try {
+    await db.query('DELETE FROM section_teachers WHERE id = ?', [req.params.id]);
+    const admin = getUser(req);
+    await logActivity(admin.id, admin.fullname, 'REMOVE_ASSIGNMENT',
+      `Removed assignment ID ${req.params.id}`, 'web');
+    res.json({ message: 'Assignment removed.' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// ===========================
 // ADMIN — ACTIVITY LOGS
 // ===========================
 app.get('/api/admin/logs', requireAdmin, async (req, res) => {
@@ -461,16 +530,30 @@ app.get('/api/sections', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const [rows] = await db.query(
-      `SELECT sections.*, COUNT(students.id) AS students
+    // Own sections (adviser)
+    const [own] = await db.query(
+      `SELECT sections.*, COUNT(DISTINCT students.id) AS students, 0 AS is_assigned,
+              NULL AS assigned_subject_id, NULL AS assigned_subject_name
        FROM sections
        LEFT JOIN students ON students.section_id = sections.id
        WHERE sections.user_id = ?
-       GROUP BY sections.id
-       ORDER BY sections.name ASC`,
+       GROUP BY sections.id`,
       [user.id]
     );
-    res.json(rows);
+    // Sections where teacher is assigned as subject teacher
+    const [assigned] = await db.query(
+      `SELECT sections.*, COUNT(DISTINCT students.id) AS students, 1 AS is_assigned,
+              st.subject_id AS assigned_subject_id, sub.name AS assigned_subject_name
+       FROM sections
+       LEFT JOIN students ON students.section_id = sections.id
+       INNER JOIN section_teachers st ON st.section_id = sections.id AND st.teacher_id = ?
+       LEFT JOIN subjects sub ON sub.id = st.subject_id
+       WHERE sections.user_id != ?
+       GROUP BY sections.id, st.id`,
+      [user.id, user.id]
+    );
+    const all = [...own, ...assigned].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    res.json(all);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 app.post('/api/sections', async (req, res) => {
@@ -508,13 +591,33 @@ app.get('/api/students', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    let query = 'SELECT students.*, sections.name AS section_name FROM students LEFT JOIN sections ON students.section_id = sections.id WHERE students.user_id=? ORDER BY students.last_name ASC, students.first_name ASC';
-    let params = [user.id];
+    let rows;
     if (req.query.section_id) {
-      query = 'SELECT students.*, sections.name AS section_name FROM students LEFT JOIN sections ON students.section_id = sections.id WHERE students.section_id=? AND students.user_id=? ORDER BY students.last_name ASC';
-      params = [req.query.section_id, user.id];
+      // Allow if teacher owns the section OR is assigned to it as subject teacher
+      [rows] = await db.query(
+        `SELECT students.*, sections.name AS section_name
+         FROM students
+         LEFT JOIN sections ON students.section_id = sections.id
+         WHERE students.section_id = ?
+           AND (sections.user_id = ? OR EXISTS (
+             SELECT 1 FROM section_teachers st
+             WHERE st.section_id = ? AND st.teacher_id = ?
+           ))
+         ORDER BY students.last_name ASC, students.first_name ASC`,
+        [req.query.section_id, user.id, req.query.section_id, user.id]
+      );
+    } else {
+      // Own students + students from assigned sections
+      [rows] = await db.query(
+        `SELECT DISTINCT students.*, sections.name AS section_name
+         FROM students
+         LEFT JOIN sections ON students.section_id = sections.id
+         WHERE students.user_id = ?
+            OR sections.id IN (SELECT section_id FROM section_teachers WHERE teacher_id = ?)
+         ORDER BY students.last_name ASC, students.first_name ASC`,
+        [user.id, user.id]
+      );
     }
-    const [rows] = await db.query(query, params);
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -934,8 +1037,19 @@ app.delete('/api/test-bank/:id', requireAdmin, async (req, res) => {
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 
-// ── Create archives table on first run if it doesn't exist ──
+// ── Create tables on first run if they don't exist ──
 async function initDB() {
+  try {
+    await db.query(`CREATE TABLE IF NOT EXISTS section_teachers (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      section_id INT NOT NULL,
+      teacher_id INT NOT NULL,
+      subject_id INT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_assignment (section_id, teacher_id, subject_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    console.log('DB ready: section_teachers table exists');
+  } catch (err) { console.log('DB init warning (section_teachers):', err.message); }
   try {
     await db.query(`CREATE TABLE IF NOT EXISTS archives (
       id            INT AUTO_INCREMENT PRIMARY KEY,

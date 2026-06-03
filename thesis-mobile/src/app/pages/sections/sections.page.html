@@ -32,18 +32,37 @@
   </div>
   <div *ngIf="!isLoading && filtered.length > 0" style="padding:16px;">
     <div *ngFor="let s of filtered" class="item-card">
-      <div class="item-icon blue"><ion-icon name="grid-outline"></ion-icon></div>
+      <div class="item-icon" [ngClass]="isAssigned(s) ? 'orange' : 'blue'">
+        <ion-icon name="grid-outline"></ion-icon>
+      </div>
       <div class="item-info">
-        <div class="item-title">{{ s.name }}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <div class="item-title">{{ s.name }}</div>
+          <span *ngIf="isAssigned(s)"
+            style="font-size:10px;font-weight:700;background:#fff7ed;color:#ea580c;
+                   border:1px solid #fed7aa;border-radius:8px;padding:1px 7px;white-space:nowrap;">
+            Subject Teacher
+          </span>
+        </div>
         <div class="item-sub" *ngIf="s.grade">{{ s.grade }}</div>
-        <div class="item-sub" *ngIf="s.adviser">Adviser: {{ s.adviser }}</div>
+        <div class="item-sub" *ngIf="!isAssigned(s) && s.adviser">Adviser: {{ s.adviser }}</div>
+        <div class="item-sub" *ngIf="isAssigned(s) && s.assigned_subject_name"
+          style="color:#ea580c;font-weight:600;">
+          📚 {{ s.assigned_subject_name }}
+        </div>
         <div class="item-sub" style="color:#1a2eaa;font-weight:700;">
           👥 {{ s.studentCount || 0 }} student{{ s.studentCount !== 1 ? 's' : '' }}
         </div>
       </div>
       <div class="item-actions">
-        <button class="action-btn edit" (click)="openEditModal(s)"><ion-icon name="create-outline"></ion-icon></button>
-        <button class="action-btn delete" (click)="confirmDelete(s)"><ion-icon name="trash-outline"></ion-icon></button>
+        <ng-container *ngIf="!isAssigned(s)">
+          <button class="action-btn edit" (click)="openEditModal(s)"><ion-icon name="create-outline"></ion-icon></button>
+          <button class="action-btn delete" (click)="confirmDelete(s)"><ion-icon name="trash-outline"></ion-icon></button>
+        </ng-container>
+        <span *ngIf="isAssigned(s)"
+          style="font-size:11px;color:#9ca3af;padding:0 4px;text-align:center;line-height:1.3;">
+          View<br>Only
+        </span>
       </div>
     </div>
   </div>

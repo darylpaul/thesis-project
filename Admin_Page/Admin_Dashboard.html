@@ -35,6 +35,9 @@
       <button class="sidebar-btn" data-tab="teachers">
         <span class="sb-icon">👩‍🏫</span> Teachers
       </button>
+      <button class="sidebar-btn" data-tab="assignments">
+        <span class="sb-icon">🔗</span> Assignments
+      </button>
       <button class="sidebar-btn" data-tab="logs">
         <span class="sb-icon">📋</span> Activity Logs
       </button>
@@ -131,6 +134,55 @@
               </thead>
               <tbody id="teachersBody"></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSIGNMENTS TAB -->
+      <div class="tab-content" id="tab-assignments">
+        <div class="tab-header">
+          <h2 class="tab-title">Section Assignments</h2>
+          <p class="tab-sub">Assign subject teachers to sections they don't advise</p>
+        </div>
+
+        <div class="section-card" style="margin-bottom:20px;">
+          <div style="padding:20px 24px 8px;font-weight:700;font-size:15px;color:#1e3a5f;">Assign Subject Teacher</div>
+          <div style="padding:0 24px 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+              <label style="font-size:12px;font-weight:600;color:#6b7280;">Teacher</label>
+              <select id="assignTeacher" onchange="onAssignTeacherChange()"
+                style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#fff;outline:none;">
+                <option value="">Select teacher...</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+              <label style="font-size:12px;font-weight:600;color:#6b7280;">Section</label>
+              <select id="assignSection"
+                style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#fff;outline:none;">
+                <option value="">Select section...</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+              <label style="font-size:12px;font-weight:600;color:#6b7280;">Subject <span id="assignSubjectHint" style="color:#9ca3af;font-weight:400;">(select teacher first)</span></label>
+              <select id="assignSubject"
+                style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#fff;outline:none;">
+                <option value="">Select subject...</option>
+              </select>
+            </div>
+            <button onclick="doAddAssignment()"
+              style="padding:9px 20px;background:#1a2eaa;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;height:38px;">
+              + Assign
+            </button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div style="padding:16px 24px 4px;display:flex;align-items:center;gap:12px;">
+            <div style="font-weight:700;font-size:15px;color:#1e3a5f;flex:1;">Current Assignments</div>
+            <button class="refresh-btn" onclick="loadAssignments()">🔄 Refresh</button>
+          </div>
+          <div id="assignmentsList" style="padding:0 0 8px;">
+            <div style="text-align:center;padding:40px;color:#9ca3af;">Loading...</div>
           </div>
         </div>
       </div>
