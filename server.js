@@ -526,6 +526,7 @@ app.post('/api/admin/sections', requireAdmin, async (req, res) => {
 app.put('/api/admin/sections/:id', requireAdmin, async (req, res) => {
   const { name, grade, teacher_id } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Section name is required' });
+  if (!teacher_id)   return res.status(400).json({ error: 'Teacher is required' });
   try {
     const [teacher] = await db.query('SELECT fullname FROM users WHERE id=?', [teacher_id]);
     const adviser = teacher[0]?.fullname || '';
