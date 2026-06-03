@@ -373,6 +373,8 @@ tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
 </body>
 </html>`);
   win.document.close();
+  win.focus();
+  win.print();
 }
 
 
