@@ -39,10 +39,12 @@ app.use(cors({
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
   await migrate(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
-  // One-time cleanup: nullify references then delete teacher-created subjects
+  // Cleanup: nullify references then delete teacher-created subjects
   await migrate(`UPDATE questionnaires q JOIN subjects s ON q.subject_id=s.id JOIN users u ON s.user_id=u.id SET q.subject_id=NULL WHERE u.role!='admin'`);
   await migrate(`UPDATE answerkeys a JOIN subjects s ON a.subject_id=s.id JOIN users u ON s.user_id=u.id SET a.subject_id=NULL WHERE u.role!='admin'`);
   await migrate(`DELETE subjects FROM subjects JOIN users ON subjects.user_id=users.id WHERE users.role!='admin'`);
+  // Un-archive all questionnaires so nothing is hidden
+  await migrate(`UPDATE questionnaires SET is_archived=0, archived_at=NULL, archived_by_name=NULL WHERE is_archived=1`);
 })();
 
 // ===========================
@@ -719,13 +721,13 @@ app.get('/api/questionnaires', async (req, res) => {
     let query = base + ` ORDER BY questionnaires.title ASC`;
     let params = [];
     if (req.query.section_id && req.query.subject_id) {
-      query = base + ` AND questionnaires.section_id=? AND questionnaires.subject_id=? ORDER BY questionnaires.title ASC`;
+      query = base + ` AND questionnaires.section_id=? AND (questionnaires.subject_id=? OR questionnaires.subject_id IS NULL) ORDER BY questionnaires.title ASC`;
       params = [req.query.section_id, req.query.subject_id];
     } else if (req.query.section_id) {
       query = base + ` AND questionnaires.section_id=? ORDER BY questionnaires.title ASC`;
       params = [req.query.section_id];
     } else if (req.query.subject_id) {
-      query = base + ` AND questionnaires.subject_id=? ORDER BY questionnaires.title ASC`;
+      query = base + ` AND (questionnaires.subject_id=? OR questionnaires.subject_id IS NULL) ORDER BY questionnaires.title ASC`;
       params = [req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
@@ -844,13 +846,13 @@ app.get('/api/answerkeys', async (req, res) => {
     let query = akBase + ` ORDER BY answerkeys.title ASC`;
     let params = [];
     if (req.query.section_id && req.query.subject_id) {
-      query = akBase + ` AND answerkeys.section_id=? AND answerkeys.subject_id=? ORDER BY answerkeys.title ASC`;
+      query = akBase + ` AND answerkeys.section_id=? AND (answerkeys.subject_id=? OR answerkeys.subject_id IS NULL) ORDER BY answerkeys.title ASC`;
       params = [req.query.section_id, req.query.subject_id];
     } else if (req.query.section_id) {
       query = akBase + ` AND answerkeys.section_id=? ORDER BY answerkeys.title ASC`;
       params = [req.query.section_id];
     } else if (req.query.subject_id) {
-      query = akBase + ` AND answerkeys.subject_id=? ORDER BY answerkeys.title ASC`;
+      query = akBase + ` AND (answerkeys.subject_id=? OR answerkeys.subject_id IS NULL) ORDER BY answerkeys.title ASC`;
       params = [req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
