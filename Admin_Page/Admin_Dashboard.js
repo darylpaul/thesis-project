@@ -873,7 +873,7 @@ async function loadAssignments() {
     // Populate section dropdown
     const sSel = document.getElementById('assignSection');
     sSel.innerHTML = '<option value="">Select section...</option>' +
-      sections.map(s => `<option value="${s.id}">${escHtml(s.name)} (${escHtml(s.grade||'')}) — Adviser: ${escHtml(s.adviser_name||'')}</option>`).join('');
+      sections.map(s => `<option value="${s.id}">${escHtml(s.name)} (${escHtml(s.grade||'')}) — Teacher: ${escHtml(s.adviser_name||'')}</option>`).join('');
 
     renderAssignments(allAssignments);
   } catch {

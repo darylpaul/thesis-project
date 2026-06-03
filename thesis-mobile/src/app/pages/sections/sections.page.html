@@ -45,7 +45,7 @@
           </span>
         </div>
         <div class="item-sub" *ngIf="s.grade">{{ s.grade }}</div>
-        <div class="item-sub" *ngIf="!isAssigned(s) && s.adviser">Adviser: {{ s.adviser }}</div>
+        <div class="item-sub" *ngIf="!isAssigned(s) && s.adviser">Teacher: {{ s.adviser }}</div>
         <div class="item-sub" *ngIf="isAssigned(s) && s.assigned_subject_name"
           style="color:#ea580c;font-weight:600;">
           📚 {{ s.assigned_subject_name }}
@@ -94,7 +94,7 @@
           </select>
         </div>
         <div class="field-group">
-          <label class="field-label">Adviser <span style="font-size:11px;color:#9ca3af;">(auto-filled)</span></label>
+          <label class="field-label">Teacher <span style="font-size:11px;color:#9ca3af;">(auto-filled)</span></label>
           <input class="field-input" [(ngModel)]="form.adviser" readonly
             style="background:#f3f4f6;color:#6b7280;" />
         </div>
