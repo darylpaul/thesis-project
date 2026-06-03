@@ -44,14 +44,15 @@ async function renderQuestionnaires() {
   const empty     = document.getElementById('emptyState');
   const list      = document.getElementById('questionnairesList');
   list.innerHTML  = '';
-
-  if (!sectionId || !subjectId) {
-    prompt.style.display = 'flex'; empty.style.display = 'none'; list.style.display = 'none'; return;
-  }
   prompt.style.display = 'none';
 
+  const params = new URLSearchParams();
+  if (sectionId) params.append('section_id', sectionId);
+  if (subjectId) params.append('subject_id', subjectId);
+  const qs = params.toString();
+
   try {
-    const res  = await fetch(`${API}/questionnaires?section_id=${sectionId}&subject_id=${subjectId}`, { headers: { 'Authorization': localStorage.getItem('token') } });
+    const res  = await fetch(`${API}/questionnaires${qs ? '?' + qs : ''}`, { headers: { 'Authorization': localStorage.getItem('token') } });
     allQuestionnairesData = await res.json();
     // Reapply search if active
     const q = document.getElementById('searchInput')?.value || '';

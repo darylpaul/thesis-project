@@ -45,17 +45,15 @@ async function renderAnswerKeys() {
   const emptyState  = document.getElementById('emptyState');
   const listEl      = document.getElementById('answerkeysList');
   listEl.innerHTML  = '';
-
-  if (!sectionId || !subjectId) {
-    promptState.style.display = 'flex';
-    emptyState.style.display  = 'none';
-    listEl.style.display      = 'none';
-    return;
-  }
   promptState.style.display = 'none';
 
+  const params = new URLSearchParams();
+  if (sectionId) params.append('section_id', sectionId);
+  if (subjectId) params.append('subject_id', subjectId);
+  const qs = params.toString();
+
   try {
-    const res = await fetch(`${API}/answerkeys?section_id=${sectionId}&subject_id=${subjectId}`, {
+    const res = await fetch(`${API}/answerkeys${qs ? '?' + qs : ''}`, {
       headers: { 'Authorization': localStorage.getItem('token') }
     });
     allAnswerKeysData = await res.json();

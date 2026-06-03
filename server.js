@@ -654,16 +654,17 @@ app.delete('/api/students/:id', async (req, res) => {
 // ===========================
 // SUBJECTS ROUTES
 // ===========================
-// ── SUBJECTS — Admin manages global subjects; teachers pick from the shared list ──
+// ── SUBJECTS — Admin global subjects + teacher's own legacy subjects ──
 app.get('/api/subjects', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const [rows] = await db.query(
-      `SELECT subjects.* FROM subjects
+      `SELECT DISTINCT subjects.* FROM subjects
        JOIN users ON subjects.user_id = users.id
-       WHERE users.role = 'admin'
-       ORDER BY subjects.name ASC`
+       WHERE users.role = 'admin' OR subjects.user_id = ?
+       ORDER BY subjects.name ASC`,
+      [user.id]
     );
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
@@ -717,11 +718,18 @@ app.get('/api/questionnaires', async (req, res) => {
   const userQ = getUser(req);
   if (!userQ) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    let query = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY questionnaires.title ASC`;
+    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
+    let query = base + ` ORDER BY questionnaires.title ASC`;
     let params = [userQ.id];
     if (req.query.section_id && req.query.subject_id) {
-      query = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.section_id=? AND questionnaires.subject_id=? AND questionnaires.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY questionnaires.title ASC`;
-      params = [req.query.section_id, req.query.subject_id, userQ.id];
+      query = base + ` AND questionnaires.section_id=? AND questionnaires.subject_id=? ORDER BY questionnaires.title ASC`;
+      params = [userQ.id, req.query.section_id, req.query.subject_id];
+    } else if (req.query.section_id) {
+      query = base + ` AND questionnaires.section_id=? ORDER BY questionnaires.title ASC`;
+      params = [userQ.id, req.query.section_id];
+    } else if (req.query.subject_id) {
+      query = base + ` AND questionnaires.subject_id=? ORDER BY questionnaires.title ASC`;
+      params = [userQ.id, req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
     res.json(rows);
@@ -835,11 +843,18 @@ app.get('/api/answerkeys', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    let query = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE answerkeys.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY answerkeys.title ASC`;
+    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE answerkeys.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
+    let query = akBase + ` ORDER BY answerkeys.title ASC`;
     let params = [user.id];
     if (req.query.section_id && req.query.subject_id) {
-      query = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE answerkeys.section_id=? AND answerkeys.subject_id=? AND answerkeys.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY answerkeys.title ASC`;
-      params = [req.query.section_id, req.query.subject_id, user.id];
+      query = akBase + ` AND answerkeys.section_id=? AND answerkeys.subject_id=? ORDER BY answerkeys.title ASC`;
+      params = [user.id, req.query.section_id, req.query.subject_id];
+    } else if (req.query.section_id) {
+      query = akBase + ` AND answerkeys.section_id=? ORDER BY answerkeys.title ASC`;
+      params = [user.id, req.query.section_id];
+    } else if (req.query.subject_id) {
+      query = akBase + ` AND answerkeys.subject_id=? ORDER BY answerkeys.title ASC`;
+      params = [user.id, req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
     res.json(rows);
