@@ -114,6 +114,11 @@ export class ApiService {
     return this.http.delete(`${BASE}/answerkeys/${id}`, { headers: this.headers() });
   }
 
+  // ── Stats ─────────────────────────────────────────────
+  getTeacherStats() {
+    return this.http.get(`${BASE}/teacher/stats`, { headers: this.headers() });
+  }
+
   // ── Auth ──────────────────────────────────────────
   verifyPassword(password: string) {
     return this.http.post(`${BASE}/verify-password`, { password }, { headers: this.headers() });

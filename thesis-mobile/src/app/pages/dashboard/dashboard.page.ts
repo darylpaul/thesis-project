@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { IonContent, IonFooter, ToastController } from '@ionic/angular/standalone';
 import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api';
-import { lastValueFrom, interval, Subscription } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -65,26 +65,11 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.sessionSubscription?.unsubscribe();
   }
 
-  async loadStats() {
-    try {
-      const [sections, students, subjects, questionnaires, answerkeys, records]: any[] =
-        await Promise.all([
-          lastValueFrom(this.api.getSections()),
-          lastValueFrom(this.api.getStudents()),
-          lastValueFrom(this.api.getSubjects()),
-          lastValueFrom(this.api.getQuestionnaires()),
-          lastValueFrom(this.api.getAnswerKeys()),
-          lastValueFrom(this.api.getRecords()),
-        ]);
-      this.stats = {
-        sections:       (sections      || []).length,
-        students:       (students       || []).length,
-        subjects:       (subjects       || []).length,
-        questionnaires: (questionnaires || []).length,
-        answerkeys:     (answerkeys     || []).length,
-        records:        (records        || []).length,
-      };
-    } catch (err) { console.error(err); }
+  loadStats() {
+    this.api.getTeacherStats().subscribe({
+      next: (data: any) => { this.stats = data; },
+      error: (err) => console.error(err)
+    });
   }
 
   openMenu()  { this.menuOpen = true;  }
