@@ -57,6 +57,7 @@ export class QuestionnairesPage implements OnInit {
   selectedSection       = '';
   selectedSubject       = '';
   editingId: number | null = null;
+  currentUserId: number | null = null;
 
   form: {
     title: string; type: string; section_id: string; subject_id: string; parts: ExamPart[];
@@ -84,6 +85,11 @@ export class QuestionnairesPage implements OnInit {
   }
 
   ngOnInit() {
+    try {
+      const token = localStorage.getItem('token') || '';
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      this.currentUserId = payload.id || null;
+    } catch {}
     this.api.getSections().subscribe({ next: (d: any) => this.sections = d });
     this.api.getSubjects().subscribe({ next: (d: any) => this.subjects = d });
     this.load();

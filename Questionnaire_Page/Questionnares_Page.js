@@ -1,5 +1,16 @@
 const API = window.API_URL || 'http://localhost:3000/api';
 
+// Decode current user ID from JWT so we know which questionnaires belong to us
+function getCurrentUserId() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.id || null;
+  } catch { return null; }
+}
+const currentUserId = getCurrentUserId();
+
 window.addEventListener('DOMContentLoaded', () => { populateFilterDropdowns(); });
 
 // ===========================
@@ -127,12 +138,13 @@ function createQCard(q, i) {
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
         </svg>
       </button>
+      ${q.user_id == currentUserId ? `
       <button class="btn-icon edit-btn" title="Edit">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
         </svg>
-      </button>
+      </button>` : ''}
       <button class="btn-icon duplicate-btn" title="Duplicate">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -145,20 +157,21 @@ function createQCard(q, i) {
           <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
       </button>
+      ${q.user_id == currentUserId ? `
       <button class="btn-icon delete" title="Move to Archive">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"/>
           <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
           <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
         </svg>
-      </button>
+      </button>` : ''}
     </div>`;
 
   card.querySelector('.btn-icon.view').addEventListener('click',          () => openViewModal(q));
-  card.querySelector('.btn-icon.edit-btn').addEventListener('click',      () => openEditModal(q));
   card.querySelector('.btn-icon.duplicate-btn').addEventListener('click', () => duplicateQuestionnaire(q));
   card.querySelector('.btn-icon.export-btn').addEventListener('click',    () => exportJSON(q));
-  card.querySelector('.btn-icon.delete').addEventListener('click',        () => {
+  card.querySelector('.btn-icon.edit-btn')?.addEventListener('click',     () => openEditModal(q));
+  card.querySelector('.btn-icon.delete')?.addEventListener('click',       () => {
     requireAuthThenDelete(
       q.title || 'this questionnaire',
       'questionnaires', q.id, q,

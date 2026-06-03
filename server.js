@@ -433,6 +433,8 @@ app.delete('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
     );
 
     await db.query('DELETE FROM users WHERE id = ? AND role = "teacher"', [req.params.id]);
+    // Remove their subject-teacher assignments
+    await db.query('DELETE FROM section_teachers WHERE teacher_id=?', [req.params.id]);
 
     // Reassign orphaned sections to admin so they stay visible
     const [adminRows] = await db.query('SELECT id, fullname FROM users WHERE role="admin" LIMIT 1');
@@ -570,8 +572,10 @@ app.put('/api/admin/sections/:id', requireAdmin, async (req, res) => {
 });
 app.delete('/api/admin/sections/:id', requireAdmin, async (req, res) => {
   try {
-    await db.query('DELETE FROM students WHERE section_id=?', [req.params.id]);
-    await db.query('DELETE FROM sections WHERE id=?', [req.params.id]);
+    await db.query('DELETE FROM records  WHERE section_id=?',  [req.params.id]);
+    await db.query('DELETE FROM section_teachers WHERE section_id=?', [req.params.id]);
+    await db.query('DELETE FROM students WHERE section_id=?',  [req.params.id]);
+    await db.query('DELETE FROM sections WHERE id=?',          [req.params.id]);
     res.json({ message: 'Section deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
