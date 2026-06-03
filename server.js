@@ -350,7 +350,7 @@ app.get('/api/teacher/stats', async (req, res) => {
     const [[questionnaires]] = await db.query('SELECT COUNT(*) as count FROM questionnaires WHERE user_id=?', [user.id]);
     const [[answerkeys]]     = await db.query('SELECT COUNT(*) as count FROM answerkeys WHERE user_id=?',     [user.id]);
     const [[records]]        = await db.query('SELECT COUNT(*) as count FROM records WHERE user_id=?',        [user.id]);
-    const [[subjects]]       = await db.query('SELECT COUNT(*) as count FROM subjects');
+    const [[subjects]]       = await db.query(`SELECT COUNT(DISTINCT subjects.id) as count FROM subjects JOIN users ON subjects.user_id=users.id WHERE users.role='admin' OR subjects.user_id=?`, [user.id]);
     res.json({ sections: sections.count, students: students.count, questionnaires: questionnaires.count, answerkeys: answerkeys.count, records: records.count, subjects: subjects.count });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
