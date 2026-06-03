@@ -1004,7 +1004,7 @@ function filterAdminSections() {
   renderAdminSections(allAdminSections.filter(s =>
     (s.name||'').toLowerCase().includes(q) ||
     (s.grade||'').toLowerCase().includes(q) ||
-    (s.adviser||'').toLowerCase().includes(q)
+    (s.adviser_name||s.adviser||'').toLowerCase().includes(q)
   ));
 }
 
@@ -1018,7 +1018,7 @@ function renderAdminSections(sections) {
     <tr>
       <td style="font-weight:600;color:#1e3a5f;">${escHtml(s.name)}</td>
       <td style="color:#374151;">${escHtml(s.grade||'—')}</td>
-      <td style="color:#374151;">${escHtml(s.adviser||'—')}</td>
+      <td style="color:#374151;">${escHtml(s.adviser_name||s.adviser||'—')}</td>
       <td style="color:#374151;">${s.students_count ?? '—'}</td>
       <td>
         <button onclick="openEditSectionModal(${s.id})"
