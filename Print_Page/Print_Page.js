@@ -46,13 +46,20 @@ async function loadQuestionnaires() {
   qSel.innerHTML = '<option value="" disabled hidden>Select questionnaire</option>';
   document.getElementById('previewArea').style.display = 'none';
   document.getElementById('promptState').style.display = 'flex';
-  if (!sId || !subId) return;
+  if (!sId && !subId) return;
+
+  const params = new URLSearchParams();
+  if (sId)  params.append('section_id', sId);
+  if (subId) params.append('subject_id', subId);
 
   try {
-    const res  = await fetch(`${API}/questionnaires?section_id=${sId}&subject_id=${subId}`, { headers: { 'Authorization': localStorage.getItem('token') } });
+    const res  = await fetch(`${API}/questionnaires?${params}`, { headers: { 'Authorization': localStorage.getItem('token') } });
     const data = await res.json();
     if (!data.length) { qSel.innerHTML = '<option value="">No questionnaires found</option>'; return; }
     data.forEach(q => { const o = document.createElement('option'); o.value = q.id; o.textContent = q.title; qSel.appendChild(o); });
+    // Auto-select first and render preview
+    qSel.selectedIndex = 1;
+    qSel.dispatchEvent(new Event('change'));
   } catch { showToast('Could not load questionnaires.', 'error'); }
 }
 
