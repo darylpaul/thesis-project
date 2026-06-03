@@ -4,13 +4,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonHeader, IonToolbar, IonTitle, IonContent, IonFooter,
   IonButtons, IonButton, IonIcon, IonSpinner,
   ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline, cameraOutline, scanOutline } from 'ionicons/icons';
 import { ApiService } from '../../services/api';
+import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
 
 @Component({
   selector: 'app-scan',
@@ -18,8 +19,8 @@ import { ApiService } from '../../services/api';
   styleUrls: ['./scan.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
+    CommonModule, FormsModule, BottomNavComponent,
+    IonHeader, IonToolbar, IonTitle, IonContent, IonFooter,
     IonButtons, IonButton, IonIcon, IonSpinner
   ]
 })
