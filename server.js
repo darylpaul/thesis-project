@@ -39,6 +39,10 @@ app.use(cors({
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
   await migrate(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
+  // One-time cleanup: nullify references then delete teacher-created subjects
+  await migrate(`UPDATE questionnaires q JOIN subjects s ON q.subject_id=s.id JOIN users u ON s.user_id=u.id SET q.subject_id=NULL WHERE u.role!='admin'`);
+  await migrate(`UPDATE answerkeys a JOIN subjects s ON a.subject_id=s.id JOIN users u ON s.user_id=u.id SET a.subject_id=NULL WHERE u.role!='admin'`);
+  await migrate(`DELETE subjects FROM subjects JOIN users ON subjects.user_id=users.id WHERE users.role!='admin'`);
 })();
 
 // ===========================
