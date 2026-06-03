@@ -402,24 +402,6 @@ document.getElementById('tbtnPdf').addEventListener('click', function() {
 }
 
 
-document.getElementById('savePdfBtn').addEventListener('click', () => {
-  const title   = document.getElementById('previewTitle').textContent;
-  const section = document.getElementById('previewSection').textContent;
-  if (!title) { alert('Please select a questionnaire first.'); return; }
-  const btn = document.getElementById('savePdfBtn');
-  btn.textContent = '⏳ Generating...';
-  btn.disabled = true;
-  html2pdf().set({
-    margin: 10,
-    filename: `${title}${section ? ' - ' + section : ''}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  }).from(document.getElementById('examPaper')).save().then(() => {
-    btn.textContent = '📥 Save Exam PDF';
-    btn.disabled = false;
-  });
-});
 
 document.getElementById('printBtn').addEventListener('click', () => {
   const qTitle   = document.getElementById('previewTitle').textContent || 'Questionnaire';
