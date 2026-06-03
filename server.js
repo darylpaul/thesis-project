@@ -535,6 +535,7 @@ app.put('/api/admin/sections/:id', requireAdmin, async (req, res) => {
 });
 app.delete('/api/admin/sections/:id', requireAdmin, async (req, res) => {
   try {
+    await db.query('DELETE FROM students WHERE section_id=?', [req.params.id]);
     await db.query('DELETE FROM sections WHERE id=?', [req.params.id]);
     res.json({ message: 'Section deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
