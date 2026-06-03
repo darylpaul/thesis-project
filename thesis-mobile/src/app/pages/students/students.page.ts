@@ -30,7 +30,8 @@ export class StudentsPage implements OnInit {
   students: any[]  = [];
   filtered: any[]  = [];
   searchQuery      = '';
-  sections: any[] = [];
+  allSections: any[] = [];
+  ownSections: any[] = [];
   isLoading = false;
   isSaving = false;
   showModal = false;
@@ -50,8 +51,10 @@ export class StudentsPage implements OnInit {
   }
 
   ngOnInit() {
-    // Only own sections (not subject-assigned) can have students added
-    this.api.getSections().subscribe({ next: (d: any) => this.sections = (d || []).filter((s: any) => !s.is_assigned) });
+    this.api.getSections().subscribe({ next: (d: any) => {
+      this.allSections = d || [];
+      this.ownSections = (d || []).filter((s: any) => !s.is_assigned);
+    }});
     this.loadStudents();
   }
 
@@ -122,7 +125,7 @@ export class StudentsPage implements OnInit {
   delete(id: number) {
     this.api.deleteStudent(id).subscribe({
       next: () => { this.loadStudents(); this.toast('Student removed', 'success'); },
-      error: () => this.toast('Could not remove student', 'danger')
+      error: (err: any) => this.toast(err.error?.error || 'Could not remove student', 'danger')
     });
   }
 

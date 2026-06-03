@@ -650,7 +650,8 @@ app.put('/api/students/:id', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    await db.query('UPDATE students SET first_name=?, last_name=?, student_id=?, section_id=?, gender=? WHERE id=? AND user_id=?', [first_name, last_name, student_id, section_id, gender || null, req.params.id, user.id]);
+    const [result] = await db.query('UPDATE students SET first_name=?, last_name=?, student_id=?, section_id=?, gender=? WHERE id=? AND user_id=?', [first_name, last_name, student_id, section_id, gender || null, req.params.id, user.id]);
+    if (result.affectedRows === 0) return res.status(403).json({ error: 'Only the class teacher can edit this student.' });
     res.json({ message: 'Student updated!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -658,7 +659,8 @@ app.delete('/api/students/:id', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    await db.query('DELETE FROM students WHERE id=? AND user_id=?', [req.params.id, user.id]);
+    const [result] = await db.query('DELETE FROM students WHERE id=? AND user_id=?', [req.params.id, user.id]);
+    if (result.affectedRows === 0) return res.status(403).json({ error: 'Only the class teacher can delete this student.' });
     res.json({ message: 'Student deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });

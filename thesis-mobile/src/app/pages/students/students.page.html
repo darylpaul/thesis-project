@@ -26,7 +26,7 @@
   <div style="padding:14px 16px 0;">
     <select class="field-input" [(ngModel)]="selectedSection" (change)="onSectionChange()">
       <option value="">All Sections</option>
-      <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+      <option *ngFor="let s of allSections" [value]="s.id">{{ s.name }}</option>
     </select>
   </div>
   <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
@@ -93,7 +93,7 @@
           <label class="field-label">Section *</label>
           <select class="field-input" [(ngModel)]="form.section_id">
             <option value="" disabled hidden>Select section</option>
-            <option *ngFor="let s of sections" [value]="s.id">{{ s.name }}</option>
+            <option *ngFor="let s of ownSections" [value]="s.id">{{ s.name }}</option>
           </select>
         </div>
         <button class="submit-btn" (click)="save()" [disabled]="isSaving">
