@@ -35,6 +35,9 @@
       <button class="sidebar-btn" data-tab="teachers">
         <span class="sb-icon">👩‍🏫</span> Teachers
       </button>
+      <button class="sidebar-btn" data-tab="subjects">
+        <span class="sb-icon">📚</span> Subjects
+      </button>
       <button class="sidebar-btn" data-tab="assignments">
         <span class="sb-icon">🔗</span> Assignments
       </button>
@@ -138,6 +141,51 @@
         </div>
       </div>
 
+      <!-- SUBJECTS TAB -->
+      <div class="tab-content" id="tab-subjects">
+        <div class="tab-header-row">
+          <div>
+            <h2 class="tab-title">Subjects</h2>
+            <p class="tab-sub">Manage school-wide subjects — all teachers pick from this shared list</p>
+          </div>
+          <button class="btn-add-teacher" onclick="openAddSubjectModal()">+ Add Subject</button>
+        </div>
+        <div class="section-card">
+          <div class="search-bar">
+            <input type="text" id="subjectSearch" placeholder="🔍 Search subjects..." oninput="filterSubjects()" />
+          </div>
+          <div class="table-wrap">
+            <table class="admin-table" id="subjectsTable">
+              <thead>
+                <tr><th>Subject Name</th><th>Code</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="subjectsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Subject Modal -->
+        <div id="subjectModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
+          <div style="background:#fff;border-radius:16px;padding:32px;width:100%;max-width:420px;margin:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);">
+            <h3 style="margin:0 0 20px;font-size:18px;color:#1e3a5f;" id="subjectModalTitle">Add Subject</h3>
+            <div style="margin-bottom:16px;">
+              <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Subject Name *</label>
+              <input id="subjectNameInput" type="text" placeholder="e.g. Mathematics"
+                style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;outline:none;" />
+            </div>
+            <div style="margin-bottom:24px;">
+              <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Subject Code</label>
+              <input id="subjectCodeInput" type="text" placeholder="e.g. MATH (optional)"
+                style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;outline:none;" />
+            </div>
+            <div style="display:flex;gap:12px;justify-content:flex-end;">
+              <button onclick="closeSubjectModal()" style="padding:10px 20px;border:1.5px solid #d1d5db;background:#fff;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">Cancel</button>
+              <button onclick="saveSubject()" id="saveSubjectBtn" style="padding:10px 24px;background:#1a2eaa;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ASSIGNMENTS TAB -->
       <div class="tab-content" id="tab-assignments">
         <div class="tab-header">
@@ -191,7 +239,7 @@
       <div class="tab-content" id="tab-archive">
         <div class="tab-header">
           <h2 class="tab-title">Archive</h2>
-          <p class="tab-sub">Deleted items are kept here for 30 days — only admin can restore or permanently delete</p>
+          <p class="tab-sub">Deleted items stay here until admin restores or permanently deletes them</p>
         </div>
         <div class="section-card">
           <div class="logs-filters">

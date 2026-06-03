@@ -38,6 +38,7 @@ app.use(cors({
     await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS is_archived TINYINT(1) DEFAULT 0`);
     await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
     await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
+    await db.query(`ALTER TABLE subjects ADD COLUMN IF NOT EXISTS is_global TINYINT(1) DEFAULT 0`);
   } catch (e) { console.log('Migration note:', e.message); }
 })();
 
@@ -652,39 +653,45 @@ app.delete('/api/students/:id', async (req, res) => {
 // ===========================
 // SUBJECTS ROUTES
 // ===========================
-// ── SUBJECTS — Each teacher manages their own subjects ──
+// ── SUBJECTS — Admin manages global subjects; teachers pick from the shared list ──
 app.get('/api/subjects', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const [rows] = await db.query('SELECT * FROM subjects WHERE user_id=? ORDER BY name ASC', [user.id]);
+    const [rows] = await db.query('SELECT * FROM subjects WHERE is_global=1 ORDER BY name ASC');
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
-app.post('/api/subjects', async (req, res) => {
-  const user = getUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { name, code } = req.body;
+app.post('/api/subjects', (req, res) => res.status(403).json({ error: 'Subjects are managed by admin' }));
+app.put('/api/subjects/:id', (req, res) => res.status(403).json({ error: 'Subjects are managed by admin' }));
+app.delete('/api/subjects/:id', (req, res) => res.status(403).json({ error: 'Subjects are managed by admin' }));
+
+// ── ADMIN — Global subject management ──
+app.get('/api/admin/subjects', requireAdmin, async (req, res) => {
   try {
-    await db.query('INSERT INTO subjects (name, code, user_id) VALUES (?,?,?)', [name, code, user.id]);
-    await logActivity(user.id, user.fullname, 'CREATE_SUBJECT', `Created subject: ${name}`, req.body.platform||'web');
-    res.json({ message: 'Subject added!' });
+    const [rows] = await db.query('SELECT * FROM subjects WHERE is_global=1 ORDER BY name ASC');
+    res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
-app.put('/api/subjects/:id', async (req, res) => {
-  const user = getUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+app.post('/api/admin/subjects', requireAdmin, async (req, res) => {
   const { name, code } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Subject name is required' });
   try {
-    await db.query('UPDATE subjects SET name=?, code=? WHERE id=? AND user_id=?', [name, code, req.params.id, user.id]);
+    await db.query('INSERT INTO subjects (name, code, is_global, user_id) VALUES (?,?,1,NULL)', [name.trim(), code||null]);
+    res.json({ message: 'Subject created!' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+app.put('/api/admin/subjects/:id', requireAdmin, async (req, res) => {
+  const { name, code } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Subject name is required' });
+  try {
+    await db.query('UPDATE subjects SET name=?, code=? WHERE id=? AND is_global=1', [name.trim(), code||null, req.params.id]);
     res.json({ message: 'Subject updated!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
-app.delete('/api/subjects/:id', async (req, res) => {
-  const user = getUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+app.delete('/api/admin/subjects/:id', requireAdmin, async (req, res) => {
   try {
-    await db.query('DELETE FROM subjects WHERE id=? AND user_id=?', [req.params.id, user.id]);
+    await db.query('DELETE FROM subjects WHERE id=? AND is_global=1', [req.params.id]);
     res.json({ message: 'Subject deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
