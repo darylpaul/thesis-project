@@ -659,7 +659,12 @@ app.get('/api/subjects', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const [rows] = await db.query('SELECT * FROM subjects WHERE is_global=1 ORDER BY name ASC');
+    const [rows] = await db.query(
+      `SELECT subjects.* FROM subjects
+       JOIN users ON subjects.user_id = users.id
+       WHERE users.role = 'admin'
+       ORDER BY subjects.name ASC`
+    );
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -670,7 +675,12 @@ app.delete('/api/subjects/:id', (req, res) => res.status(403).json({ error: 'Sub
 // ── ADMIN — Global subject management ──
 app.get('/api/admin/subjects', requireAdmin, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM subjects WHERE is_global=1 ORDER BY name ASC');
+    const [rows] = await db.query(
+      `SELECT subjects.* FROM subjects
+       JOIN users ON subjects.user_id = users.id
+       WHERE users.role = 'admin'
+       ORDER BY subjects.name ASC`
+    );
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -679,21 +689,23 @@ app.post('/api/admin/subjects', requireAdmin, async (req, res) => {
   const { name, code } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Subject name is required' });
   try {
-    await db.query('INSERT INTO subjects (name, code, is_global, user_id) VALUES (?,?,1,?)', [name.trim(), code||null, admin.id]);
+    await db.query('INSERT INTO subjects (name, code, user_id) VALUES (?,?,?)', [name.trim(), code||null, admin.id]);
     res.json({ message: 'Subject created!' });
   } catch (err) { console.log(err); res.status(500).json({ error: err.message }); }
 });
 app.put('/api/admin/subjects/:id', requireAdmin, async (req, res) => {
+  const admin = getUser(req);
   const { name, code } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Subject name is required' });
   try {
-    await db.query('UPDATE subjects SET name=?, code=? WHERE id=? AND is_global=1', [name.trim(), code||null, req.params.id]);
+    await db.query('UPDATE subjects SET name=?, code=? WHERE id=? AND user_id=?', [name.trim(), code||null, req.params.id, admin.id]);
     res.json({ message: 'Subject updated!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 app.delete('/api/admin/subjects/:id', requireAdmin, async (req, res) => {
+  const admin = getUser(req);
   try {
-    await db.query('DELETE FROM subjects WHERE id=? AND is_global=1', [req.params.id]);
+    await db.query('DELETE FROM subjects WHERE id=? AND user_id=?', [req.params.id, admin.id]);
     res.json({ message: 'Subject deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
