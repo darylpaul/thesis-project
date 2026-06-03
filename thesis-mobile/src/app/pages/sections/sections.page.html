@@ -4,9 +4,6 @@
       <ion-button (click)="goBack()"><ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon></ion-button>
     </ion-buttons>
     <ion-title>Sections</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="openModal()"><ion-icon name="add-outline" slot="icon-only"></ion-icon></ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -27,8 +24,8 @@
   </div>
   <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
     <ion-icon name="grid-outline"></ion-icon>
-    <h3>{{ searchQuery ? "No results found" : "No sections yet" }}</h3>
-    <p>{{ searchQuery ? "Try a different search" : "Tap + to add your first section" }}</p>
+    <h3>{{ searchQuery ? "No results found" : "No sections assigned yet" }}</h3>
+    <p>{{ searchQuery ? "Try a different search" : "Contact admin to have a section assigned to you" }}</p>
   </div>
   <div *ngIf="!isLoading && filtered.length > 0" style="padding:16px;">
     <div *ngFor="let s of filtered" class="item-card">
@@ -45,7 +42,7 @@
           </span>
         </div>
         <div class="item-sub" *ngIf="s.grade">{{ s.grade }}</div>
-        <div class="item-sub" *ngIf="!isAssigned(s) && s.adviser">Teacher: {{ s.adviser }}</div>
+        <div class="item-sub" *ngIf="s.adviser">Teacher: {{ s.adviser }}</div>
         <div class="item-sub" *ngIf="isAssigned(s) && s.assigned_subject_name"
           style="color:#ea580c;font-weight:600;">
           📚 {{ s.assigned_subject_name }}
@@ -54,57 +51,9 @@
           👥 {{ s.studentCount || 0 }} student{{ s.studentCount !== 1 ? 's' : '' }}
         </div>
       </div>
-      <div class="item-actions">
-        <ng-container *ngIf="!isAssigned(s)">
-          <button class="action-btn edit" (click)="openEditModal(s)"><ion-icon name="create-outline"></ion-icon></button>
-          <button class="action-btn delete" (click)="confirmDelete(s)"><ion-icon name="trash-outline"></ion-icon></button>
-        </ng-container>
-        <span *ngIf="isAssigned(s)"
-          style="font-size:11px;color:#9ca3af;padding:0 4px;text-align:center;line-height:1.3;">
-          View<br>Only
-        </span>
-      </div>
     </div>
   </div>
 </ion-content>
-
-<ion-modal [isOpen]="showModal" (didDismiss)="closeModal()">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>{{ editing ? 'Edit Section' : 'Add Section' }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="closeModal()"><ion-icon name="close-outline" slot="icon-only"></ion-icon></ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content style="--background:#f0f2f7;">
-      <div style="padding:20px;">
-        <div class="field-group">
-          <label class="field-label">Section Name *</label>
-          <input class="field-input" [(ngModel)]="form.name" placeholder="e.g. Section A" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">Grade Level</label>
-          <select class="field-input" [(ngModel)]="form.grade">
-            <option value="" disabled hidden>Select grade</option>
-            <option>Grade 7</option><option>Grade 8</option>
-            <option>Grade 9</option><option>Grade 10</option>
-            <option>Grade 11</option><option>Grade 12</option>
-          </select>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Teacher <span style="font-size:11px;color:#9ca3af;">(auto-filled)</span></label>
-          <input class="field-input" [(ngModel)]="form.adviser" readonly
-            style="background:#f3f4f6;color:#6b7280;" />
-        </div>
-        <button class="submit-btn" (click)="save()" [disabled]="isSaving">
-          {{ isSaving ? 'Saving...' : (editing ? 'Update Section' : 'Save Section') }}
-        </button>
-      </div>
-    </ion-content>
-  </ng-template>
-</ion-modal>
 
 <ion-footer>
   <app-bottom-nav activePage="sections"></app-bottom-nav>

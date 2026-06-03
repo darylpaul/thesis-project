@@ -45,6 +45,7 @@ document.querySelectorAll('.sidebar-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
     if (btn.dataset.tab === 'teachers')    loadTeachers();
+    if (btn.dataset.tab === 'sections')    loadAdminSections();
     if (btn.dataset.tab === 'subjects')    loadAdminSubjects();
     if (btn.dataset.tab === 'logs')        loadAllLogs();
     if (btn.dataset.tab === 'archive')     loadArchive();
@@ -977,4 +978,118 @@ function renderAssignments(data) {
     <div style="padding:12px 16px;font-size:12px;color:#9ca3af;border-top:1px solid #f1f5f9;">
       ${data.length} assignment${data.length !== 1 ? 's' : ''}
     </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// ADMIN — SECTIONS MANAGEMENT
+// ═══════════════════════════════════════════════════════
+let allAdminSections = [];
+let allAdminTeachers = [];
+let editingSectionId = null;
+
+async function loadAdminSections() {
+  try {
+    const [sRes, tRes] = await Promise.all([
+      fetch(`${API}/admin/all-sections`, { headers }),
+      fetch(`${API}/admin/teachers`,     { headers })
+    ]);
+    allAdminSections = await sRes.json();
+    allAdminTeachers = await tRes.json();
+    renderAdminSections(allAdminSections);
+  } catch { showToast('Could not load sections.', 'error'); }
+}
+
+function filterAdminSections() {
+  const q = document.getElementById('sectionSearch').value.toLowerCase();
+  renderAdminSections(allAdminSections.filter(s =>
+    (s.name||'').toLowerCase().includes(q) ||
+    (s.grade||'').toLowerCase().includes(q) ||
+    (s.adviser||'').toLowerCase().includes(q)
+  ));
+}
+
+function renderAdminSections(sections) {
+  const tbody = document.getElementById('adminSectionsBody');
+  if (!sections.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:24px;">No sections yet. Click "+ Add Section" to create one.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sections.map(s => `
+    <tr>
+      <td style="font-weight:600;color:#1e3a5f;">${escHtml(s.name)}</td>
+      <td style="color:#374151;">${escHtml(s.grade||'—')}</td>
+      <td style="color:#374151;">${escHtml(s.adviser||'—')}</td>
+      <td style="color:#374151;">${s.students_count ?? '—'}</td>
+      <td>
+        <button onclick="openEditSectionModal(${s.id})"
+          style="padding:5px 12px;background:#eff6ff;color:#2563eb;border:1.5px solid #bfdbfe;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px;">
+          ✏️ Edit
+        </button>
+        <button onclick="deleteAdminSection(${s.id},'${escHtml(s.name)}')"
+          style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+          🗑 Delete
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+function populateTeacherDropdown() {
+  const sel = document.getElementById('secTeacherInput');
+  sel.innerHTML = '<option value="">Select teacher...</option>' +
+    allAdminTeachers.map(t => `<option value="${t.id}">${escHtml(t.fullname)}</option>`).join('');
+}
+
+function openAddSectionModal() {
+  editingSectionId = null;
+  document.getElementById('sectionModalTitle').textContent = 'Add Section';
+  document.getElementById('secNameInput').value  = '';
+  document.getElementById('secGradeInput').value = '';
+  populateTeacherDropdown();
+  document.getElementById('sectionModalOverlay').style.display = 'flex';
+}
+
+function openEditSectionModal(id) {
+  const s = allAdminSections.find(x => x.id === id);
+  if (!s) return;
+  editingSectionId = id;
+  document.getElementById('sectionModalTitle').textContent = 'Edit Section';
+  document.getElementById('secNameInput').value  = s.name || '';
+  document.getElementById('secGradeInput').value = s.grade || '';
+  populateTeacherDropdown();
+  document.getElementById('secTeacherInput').value = s.user_id || '';
+  document.getElementById('sectionModalOverlay').style.display = 'flex';
+}
+
+function closeSectionModal() {
+  document.getElementById('sectionModalOverlay').style.display = 'none';
+}
+
+async function saveAdminSection() {
+  const name       = document.getElementById('secNameInput').value.trim();
+  const grade      = document.getElementById('secGradeInput').value;
+  const teacher_id = document.getElementById('secTeacherInput').value;
+  if (!name)       { showToast('Section name is required.', 'error'); return; }
+  if (!teacher_id) { showToast('Please select a teacher.', 'error'); return; }
+  const btn = document.getElementById('saveSectionBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const url    = editingSectionId ? `${API}/admin/sections/${editingSectionId}` : `${API}/admin/sections`;
+    const method = editingSectionId ? 'PUT' : 'POST';
+    const res    = await fetch(url, { method, headers, body: JSON.stringify({ name, grade, teacher_id }) });
+    const data   = await res.json();
+    if (!res.ok) { showToast(data.error || 'Error saving section.', 'error'); return; }
+    showToast(editingSectionId ? 'Section updated!' : 'Section created!', 'success');
+    closeSectionModal();
+    loadAdminSections();
+  } catch { showToast('Could not connect to server.', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Save'; }
+}
+
+async function deleteAdminSection(id, name) {
+  if (!confirm(`Delete section "${name}"? This will also remove all students in this section.`)) return;
+  try {
+    const res = await fetch(`${API}/admin/sections/${id}`, { method: 'DELETE', headers });
+    if (res.ok) { showToast('Section deleted.', 'success'); loadAdminSections(); }
+    else showToast('Could not delete section.', 'error');
+  } catch { showToast('Could not connect to server.', 'error'); }
 }

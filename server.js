@@ -463,8 +463,11 @@ app.get('/api/admin/section-assignments', requireAdmin, async (req, res) => {
 app.get('/api/admin/all-sections', requireAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT sections.*, u.fullname AS adviser_name
-       FROM sections JOIN users u ON sections.user_id = u.id
+      `SELECT sections.*, u.fullname AS adviser_name, COUNT(DISTINCT students.id) AS students_count
+       FROM sections
+       JOIN users u ON sections.user_id = u.id
+       LEFT JOIN students ON students.section_id = sections.id
+       GROUP BY sections.id
        ORDER BY sections.name ASC`
     );
     res.json(rows);
@@ -507,6 +510,35 @@ app.delete('/api/admin/section-assignments/:id', requireAdmin, async (req, res) 
     await logActivity(admin.id, admin.fullname, 'REMOVE_ASSIGNMENT',
       `Removed assignment ID ${req.params.id}`, 'web');
     res.json({ message: 'Assignment removed.' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// ── ADMIN — Section CRUD ──
+app.post('/api/admin/sections', requireAdmin, async (req, res) => {
+  const { name, grade, teacher_id } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Section name is required' });
+  if (!teacher_id)   return res.status(400).json({ error: 'Teacher is required' });
+  try {
+    const [teacher] = await db.query('SELECT fullname FROM users WHERE id=?', [teacher_id]);
+    const adviser = teacher[0]?.fullname || '';
+    await db.query('INSERT INTO sections (name, grade, adviser, user_id) VALUES (?,?,?,?)', [name.trim(), grade||null, adviser, teacher_id]);
+    res.json({ message: 'Section created!' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+app.put('/api/admin/sections/:id', requireAdmin, async (req, res) => {
+  const { name, grade, teacher_id } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Section name is required' });
+  try {
+    const [teacher] = await db.query('SELECT fullname FROM users WHERE id=?', [teacher_id]);
+    const adviser = teacher[0]?.fullname || '';
+    await db.query('UPDATE sections SET name=?, grade=?, adviser=?, user_id=? WHERE id=?', [name.trim(), grade||null, adviser, teacher_id, req.params.id]);
+    res.json({ message: 'Section updated!' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+app.delete('/api/admin/sections/:id', requireAdmin, async (req, res) => {
+  try {
+    await db.query('DELETE FROM sections WHERE id=?', [req.params.id]);
+    res.json({ message: 'Section deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -560,33 +592,9 @@ app.get('/api/sections', async (req, res) => {
     res.json(all);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
-app.post('/api/sections', async (req, res) => {
-  const { name, grade, adviser } = req.body;
-  const user = getUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  try {
-    await db.query('INSERT INTO sections (name, grade, adviser, user_id) VALUES (?, ?, ?, ?)', [name, grade, adviser, user.id]);
-    await logActivity(user.id, user.fullname, 'CREATE_SECTION', `Created section: ${name}`, req.body.platform||'web');
-    res.json({ message: 'Section added!' });
-  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
-});
-app.put('/api/sections/:id', async (req, res) => {
-  const { name, grade, adviser } = req.body;
-  const user = getUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  try {
-    await db.query('UPDATE sections SET name=?, grade=?, adviser=? WHERE id=? AND user_id=?', [name, grade, adviser, req.params.id, user.id]);
-    res.json({ message: 'Section updated!' });
-  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
-});
-app.delete('/api/sections/:id', async (req, res) => {
-  const user = getUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  try {
-    await db.query('DELETE FROM sections WHERE id=? AND user_id=?', [req.params.id, user.id]);
-    res.json({ message: 'Section deleted!' });
-  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
-});
+app.post('/api/sections',    async (req, res) => res.status(403).json({ error: 'Sections are managed by admin' }));
+app.put('/api/sections/:id', async (req, res) => res.status(403).json({ error: 'Sections are managed by admin' }));
+app.delete('/api/sections/:id', async (req, res) => res.status(403).json({ error: 'Sections are managed by admin' }));
 
 // ===========================
 // STUDENTS ROUTES
