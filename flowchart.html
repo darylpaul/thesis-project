@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Procedural Flow</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 24px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #222;
+      letter-spacing: 1px;
+    }
+    .chart-wrapper {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 24px;
+      overflow-x: auto;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>SYSTEM PROCEDURAL FLOW</h1>
+  <div class="chart-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START([START]) --> OpenApp[Open Application /\nWeb System]
+    OpenApp --> Login[/Login\nEnter username and password/]
+    Login --> CredsValid{Credentials\nValid?}
+    CredsValid -- NO --> DisplayError[Display Error\nMessage]
+    DisplayError --> Login
+    CredsValid -- YES --> DetermineRole{Determine User Role\nTeacher or Admin}
+
+    %% ── TEACHER PATH ──────────────────────────────────────────────
+    DetermineRole -- TEACHER --> TeacherDash[Teacher Dashboard]
+
+    TeacherDash --> AIEmotion[AI Emotion &\nBehavior Detection]
+    AIEmotion --> DisplayAI[/Display AI Result/]
+
+    TeacherDash --> ScanExam[/Scan Exam Paper or\nUpload Exam Document/]
+    ScanExam --> OCRProcess[OCR Processing]
+    OCRProcess --> DisplayOCR[/Display OCR Result/]
+    DisplayOCR --> LowOCR{Low OCR\nConfidence\nDetected?}
+
+    LowOCR -- YES --> HighlightUnread[/Highlight Unreadable\nAnswer - Manual Review/]
+    HighlightUnread --> ReviewTexts
+
+    LowOCR -- NO --> ReviewTexts[Review texts]
+    ReviewTexts --> ExtractedCorrect{Is Extracted\nText Correct?}
+
+    ExtractedCorrect -- NO --> ReviewTexts
+    ExtractedCorrect -- YES --> VerifyText[Verify Text]
+    VerifyText --> AutoCheck[Automated Answer\nChecking]
+    AutoCheck --> GenScore[Generate Student\nScore]
+    GenScore --> SaveDB[(Save Result /\nChanges to Database)]
+
+    SaveDB --> DisplayScore[/Display Student\nScore/]
+    DisplayScore --> GenReportQ{Generate\nReport?}
+    GenReportQ -- YES --> GenReport[Generate Report]
+    GenReport --> DisplayReport[/Display Report/]
+    DisplayReport --> Logout[Logout]
+    GenReportQ -- NO --> Logout
+
+    %% ── ADMIN PATH ────────────────────────────────────────────────
+    DetermineRole -- ADMIN --> AdminDash[Admin Dashboard]
+    AdminDash --> SelectModule{Select Module?}
+
+    SelectModule -- Student Records --> ViewStudentRec[View Student\nRecords]
+    ViewStudentRec --> ViewStudentScore[View Student\nScores]
+    ViewStudentScore --> Reports[Reports]
+    Reports --> ViewReports[View Reports]
+    ViewReports --> PrintReports[/Print Reports/]
+    PrintReports --> Logout
+
+    SelectModule -- Exam Management --> ViewExamQ[View Exam\nQuestionnaire]
+    ViewExamQ --> ModifyExamQ[Modify Exam\nQuestionnaire]
+    ModifyExamQ --> SaveDB
+
+    SelectModule -- User Management --> ViewTeachers[View Teachers\nAccounts]
+    ViewTeachers --> ModifyUser[Modify Username /\nPassword]
+    ModifyUser --> DeleteTeachers[Delete Teachers\nAccounts]
+    DeleteTeachers --> Logout
+
+    Logout --> END([END])
+
+    %% ── STYLES ────────────────────────────────────────────────────
+    classDef terminal fill:#fff,stroke:#000,stroke-width:2px,rx:40,ry:40
+    classDef process  fill:#fff,stroke:#000,stroke-width:1.5px
+    classDef decision fill:#fff,stroke:#000,stroke-width:1.5px
+    classDef io       fill:#fff,stroke:#000,stroke-width:1.5px
+    classDef database fill:#fff,stroke:#000,stroke-width:1.5px
+
+    class START,END terminal
+    class OpenApp,TeacherDash,AdminDash,ReviewTexts,OCRProcess,VerifyText,AutoCheck,GenScore,Reports,ViewStudentRec,ViewStudentScore,ViewReports,ViewExamQ,ModifyExamQ,ViewTeachers,ModifyUser,DeleteTeachers,GenReport,Logout,AIEmotion,DisplayError process
+    class CredsValid,DetermineRole,LowOCR,ExtractedCorrect,GenReportQ,SelectModule decision
+    class Login,ScanExam,DisplayOCR,HighlightUnread,DisplayScore,DisplayReport,PrintReports,DisplayAI io
+    class SaveDB database
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#ffffff',
+        primaryTextColor: '#000000',
+        primaryBorderColor: '#000000',
+        lineColor: '#000000',
+        secondaryColor: '#ffffff',
+        tertiaryColor: '#ffffff',
+        fontSize: '14px'
+      },
+      flowchart: {
+        curve: 'linear',
+        nodeSpacing: 40,
+        rankSpacing: 50,
+        padding: 15
+      }
+    });
+  </script>
+</body>
+</html>

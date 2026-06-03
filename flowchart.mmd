@@ -1,0 +1,57 @@
+flowchart TD
+    START([START]) --> OpenApp[Open Application /\nWeb System]
+    OpenApp --> Login[/Login\nEnter username and password/]
+    Login --> CredsValid{Credentials\nValid?}
+    CredsValid -- NO --> DisplayError[Display Error\nMessage]
+    DisplayError --> Login
+    CredsValid -- YES --> DetermineRole{Determine User Role\nTeacher or Admin}
+
+    DetermineRole -- TEACHER --> TeacherDash[Teacher Dashboard]
+
+    TeacherDash --> AIEmotion[AI Emotion &\nBehavior Detection]
+    AIEmotion --> DisplayAI[/Display AI Result/]
+
+    TeacherDash --> ScanExam[/Scan Exam Paper or\nUpload Exam Document/]
+    ScanExam --> OCRProcess[OCR Processing]
+    OCRProcess --> DisplayOCR[/Display OCR Result/]
+    DisplayOCR --> LowOCR{Low OCR\nConfidence\nDetected?}
+
+    LowOCR -- YES --> HighlightUnread[/Highlight Unreadable\nAnswer - Manual Review/]
+    HighlightUnread --> ReviewTexts
+
+    LowOCR -- NO --> ReviewTexts[Review texts]
+    ReviewTexts --> ExtractedCorrect{Is Extracted\nText Correct?}
+
+    ExtractedCorrect -- NO --> ReviewTexts
+    ExtractedCorrect -- YES --> VerifyText[Verify Text]
+    VerifyText --> AutoCheck[Automated Answer\nChecking]
+    AutoCheck --> GenScore[Generate Student\nScore]
+    GenScore --> SaveDB[(Save Result /\nChanges to Database)]
+
+    SaveDB --> DisplayScore[/Display Student\nScore/]
+    DisplayScore --> GenReportQ{Generate\nReport?}
+    GenReportQ -- YES --> GenReport[Generate Report]
+    GenReport --> DisplayReport[/Display Report/]
+    DisplayReport --> Logout[Logout]
+    GenReportQ -- NO --> Logout
+
+    DetermineRole -- ADMIN --> AdminDash[Admin Dashboard]
+    AdminDash --> SelectModule{Select Module?}
+
+    SelectModule -- Student Records --> ViewStudentRec[View Student\nRecords]
+    ViewStudentRec --> ViewStudentScore[View Student\nScores]
+    ViewStudentScore --> Reports[Reports]
+    Reports --> ViewReports[View Reports]
+    ViewReports --> PrintReports[/Print Reports/]
+    PrintReports --> Logout
+
+    SelectModule -- Exam Management --> ViewExamQ[View Exam\nQuestionnaire]
+    ViewExamQ --> ModifyExamQ[Modify Exam\nQuestionnaire]
+    ModifyExamQ --> SaveDB
+
+    SelectModule -- User Management --> ViewTeachers[View Teachers\nAccounts]
+    ViewTeachers --> ModifyUser[Modify Username /\nPassword]
+    ModifyUser --> DeleteTeachers[Delete Teachers\nAccounts]
+    DeleteTeachers --> Logout
+
+    Logout --> END([END])

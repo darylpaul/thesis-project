@@ -71,10 +71,10 @@ export class ApiService {
 
   // ── Questionnaires ────────────────────────────────────
   getQuestionnaires(sectionId?: number, subjectId?: number) {
-    let url = `${BASE}/questionnaires`;
-    if (sectionId && subjectId) {
-      url += `?section_id=${sectionId}&subject_id=${subjectId}`;
-    }
+    const params: string[] = [];
+    if (sectionId) params.push(`section_id=${sectionId}`);
+    if (subjectId) params.push(`subject_id=${subjectId}`);
+    const url = `${BASE}/questionnaires${params.length ? '?' + params.join('&') : ''}`;
     return this.http.get(url, { headers: this.headers() });
   }
   getQuestionnaire(id: number) {
@@ -95,10 +95,10 @@ export class ApiService {
 
   // ── Answer Keys ───────────────────────────────────────
   getAnswerKeys(sectionId?: number, subjectId?: number) {
-    let url = `${BASE}/answerkeys`;
-    if (sectionId && subjectId) {
-      url += `?section_id=${sectionId}&subject_id=${subjectId}`;
-    }
+    const params: string[] = [];
+    if (sectionId) params.push(`section_id=${sectionId}`);
+    if (subjectId) params.push(`subject_id=${subjectId}`);
+    const url = `${BASE}/answerkeys${params.length ? '?' + params.join('&') : ''}`;
     return this.http.get(url, { headers: this.headers() });
   }
   addAnswerKey(data: object) {
