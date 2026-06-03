@@ -89,6 +89,9 @@ export class ApiService {
   deleteQuestionnaire(id: number) {
     return this.http.delete(`${BASE}/questionnaires/${id}`, { headers: this.headers() });
   }
+  duplicateQuestionnaire(id: number) {
+    return this.http.post(`${BASE}/questionnaires/${id}/duplicate`, {}, { headers: this.headers() });
+  }
 
   // ── Answer Keys ───────────────────────────────────────
   getAnswerKeys(sectionId?: number, subjectId?: number) {

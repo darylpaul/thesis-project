@@ -12,7 +12,7 @@ import { addIcons } from 'ionicons';
 import {
   addOutline, arrowBackOutline, documentTextOutline, createOutline,
   trashOutline, downloadOutline, cloudUploadOutline, informationCircleOutline,
-  libraryOutline, checkmarkCircleOutline
+  libraryOutline, checkmarkCircleOutline, copyOutline
 } from 'ionicons/icons';
 import { ApiService } from '../../services/api';
 import { AuthDeleteService } from '../../services/auth-delete.service';
@@ -79,7 +79,7 @@ export class QuestionnairesPage implements OnInit {
     addIcons({
       addOutline, arrowBackOutline, documentTextOutline, createOutline,
       trashOutline, downloadOutline, cloudUploadOutline, informationCircleOutline,
-      libraryOutline, checkmarkCircleOutline
+      libraryOutline, checkmarkCircleOutline, copyOutline
     });
   }
 
@@ -329,9 +329,27 @@ export class QuestionnairesPage implements OnInit {
   }
   delete(id: number) {
     this.api.deleteQuestionnaire(id).subscribe({
-      next: () => { this.load(); this.toast('Questionnaire deleted', 'success'); },
+      next: () => { this.load(); this.toast('Questionnaire moved to archive', 'success'); },
       error: () => this.toast('Could not delete', 'danger')
     });
+  }
+
+  // ── Duplicate ─────────────────────────────────────────
+  async duplicateQuestionnaire(q: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Duplicate',
+      message: `Create a copy of "${q.title}"?`,
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        { text: 'Duplicate', handler: () => {
+          this.api.duplicateQuestionnaire(q.id).subscribe({
+            next: () => { this.load(); this.toast(`"${q.title} (Copy)" created!`, 'success'); },
+            error: () => this.toast('Could not duplicate', 'danger')
+          });
+        }}
+      ]
+    });
+    await alert.present();
   }
 
   // ── Save Question to Test Bank ────────────────────────

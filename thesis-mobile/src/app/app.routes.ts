@@ -13,5 +13,5 @@ export const routes: Routes = [
   { path: 'records', loadComponent: () => import('./pages/records/records.page').then(m => m.RecordsPage) },
   { path: 'print', loadComponent: () => import('./pages/print/print.page').then(m => m.PrintPage) },
   { path: 'scan', loadComponent: () => import('./pages/scan/scan.page').then(m => m.ScanPage) },
-  { path: 'test-bank', loadComponent: () => import('./pages/test-bank/test-bank.page').then(m => m.TestBankPage) }
+  { path: 'test-bank', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

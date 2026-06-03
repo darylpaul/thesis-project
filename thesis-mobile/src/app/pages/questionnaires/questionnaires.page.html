@@ -68,10 +68,14 @@
         <button class="action-btn edit" (click)="openEditModal(q); $event.stopPropagation()" title="Edit">
           <ion-icon name="create-outline"></ion-icon>
         </button>
-        <button class="action-btn export" (click)="exportQuestionnaire(q); $event.stopPropagation()">
+        <button class="action-btn export" (click)="exportQuestionnaire(q); $event.stopPropagation()" title="Export">
           <ion-icon name="download-outline"></ion-icon>
         </button>
-        <button class="action-btn delete" (click)="confirmDelete(q); $event.stopPropagation()">
+        <button class="action-btn" style="background:#f0fdf4;color:#16a34a;"
+          (click)="duplicateQuestionnaire(q); $event.stopPropagation()" title="Duplicate">
+          <ion-icon name="copy-outline"></ion-icon>
+        </button>
+        <button class="action-btn delete" (click)="confirmDelete(q); $event.stopPropagation()" title="Delete">
           <ion-icon name="trash-outline"></ion-icon>
         </button>
       </div>
