@@ -158,7 +158,13 @@ function createQCard(q, i) {
   card.querySelector('.btn-icon.edit-btn').addEventListener('click',      () => openEditModal(q));
   card.querySelector('.btn-icon.duplicate-btn').addEventListener('click', () => duplicateQuestionnaire(q));
   card.querySelector('.btn-icon.export-btn').addEventListener('click',    () => exportJSON(q));
-  card.querySelector('.btn-icon.delete').addEventListener('click',        () => openDeleteModal(q));
+  card.querySelector('.btn-icon.delete').addEventListener('click',        () => {
+    requireAuthThenDelete(
+      q.title || 'this questionnaire',
+      'questionnaires', q.id, q,
+      () => { showToast('Questionnaire deleted.', 'success'); renderQuestionnaires(); }
+    );
+  });
   return card;
 }
 
@@ -607,23 +613,6 @@ async function duplicateQuestionnaire(q) {
 }
 
 // ===========================
-let deleteId = null;
-let deleteQ  = null;
-const deleteOverlay = document.getElementById('deleteOverlay');
-
-function openDeleteModal(q) { deleteId = q.id; deleteQ = q; document.getElementById('deleteQName').textContent = q.title; deleteOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeDeleteModal() { deleteOverlay.classList.remove('open'); document.body.style.overflow = ''; }
-
-document.getElementById('deleteClose').addEventListener('click', closeDeleteModal);
-document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
-deleteOverlay.addEventListener('click', e => { if (e.target === deleteOverlay) closeDeleteModal(); });
-document.getElementById('deleteConfirmBtn').addEventListener('click', () => {
-  requireAuthThenDelete(
-    (deleteQ && deleteQ.title ? deleteQ.title : 'this questionnaire'),
-    'questionnaires', deleteId, deleteQ,
-    () => { showToast('Questionnaire archived.', 'success'); closeDeleteModal(); renderQuestionnaires(); deleteId = null; deleteQ = null; }
-  );
-});
 
 // ===========================
 // EXPORT
