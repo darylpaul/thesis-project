@@ -638,6 +638,8 @@ app.post('/api/students', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
+    const [owned] = await db.query('SELECT id FROM sections WHERE id=? AND user_id=?', [section_id, user.id]);
+    if (!owned.length) return res.status(403).json({ error: 'You can only add students to your own sections.' });
     await db.query('INSERT INTO students (first_name, last_name, student_id, section_id, gender, user_id) VALUES (?,?,?,?,?,?)', [first_name, last_name, student_id, section_id, gender || null, user.id]);
     await logActivity(user.id, user.fullname, 'CREATE_STUDENT', `Added student: ${first_name} ${last_name}`, req.body.platform||'web');
     res.json({ message: 'Student added!' });

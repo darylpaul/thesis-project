@@ -50,7 +50,8 @@ export class StudentsPage implements OnInit {
   }
 
   ngOnInit() {
-    this.api.getSections().subscribe({ next: (d: any) => this.sections = d });
+    // Only own sections (not subject-assigned) can have students added
+    this.api.getSections().subscribe({ next: (d: any) => this.sections = (d || []).filter((s: any) => !s.is_assigned) });
     this.loadStudents();
   }
 

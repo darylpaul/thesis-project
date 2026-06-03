@@ -43,10 +43,13 @@ async function populateSectionDropdowns() {
       opt1.textContent = sec.name;
       filterSelect.appendChild(opt1);
 
-      const opt2 = document.createElement('option');
-      opt2.value = sec.id;
-      opt2.textContent = sec.name;
-      modalSection.appendChild(opt2);
+      // Only own sections (not subject-assigned) can have students added
+      if (!sec.is_assigned) {
+        const opt2 = document.createElement('option');
+        opt2.value = sec.id;
+        opt2.textContent = sec.name;
+        modalSection.appendChild(opt2);
+      }
     });
   } catch (err) {
     showToast('Could not load sections.', 'error');
