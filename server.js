@@ -39,12 +39,8 @@ app.use(cors({
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
   await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
   await migrate(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
-  // Cleanup: nullify references then delete teacher-created subjects
-  await migrate(`UPDATE questionnaires q JOIN subjects s ON q.subject_id=s.id JOIN users u ON s.user_id=u.id SET q.subject_id=NULL WHERE u.role!='admin'`);
-  await migrate(`UPDATE answerkeys a JOIN subjects s ON a.subject_id=s.id JOIN users u ON s.user_id=u.id SET a.subject_id=NULL WHERE u.role!='admin'`);
-  await migrate(`DELETE subjects FROM subjects JOIN users ON subjects.user_id=users.id WHERE users.role!='admin'`);
   // Un-archive all questionnaires so nothing is hidden
-  await migrate(`UPDATE questionnaires SET is_archived=0, archived_at=NULL, archived_by_name=NULL WHERE is_archived=1`);
+  await migrate(`UPDATE questionnaires SET is_archived=0, archived_at=NULL, archived_by_name=NULL`);
 })();
 
 // ===========================
@@ -717,7 +713,7 @@ app.get('/api/questionnaires', async (req, res) => {
   const userQ = getUser(req);
   if (!userQ) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
+    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE 1=1`;
     let query = base + ` ORDER BY questionnaires.title ASC`;
     let params = [];
     if (req.query.section_id && req.query.subject_id) {
@@ -733,6 +729,14 @@ app.get('/api/questionnaires', async (req, res) => {
     const [rows] = await db.query(query, params);
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// Temporary debug: show ALL questionnaires raw
+app.get('/api/debug/questionnaires', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(`SELECT id, title, section_id, subject_id, user_id, is_archived, archived_at FROM questionnaires ORDER BY id DESC`);
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // Archived questionnaires — must be BEFORE /:id route
@@ -842,7 +846,7 @@ app.get('/api/answerkeys', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id LEFT JOIN questionnaires ON answerkeys.questionnaire_id=questionnaires.id WHERE (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0)`;
+    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE 1=1`;
     let query = akBase + ` ORDER BY answerkeys.title ASC`;
     let params = [];
     if (req.query.section_id && req.query.subject_id) {
