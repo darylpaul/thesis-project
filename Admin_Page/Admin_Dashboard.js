@@ -47,7 +47,7 @@ document.querySelectorAll('.sidebar-btn').forEach(btn => {
     if (btn.dataset.tab === 'teachers')    loadTeachers();
     if (btn.dataset.tab === 'logs')        loadAllLogs();
     if (btn.dataset.tab === 'archive')     loadArchive();
-    if (btn.dataset.tab === 'testbank')    loadTestBank();
+    if (btn.dataset.tab === 'testbank')    loadQArchive();
     if (btn.dataset.tab === 'assignments') loadAssignments();
   });
 });
@@ -242,11 +242,7 @@ async function loadStats() {
     document.getElementById('stat-records').textContent            = data.records;
     document.getElementById('stat-sections').textContent           = data.sections;
     document.getElementById('stat-students').textContent           = data.students;
-    document.getElementById('stat-pending-testbank').textContent   = data.pending_testbank ?? '0';
-    // Highlight pending card if there are items waiting
-    if (data.pending_testbank > 0) {
-      document.getElementById('pendingBankCard').style.outline = '2px solid #f59e0b';
-    }
+    document.getElementById('stat-pending-testbank').textContent   = data.archived_exams ?? '0';
   } catch { console.error('Could not load stats'); }
 }
 
@@ -608,26 +604,27 @@ document.getElementById('deleteConfirmBtn').addEventListener('click', async () =
 });
 
 // ═══════════════════════════════════════
-// TEST BANK / ARCHIVE TAB
+// TEST BANK / QUESTIONNAIRE ARCHIVE TAB
 // ═══════════════════════════════════════
-let allArchiveData = [];
+let allQArchiveData = [];
 
-async function loadArchive() {
-  const list = document.getElementById('archiveList');
+async function loadQArchive() {
+  const list = document.getElementById('qArchiveList');
+  if (!list) return;
   list.innerHTML = '<div style="text-align:center;padding:24px;color:#9ca3af;">Loading...</div>';
   try {
     const res = await fetch(`${API}/questionnaires/archived/list`, { headers });
-    allArchiveData = await res.json();
-    filterArchive();
+    allQArchiveData = await res.json();
+    filterQArchive();
   } catch {
     list.innerHTML = '<div style="text-align:center;padding:24px;color:#dc2626;">Could not load archive.</div>';
   }
 }
 
-function filterArchive() {
-  const search = (document.getElementById('archiveSearch')?.value || '').toLowerCase();
-  const type   = document.getElementById('archiveTypeFilter')?.value || '';
-  let filtered = allArchiveData;
+function filterQArchive() {
+  const search = (document.getElementById('qArchiveSearch')?.value || '').toLowerCase();
+  const type   = document.getElementById('qArchiveTypeFilter')?.value || '';
+  let filtered = allQArchiveData;
   if (type)   filtered = filtered.filter(q => q.type === type);
   if (search) filtered = filtered.filter(q =>
     (q.title||'').toLowerCase().includes(search) ||
@@ -635,11 +632,12 @@ function filterArchive() {
     (q.subject_name||'').toLowerCase().includes(search) ||
     (q.archived_by_name||'').toLowerCase().includes(search)
   );
-  renderArchive(filtered);
+  renderQArchive(filtered);
 }
 
-function renderArchive(data) {
-  const list = document.getElementById('archiveList');
+function renderQArchive(data) {
+  const list = document.getElementById('qArchiveList');
+  if (!list) return;
   if (!data.length) {
     list.innerHTML = '<div style="text-align:center;padding:48px;color:#9ca3af;">No archived exams found.</div>';
     return;
@@ -666,15 +664,15 @@ function renderArchive(data) {
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
                   <button onclick="archiveView(${q.id})"
                     style="padding:5px 10px;background:#eff6ff;color:#2563eb;border:1.5px solid #bfdbfe;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
-                    👁 View
+                    View
                   </button>
                   <button onclick="archiveRestore(${q.id},'${escHtml(q.title).replace(/'/g,'')}')"
                     style="padding:5px 10px;background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
-                    ↩ Restore
+                    Restore
                   </button>
                   <button onclick="archiveDelete(${q.id},'${escHtml(q.title).replace(/'/g,'')}')"
                     style="padding:5px 10px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
-                    🗑 Delete
+                    Delete
                   </button>
                 </div>
               </td>
@@ -689,15 +687,15 @@ function renderArchive(data) {
 }
 
 function archiveView(id) {
-  const q = allArchiveData.find(x => x.id === id);
+  const q = allQArchiveData.find(x => x.id === id);
   if (!q) return;
   document.getElementById('archiveViewTitle').textContent = q.title;
   let parts = [];
   try { parts = JSON.parse(q.questions); } catch {}
   const partLabels = { multiple_choice:'Multiple Choice', true_false:'True or False', identification:'Identification', essay:'Essay' };
   let html = `<div style="font-size:12px;color:#6b7280;margin-bottom:12px;">
-    <strong>Section:</strong> ${escHtml(q.section_name||'—')} &nbsp;·&nbsp;
-    <strong>Subject:</strong> ${escHtml(q.subject_name||'—')} &nbsp;·&nbsp;
+    <strong>Section:</strong> ${escHtml(q.section_name||'—')} &nbsp;&middot;&nbsp;
+    <strong>Subject:</strong> ${escHtml(q.subject_name||'—')} &nbsp;&middot;&nbsp;
     <strong>Type:</strong> ${escHtml(q.type)}
   </div>`;
   if (parts.length && parts[0].questions) {
@@ -725,7 +723,7 @@ async function archiveRestore(id, title) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     showToast(`"${title}" restored successfully.`, 'success');
-    loadArchive(); loadStats();
+    loadQArchive(); loadStats();
   } catch (err) { showToast(err.message || 'Could not restore.', 'error'); }
 }
 
@@ -736,12 +734,11 @@ async function archiveDelete(id, title) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     showToast(`"${title}" permanently deleted.`, 'success');
-    loadArchive(); loadStats();
+    loadQArchive(); loadStats();
   } catch (err) { showToast(err.message || 'Could not delete.', 'error'); }
 }
 
-// Keep loadTestBank as alias so tab-switch still works
-function loadTestBank() { loadArchive(); }
+function loadTestBank() { loadQArchive(); }
 
 // ═══════════════════════════════════════
 // SECTION ASSIGNMENTS

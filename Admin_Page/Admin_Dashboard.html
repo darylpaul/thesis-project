@@ -89,7 +89,7 @@
             <div class="stat-num" id="stat-students">—</div>
             <div class="stat-label">Students</div>
           </div>
-          <div class="stat-card amber" id="pendingBankCard" style="cursor:pointer;" onclick="document.querySelector('[data-tab=testbank]').click()">
+          <div class="stat-card amber" id="pendingBankCard" style="cursor:pointer;" onclick="document.querySelector('[data-tab=\'testbank\']').click()">
             <div class="stat-icon">🗄️</div>
             <div class="stat-num" id="stat-pending-testbank">—</div>
             <div class="stat-label">Archived Exams</div>
@@ -268,10 +268,10 @@
         </div>
         <div class="section-card">
           <div class="logs-filters">
-            <input type="text" id="archiveSearch" placeholder="🔍 Search archived exams..."
+            <input type="text" id="qArchiveSearch" placeholder="🔍 Search archived exams..."
               style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;outline:none;flex:1;min-width:200px;"
-              oninput="filterArchive()" />
-            <select id="archiveTypeFilter" onchange="filterArchive()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;">
+              oninput="filterQArchive()" />
+            <select id="qArchiveTypeFilter" onchange="filterQArchive()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;">
               <option value="">All Types</option>
               <option value="Quiz">Quiz</option>
               <option value="Exam">Exam</option>
@@ -279,7 +279,7 @@
               <option value="Seatwork">Seatwork</option>
             </select>
           </div>
-          <div id="archiveList">
+          <div id="qArchiveList">
             <div style="text-align:center;padding:48px;color:#9ca3af;">Click the Test Bank tab to load archived exams.</div>
           </div>
         </div>
