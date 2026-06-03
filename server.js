@@ -433,9 +433,43 @@ app.delete('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
     );
 
     await db.query('DELETE FROM users WHERE id = ? AND role = "teacher"', [req.params.id]);
+
+    // Reassign orphaned sections to admin so they stay visible
+    const [adminRows] = await db.query('SELECT id, fullname FROM users WHERE role="admin" LIMIT 1');
+    if (adminRows.length) {
+      const admin = adminRows[0];
+      await db.query('UPDATE sections SET user_id=?, adviser=? WHERE user_id=?', [admin.id, admin.fullname, teacher.id]);
+    }
+
     if (adminUser) await logActivity(adminUser.id, adminUser.fullname, 'DELETE_TEACHER',
       `Archived teacher: ${teacher.fullname}`, 'web');
     res.json({ message: 'Teacher archived!' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+// Reassign all sections and assignments from one teacher to another
+app.put('/api/admin/teachers/:id/reassign', requireAdmin, async (req, res) => {
+  const { new_teacher_id } = req.body;
+  if (!new_teacher_id) return res.status(400).json({ error: 'new_teacher_id is required' });
+  const adminUser = getUser(req);
+  try {
+    const [oldRows] = await db.query('SELECT fullname FROM users WHERE id=? AND role="teacher"', [req.params.id]);
+    const [newRows] = await db.query('SELECT fullname FROM users WHERE id=? AND role="teacher"', [new_teacher_id]);
+    if (!oldRows.length) return res.status(404).json({ error: 'Teacher not found' });
+    if (!newRows.length) return res.status(404).json({ error: 'Replacement teacher not found' });
+
+    const newName = newRows[0].fullname;
+
+    // Transfer advisory sections
+    await db.query('UPDATE sections SET user_id=?, adviser=? WHERE user_id=?', [new_teacher_id, newName, req.params.id]);
+    // Transfer subject-teacher assignments
+    await db.query('UPDATE section_teachers SET teacher_id=? WHERE teacher_id=?', [new_teacher_id, req.params.id]);
+    // Transfer student ownership
+    await db.query('UPDATE students SET user_id=? WHERE user_id=?', [new_teacher_id, req.params.id]);
+
+    await logActivity(adminUser.id, adminUser.fullname, 'REASSIGN_TEACHER',
+      `Reassigned from ${oldRows[0].fullname} to ${newName}`, 'web');
+    res.json({ message: `All sections and assignments transferred to ${newName}!` });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 

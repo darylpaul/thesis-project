@@ -468,6 +468,7 @@ function renderTeachers(teachers) {
       <td class="actions-cell">
         <button class="btn-view-logs" onclick="viewTeacherLogs(${t.id}, '${t.fullname}')">📋 Logs</button>
         <button class="btn-reset" onclick="openResetModal(${t.id}, '${t.fullname}')">🔑 Reset</button>
+        <button class="btn-reassign" onclick="openReassignModal(${t.id}, '${escHtml(t.fullname)}')">🔄 Reassign</button>
         <button class="btn-del" onclick="openDeleteModal(${t.id}, '${t.fullname}')">🗑️</button>
       </td>
     </tr>`).join('');
@@ -707,6 +708,52 @@ document.getElementById('deleteConfirmBtn').addEventListener('click', async () =
     }
   } catch { showToast('Could not delete teacher.', 'error'); }
   deleteTeacherId = null;
+});
+
+// ═══════════════════════════════════════
+// REASSIGN TEACHER
+// ═══════════════════════════════════════
+let reassignFromId   = null;
+let reassignFromName = '';
+
+function openReassignModal(id, name) {
+  reassignFromId   = id;
+  reassignFromName = name;
+  document.getElementById('reassignFromName').textContent = name;
+  const sel = document.getElementById('reassignToTeacher');
+  sel.innerHTML = '<option value="">Select replacement teacher...</option>' +
+    teachersData
+      .filter(t => t.id !== id)
+      .map(t => `<option value="${t.id}">${escHtml(t.fullname)}</option>`)
+      .join('');
+  document.getElementById('reassignOverlay').style.display = 'flex';
+}
+
+document.getElementById('reassignCancelBtn').addEventListener('click', () => {
+  document.getElementById('reassignOverlay').style.display = 'none';
+  reassignFromId = null;
+});
+
+document.getElementById('reassignConfirmBtn').addEventListener('click', async () => {
+  const newId = document.getElementById('reassignToTeacher').value;
+  if (!newId) { showToast('Please select a replacement teacher.', 'error'); return; }
+  const btn = document.getElementById('reassignConfirmBtn');
+  btn.disabled = true; btn.textContent = 'Transferring...';
+  try {
+    const res  = await fetch(`${API}/admin/teachers/${reassignFromId}/reassign`, {
+      method: 'PUT', headers, body: JSON.stringify({ new_teacher_id: newId })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('reassignOverlay').style.display = 'none';
+      showToast(data.message || 'Reassigned successfully!', 'success');
+      loadTeachers();
+      loadAdminSections();
+    } else {
+      showToast(data.error || 'Could not reassign.', 'error');
+    }
+  } catch { showToast('Server error.', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Confirm Reassign'; reassignFromId = null; }
 });
 
 // ═══════════════════════════════════════

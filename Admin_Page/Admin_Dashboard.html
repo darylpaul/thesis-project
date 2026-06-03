@@ -536,6 +536,22 @@
     </div>
   </div>
 
+  <!-- REASSIGN TEACHER MODAL -->
+  <div class="modal-overlay" id="reassignOverlay">
+    <div class="modal-box">
+      <h3>🔄 Reassign Teacher</h3>
+      <p>Transfer all sections, assignments, and students from <strong id="reassignFromName"></strong> to another teacher.</p>
+      <div class="field-group" style="margin:16px 0;">
+        <label class="field-label">Replacement Teacher *</label>
+        <select class="field-input" id="reassignToTeacher"></select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="reassignCancelBtn">Cancel</button>
+        <button class="btn-save" id="reassignConfirmBtn">Confirm Reassign</button>
+      </div>
+    </div>
+  </div>
+
   <!-- DELETE TEACHER MODAL -->
   <div class="modal-overlay" id="deleteOverlay">
     <div class="modal-box">
