@@ -358,16 +358,18 @@ app.get('/api/teacher/stats', async (req, res) => {
 // ADMIN — STATS
 // ===========================
 app.get('/api/admin/stats', requireAdmin, async (req, res) => {
-  try {
-    const [[teachers]]        = await db.query('SELECT COUNT(*) as count FROM users WHERE role = "teacher"');
-    const [[questionnaires]]  = await db.query('SELECT COUNT(*) as count FROM questionnaires');
-    const [[answerkeys]]      = await db.query('SELECT COUNT(*) as count FROM answerkeys');
-    const [[records]]         = await db.query('SELECT COUNT(*) as count FROM records');
-    const [[sections]]        = await db.query('SELECT COUNT(*) as count FROM sections');
-    const [[students]]        = await db.query('SELECT COUNT(*) as count FROM students');
-    const [[archived]]        = await db.query('SELECT COUNT(*) as count FROM questionnaires WHERE is_archived=1');
-    res.json({ teachers: teachers.count, questionnaires: questionnaires.count, answerkeys: answerkeys.count, records: records.count, sections: sections.count, students: students.count, archived_exams: archived.count });
-  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+  const count = async (sql) => {
+    try { const [[r]] = await db.query(sql); return r?.count ?? 0; }
+    catch { return 0; }
+  };
+  const teachers       = await count('SELECT COUNT(*) as count FROM users WHERE role = "teacher"');
+  const questionnaires = await count('SELECT COUNT(*) as count FROM questionnaires');
+  const answerkeys     = await count('SELECT COUNT(*) as count FROM answerkeys');
+  const records        = await count('SELECT COUNT(*) as count FROM records');
+  const sections       = await count('SELECT COUNT(*) as count FROM sections');
+  const students       = await count('SELECT COUNT(*) as count FROM students');
+  const archived_exams = await count('SELECT COUNT(*) as count FROM questionnaires WHERE is_archived=1');
+  res.json({ teachers, questionnaires, answerkeys, records, sections, students, archived_exams });
 });
 
 // ===========================

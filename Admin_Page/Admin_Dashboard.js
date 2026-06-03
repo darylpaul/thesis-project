@@ -340,13 +340,13 @@ async function loadStats() {
   try {
     const res  = await fetch(`${API}/admin/stats`, { headers });
     const data = await res.json();
-    document.getElementById('stat-teachers').textContent           = data.teachers;
-    document.getElementById('stat-questionnaires').textContent     = data.questionnaires;
-    document.getElementById('stat-answerkeys').textContent         = data.answerkeys;
-    document.getElementById('stat-records').textContent            = data.records;
-    document.getElementById('stat-sections').textContent           = data.sections;
-    document.getElementById('stat-students').textContent           = data.students;
-    document.getElementById('stat-pending-testbank').textContent   = data.archived_exams ?? '0';
+    document.getElementById('stat-teachers').textContent           = data.teachers       ?? 0;
+    document.getElementById('stat-questionnaires').textContent     = data.questionnaires  ?? 0;
+    document.getElementById('stat-answerkeys').textContent         = data.answerkeys      ?? 0;
+    document.getElementById('stat-records').textContent            = data.records         ?? 0;
+    document.getElementById('stat-sections').textContent           = data.sections        ?? 0;
+    document.getElementById('stat-students').textContent           = data.students        ?? 0;
+    document.getElementById('stat-pending-testbank').textContent   = data.archived_exams  ?? 0;
   } catch { console.error('Could not load stats'); }
 }
 
