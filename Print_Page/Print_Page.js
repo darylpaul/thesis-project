@@ -316,7 +316,6 @@ tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
 <div id="as-toolbar">
   <span class="tb-label">OCR Answer Sheet · ${escHtml(q.title)}</span>
   <button class="tb-btn tb-btn-print" onclick="window.print()">🖨️ Print</button>
-  <button class="tb-btn tb-btn-pdf" id="tbtnPdf">📥 Save as PDF</button>
 </div>
 
 <!-- PAPER -->
@@ -371,38 +370,6 @@ tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>
-document.getElementById('tbtnPdf').addEventListener('click', function() {
-  var btn     = this;
-  var toolbar = document.getElementById('as-toolbar');
-  var paper   = document.getElementById('as-paper');
-  btn.textContent = '⏳ Generating...';
-  btn.disabled = true;
-  // Collapse toolbar + spacing so html2canvas captures no blank space at top
-  toolbar.style.display = 'none';
-  document.body.style.paddingTop = '0';
-  document.body.style.background  = '#fff';
-  paper.style.margin    = '0';
-  paper.style.boxShadow = 'none';
-  html2pdf().set({
-    margin: 8,
-    filename: 'Answer_Sheet - ${escHtml(q.title)} - ${escHtml(section)}.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  }).from(paper).save().then(function() {
-    // Restore
-    toolbar.style.display           = 'flex';
-    document.body.style.paddingTop  = '56px';
-    document.body.style.background  = '#f3f4f6';
-    paper.style.margin    = '20px auto';
-    paper.style.boxShadow = '0 2px 16px rgba(0,0,0,0.1)';
-    btn.textContent = '📥 Save as PDF';
-    btn.disabled = false;
-  });
-});
-</script>
 </body>
 </html>`);
   win.document.close();
