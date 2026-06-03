@@ -832,8 +832,9 @@ app.put('/api/questionnaires/:id', async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   const { title, type, section_id, subject_id, questions } = req.body;
   try {
-    await db.query('UPDATE questionnaires SET title=?, type=?, section_id=?, subject_id=?, questions=? WHERE id=?',
-      [title, type, section_id, subject_id, questions, req.params.id]);
+    const [result] = await db.query('UPDATE questionnaires SET title=?, type=?, section_id=?, subject_id=?, questions=? WHERE id=? AND user_id=?',
+      [title, type, section_id, subject_id, questions, req.params.id, user.id]);
+    if (result.affectedRows === 0) return res.status(403).json({ error: 'You can only edit your own questionnaires.' });
     await logActivity(user.id, user.fullname, 'UPDATE_QUESTIONNAIRE', `Updated: ${title}`, req.body.platform || 'web');
     res.json({ message: 'Questionnaire updated!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
@@ -842,10 +843,11 @@ app.delete('/api/questionnaires/:id', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    await db.query(
-      'UPDATE questionnaires SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=?',
-      [user.fullname, req.params.id]
+    const [result] = await db.query(
+      'UPDATE questionnaires SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=? AND user_id=?',
+      [user.fullname, req.params.id, user.id]
     );
+    if (result.affectedRows === 0) return res.status(403).json({ error: 'You can only delete your own questionnaires.' });
     await logActivity(user.id, user.fullname, 'ARCHIVE_QUESTIONNAIRE', `Archived ID: ${req.params.id}`, req.body?.platform || 'web');
     res.json({ message: 'Questionnaire moved to archive.' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
