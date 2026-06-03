@@ -132,13 +132,19 @@ function createQCard(q, i) {
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
         </svg>
       </button>
+      <button class="btn-icon duplicate-btn" title="Duplicate">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+      </button>
       <button class="btn-icon export-btn" title="Export JSON">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
       </button>
-      <button class="btn-icon delete" title="Delete">
+      <button class="btn-icon delete" title="Move to Archive">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"/>
           <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -147,10 +153,11 @@ function createQCard(q, i) {
       </button>
     </div>`;
 
-  card.querySelector('.btn-icon.view').addEventListener('click',       () => openViewModal(q));
-  card.querySelector('.btn-icon.edit-btn').addEventListener('click',   () => openEditModal(q));
-  card.querySelector('.btn-icon.export-btn').addEventListener('click', () => exportJSON(q));
-  card.querySelector('.btn-icon.delete').addEventListener('click',     () => openDeleteModal(q));
+  card.querySelector('.btn-icon.view').addEventListener('click',          () => openViewModal(q));
+  card.querySelector('.btn-icon.edit-btn').addEventListener('click',      () => openEditModal(q));
+  card.querySelector('.btn-icon.duplicate-btn').addEventListener('click', () => duplicateQuestionnaire(q));
+  card.querySelector('.btn-icon.export-btn').addEventListener('click',    () => exportJSON(q));
+  card.querySelector('.btn-icon.delete').addEventListener('click',        () => openDeleteModal(q));
   return card;
 }
 
@@ -586,6 +593,25 @@ viewOverlay.addEventListener('click', e => { if (e.target === viewOverlay) { vie
 
 // ===========================
 // DELETE MODAL
+// ===========================
+// DUPLICATE
+// ===========================
+async function duplicateQuestionnaire(q) {
+  if (!confirm(`Duplicate "${q.title}"?\nA copy will be created in the same section and subject.`)) return;
+  try {
+    const res = await fetch(`${API}/questionnaires/${q.id}/duplicate`, {
+      method: 'POST',
+      headers: { 'Authorization': localStorage.getItem('token') }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to duplicate');
+    showToast(`"${q.title} (Copy)" created!`, 'success');
+    renderQuestionnaires();
+  } catch (err) {
+    showToast(err.message || 'Could not duplicate.', 'error');
+  }
+}
+
 // ===========================
 let deleteId = null;
 let deleteQ  = null;

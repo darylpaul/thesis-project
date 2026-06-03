@@ -31,6 +31,17 @@ app.use(cors({
 }));
 
 // ===========================
+// STARTUP MIGRATION
+// ===========================
+(async () => {
+  try {
+    await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS is_archived TINYINT(1) DEFAULT 0`);
+    await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
+    await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
+  } catch (e) { console.log('Migration note:', e.message); }
+})();
+
+// ===========================
 // HELPERS
 // ===========================
 function getUser(req) {
@@ -353,8 +364,8 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
     const [[records]]         = await db.query('SELECT COUNT(*) as count FROM records');
     const [[sections]]        = await db.query('SELECT COUNT(*) as count FROM sections');
     const [[students]]        = await db.query('SELECT COUNT(*) as count FROM students');
-    const [[pending_testbank]]= await db.query('SELECT COUNT(*) as count FROM test_bank WHERE status = "pending"');
-    res.json({ teachers: teachers.count, questionnaires: questionnaires.count, answerkeys: answerkeys.count, records: records.count, sections: sections.count, students: students.count, pending_testbank: pending_testbank.count });
+    const [[archived]]        = await db.query('SELECT COUNT(*) as count FROM questionnaires WHERE is_archived=1');
+    res.json({ teachers: teachers.count, questionnaires: questionnaires.count, answerkeys: answerkeys.count, records: records.count, sections: sections.count, students: students.count, archived_exams: archived.count });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -582,16 +593,75 @@ app.get('/api/questionnaires', async (req, res) => {
   const userQ = getUser(req);
   if (!userQ) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    let query = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.user_id=? ORDER BY questionnaires.title ASC`;
+    let query = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY questionnaires.title ASC`;
     let params = [userQ.id];
     if (req.query.section_id && req.query.subject_id) {
-      query = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.section_id=? AND questionnaires.subject_id=? AND questionnaires.user_id=? ORDER BY questionnaires.title ASC`;
+      query = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.section_id=? AND questionnaires.subject_id=? AND questionnaires.user_id=? AND (questionnaires.is_archived IS NULL OR questionnaires.is_archived=0) ORDER BY questionnaires.title ASC`;
       params = [req.query.section_id, req.query.subject_id, userQ.id];
     }
     const [rows] = await db.query(query, params);
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
+
+// Archived questionnaires — must be BEFORE /:id route
+app.get('/api/questionnaires/archived/list', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT q.*, s.name AS section_name, sub.name AS subject_name
+       FROM questionnaires q
+       LEFT JOIN sections s ON q.section_id=s.id
+       LEFT JOIN subjects sub ON q.subject_id=sub.id
+       WHERE q.is_archived=1
+       ORDER BY q.archived_at DESC`
+    );
+    res.json(rows);
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.put('/api/questionnaires/:id/restore', requireAdmin, async (req, res) => {
+  const user = getUser(req);
+  try {
+    await db.query('UPDATE questionnaires SET is_archived=0, archived_at=NULL, archived_by_name=NULL WHERE id=?', [req.params.id]);
+    await logActivity(user.id, user.fullname, 'RESTORE_QUESTIONNAIRE', `Restored ID: ${req.params.id}`, 'web');
+    res.json({ message: 'Questionnaire restored successfully.' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/questionnaires/:id/permanent', requireAdmin, async (req, res) => {
+  const user = getUser(req);
+  try {
+    await db.query('DELETE FROM answerkeys WHERE questionnaire_id=?', [req.params.id]);
+    await db.query('DELETE FROM questionnaires WHERE id=?', [req.params.id]);
+    await logActivity(user.id, user.fullname, 'PERMANENT_DELETE_QUESTIONNAIRE', `Permanently deleted ID: ${req.params.id}`, 'web');
+    res.json({ message: 'Questionnaire permanently deleted.' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/questionnaires/:id/duplicate', async (req, res) => {
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const [[original]] = await db.query('SELECT * FROM questionnaires WHERE id=? AND user_id=?', [req.params.id, user.id]);
+    if (!original) return res.status(404).json({ error: 'Not found' });
+    const newTitle = original.title + ' (Copy)';
+    const [result] = await db.query(
+      'INSERT INTO questionnaires (title, type, section_id, subject_id, questions, user_id) VALUES (?,?,?,?,?,?)',
+      [newTitle, original.type, original.section_id, original.subject_id, original.questions, user.id]
+    );
+    const [aks] = await db.query('SELECT * FROM answerkeys WHERE questionnaire_id=?', [original.id]);
+    if (aks.length) {
+      const ak = aks[0];
+      await db.query(
+        'INSERT INTO answerkeys (title, type, section_id, subject_id, answers, user_id, questionnaire_id) VALUES (?,?,?,?,?,?,?)',
+        [newTitle, ak.type, ak.section_id, ak.subject_id, ak.answers, user.id, result.insertId]
+      );
+    }
+    await logActivity(user.id, user.fullname, 'DUPLICATE_QUESTIONNAIRE', `Duplicated: ${original.title}`, 'web');
+    res.json({ message: 'Questionnaire duplicated!', id: result.insertId });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
 app.get('/api/questionnaires/:id', async (req, res) => {
   try {
     const [rows] = await db.query(`SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE questionnaires.id=?`, [req.params.id]);
@@ -625,9 +695,12 @@ app.delete('/api/questionnaires/:id', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    await db.query('DELETE FROM questionnaires WHERE id=? AND user_id=?', [req.params.id, user.id]);
-    await logActivity(user.id, user.fullname, 'DELETE_QUESTIONNAIRE', `Deleted ID: ${req.params.id}`, req.body?.platform || 'web');
-    res.json({ message: 'Questionnaire deleted!' });
+    await db.query(
+      'UPDATE questionnaires SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=? AND user_id=?',
+      [user.fullname, req.params.id, user.id]
+    );
+    await logActivity(user.id, user.fullname, 'ARCHIVE_QUESTIONNAIRE', `Archived ID: ${req.params.id}`, req.body?.platform || 'web');
+    res.json({ message: 'Questionnaire moved to archive.' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 

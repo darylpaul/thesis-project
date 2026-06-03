@@ -607,128 +607,137 @@ document.getElementById('deleteConfirmBtn').addEventListener('click', async () =
 });
 
 // ═══════════════════════════════════════
-// TEST BANK TAB
+// TEST BANK / ARCHIVE TAB
 // ═══════════════════════════════════════
-let allTestBankData = [];
+let allArchiveData = [];
 
-async function loadTestBank() {
-  const list = document.getElementById('tbList');
+async function loadArchive() {
+  const list = document.getElementById('archiveList');
   list.innerHTML = '<div style="text-align:center;padding:24px;color:#9ca3af;">Loading...</div>';
   try {
-    const res  = await fetch(`${API}/test-bank`, { headers });
-    allTestBankData = await res.json();
-    filterTestBank();
+    const res = await fetch(`${API}/questionnaires/archived/list`, { headers });
+    allArchiveData = await res.json();
+    filterArchive();
   } catch {
-    list.innerHTML = '<div style="text-align:center;padding:24px;color:#dc2626;">Could not load test bank.</div>';
+    list.innerHTML = '<div style="text-align:center;padding:24px;color:#dc2626;">Could not load archive.</div>';
   }
 }
 
-function filterTestBank() {
-  const search = (document.getElementById('tbSearch')?.value || '').toLowerCase();
-  const status = document.getElementById('tbStatusFilter').value;
-  const type   = document.getElementById('tbTypeFilter').value;
-  let filtered = allTestBankData;
-  if (status) filtered = filtered.filter(q => q.status === status);
+function filterArchive() {
+  const search = (document.getElementById('archiveSearch')?.value || '').toLowerCase();
+  const type   = document.getElementById('archiveTypeFilter')?.value || '';
+  let filtered = allArchiveData;
   if (type)   filtered = filtered.filter(q => q.type === type);
   if (search) filtered = filtered.filter(q =>
-    (q.question_text||'').toLowerCase().includes(search) ||
-    (q.topic||'').toLowerCase().includes(search) ||
+    (q.title||'').toLowerCase().includes(search) ||
+    (q.section_name||'').toLowerCase().includes(search) ||
     (q.subject_name||'').toLowerCase().includes(search) ||
-    (q.suggested_by_name||'').toLowerCase().includes(search)
+    (q.archived_by_name||'').toLowerCase().includes(search)
   );
-  renderTestBank(filtered);
+  renderArchive(filtered);
 }
 
-function renderTestBank(data) {
-  const list = document.getElementById('tbList');
+function renderArchive(data) {
+  const list = document.getElementById('archiveList');
   if (!data.length) {
-    list.innerHTML = '<div style="text-align:center;padding:48px;color:#9ca3af;">No questions found.</div>';
+    list.innerHTML = '<div style="text-align:center;padding:48px;color:#9ca3af;">No archived exams found.</div>';
     return;
   }
-
-  const typeLabels = { multiple_choice:'MC', true_false:'T/F', identification:'ID', essay:'Essay' };
-  const typeColors = {
-    multiple_choice:'#eff6ff;color:#2563eb',
-    true_false:'#f0fdf4;color:#16a34a',
-    identification:'#fefce8;color:#ca8a04',
-    essay:'#f5f3ff;color:#7c3aed'
-  };
-
+  const typeColor = { Quiz:'#eff6ff;color:#2563eb', Exam:'#f5f3ff;color:#7c3aed', Activity:'#f0fdf4;color:#16a34a', Seatwork:'#fff7ed;color:#ea580c' };
   list.innerHTML = `
     <div class="table-wrap">
       <table class="admin-table">
         <thead>
-          <tr>
-            <th>Question</th>
-            <th>Type</th>
-            <th>Topic</th>
-            <th>Subject</th>
-            <th>Suggested By</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
+          <tr><th>Title</th><th>Type</th><th>Section</th><th>Subject</th><th>Deleted By</th><th>Archived On</th><th>Actions</th></tr>
         </thead>
         <tbody>
           ${data.map(q => {
-            const tc  = typeColors[q.type] || '#f3f4f6;color:#374151';
-            const isPending = q.status === 'pending';
-            return `
-              <tr>
-                <td style="max-width:260px;font-size:13px;color:#111827;">${escHtml(q.question_text)}</td>
-                <td>
-                  <span style="background:${tc.split(';')[0]};${tc.split(';')[1]};
-                    font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;">
-                    ${typeLabels[q.type] || q.type}
-                  </span>
-                </td>
-                <td style="font-size:13px;color:#374151;">${escHtml(q.topic)}</td>
-                <td style="font-size:13px;color:#374151;">${escHtml(q.subject_name||'—')}</td>
-                <td style="font-size:13px;color:#374151;">${escHtml(q.suggested_by_name||'—')}</td>
-                <td>
-                  <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;
-                    background:${isPending?'#fffbeb':'#f0fdf4'};color:${isPending?'#d97706':'#16a34a'};">
-                    ${isPending ? '⏳ Pending' : '✓ Approved'}
-                  </span>
-                </td>
-                <td>
-                  <div style="display:flex;gap:6px;">
-                    ${isPending ? `
-                    <button onclick="tbApprove(${q.id})"
-                      style="padding:5px 12px;background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;
-                      border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
-                      ✓ Approve
-                    </button>` : ''}
-                    <button onclick="tbDelete(${q.id}, '${escHtml(q.question_text).substring(0,30)}...')"
-                      style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;
-                      border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
-                      🗑 Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>`;
+            const tc = typeColor[q.type] || '#f3f4f6;color:#374151';
+            const archivedDate = q.archived_at ? new Date(q.archived_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+            return `<tr>
+              <td style="font-size:13px;font-weight:600;color:#111827;max-width:220px;">${escHtml(q.title)}</td>
+              <td><span style="background:${tc.split(';')[0]};${tc.split(';')[1]};font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;">${escHtml(q.type)}</span></td>
+              <td style="font-size:13px;color:#374151;">${escHtml(q.section_name||'—')}</td>
+              <td style="font-size:13px;color:#374151;">${escHtml(q.subject_name||'—')}</td>
+              <td style="font-size:13px;color:#374151;">${escHtml(q.archived_by_name||'—')}</td>
+              <td style="font-size:13px;color:#6b7280;">${archivedDate}</td>
+              <td>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button onclick="archiveView(${q.id})"
+                    style="padding:5px 10px;background:#eff6ff;color:#2563eb;border:1.5px solid #bfdbfe;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                    👁 View
+                  </button>
+                  <button onclick="archiveRestore(${q.id},'${escHtml(q.title).replace(/'/g,'')}')"
+                    style="padding:5px 10px;background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                    ↩ Restore
+                  </button>
+                  <button onclick="archiveDelete(${q.id},'${escHtml(q.title).replace(/'/g,'')}')"
+                    style="padding:5px 10px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                    🗑 Delete
+                  </button>
+                </div>
+              </td>
+            </tr>`;
           }).join('')}
         </tbody>
       </table>
     </div>
     <div style="padding:12px 16px;font-size:12px;color:#9ca3af;border-top:1px solid #f1f5f9;">
-      ${data.length} question${data.length !== 1 ? 's' : ''}
+      ${data.length} archived exam${data.length !== 1 ? 's' : ''}
     </div>`;
 }
 
-async function tbApprove(id) {
-  if (!confirm('Approve this question? It will be visible to all teachers.')) return;
-  try {
-    const res = await fetch(`${API}/test-bank/${id}/approve`, { method: 'PUT', headers });
-    if (res.ok) { showToast('Question approved!', 'success'); loadTestBank(); loadStats(); }
-    else showToast('Could not approve.', 'error');
-  } catch { showToast('Server error.', 'error'); }
+function archiveView(id) {
+  const q = allArchiveData.find(x => x.id === id);
+  if (!q) return;
+  document.getElementById('archiveViewTitle').textContent = q.title;
+  let parts = [];
+  try { parts = JSON.parse(q.questions); } catch {}
+  const partLabels = { multiple_choice:'Multiple Choice', true_false:'True or False', identification:'Identification', essay:'Essay' };
+  let html = `<div style="font-size:12px;color:#6b7280;margin-bottom:12px;">
+    <strong>Section:</strong> ${escHtml(q.section_name||'—')} &nbsp;·&nbsp;
+    <strong>Subject:</strong> ${escHtml(q.subject_name||'—')} &nbsp;·&nbsp;
+    <strong>Type:</strong> ${escHtml(q.type)}
+  </div>`;
+  if (parts.length && parts[0].questions) {
+    let num = 1;
+    parts.forEach((part, pi) => {
+      html += `<div style="margin-bottom:12px;"><strong style="font-size:13px;">Part ${pi+1} — ${partLabels[part.type]||part.type}</strong>`;
+      html += `<ol style="margin:6px 0 0 18px;font-size:13px;color:#374151;">`;
+      part.questions.forEach(qt => {
+        html += `<li style="margin-bottom:4px;" value="${num}">${escHtml(qt.text)}</li>`;
+        num++;
+      });
+      html += `</ol></div>`;
+    });
+  } else {
+    html += '<p style="color:#9ca3af;font-size:13px;">No questions preview available.</p>';
+  }
+  document.getElementById('archiveViewBody').innerHTML = html;
+  document.getElementById('archiveViewOverlay').style.display = 'flex';
 }
 
-async function tbDelete(id, name) {
-  if (!confirm(`Permanently delete this question?\n"${name}"\nThis cannot be undone.`)) return;
+async function archiveRestore(id, title) {
+  if (!confirm(`Restore "${title}"?\nIt will reappear in the teacher's questionnaire list.`)) return;
   try {
-    const res = await fetch(`${API}/test-bank/${id}`, { method: 'DELETE', headers });
-    if (res.ok) { showToast('Question deleted.', 'success'); loadTestBank(); loadStats(); }
-    else showToast('Could not delete.', 'error');
-  } catch { showToast('Server error.', 'error'); }
+    const res = await fetch(`${API}/questionnaires/${id}/restore`, { method: 'PUT', headers });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showToast(`"${title}" restored successfully.`, 'success');
+    loadArchive(); loadStats();
+  } catch (err) { showToast(err.message || 'Could not restore.', 'error'); }
 }
+
+async function archiveDelete(id, title) {
+  if (!confirm(`Permanently delete "${title}"?\nThis cannot be undone.`)) return;
+  try {
+    const res = await fetch(`${API}/questionnaires/${id}/permanent`, { method: 'DELETE', headers });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showToast(`"${title}" permanently deleted.`, 'success');
+    loadArchive(); loadStats();
+  } catch (err) { showToast(err.message || 'Could not delete.', 'error'); }
+}
+
+// Keep loadTestBank as alias so tab-switch still works
+function loadTestBank() { loadArchive(); }

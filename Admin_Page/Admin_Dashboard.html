@@ -87,9 +87,9 @@
             <div class="stat-label">Students</div>
           </div>
           <div class="stat-card amber" id="pendingBankCard" style="cursor:pointer;" onclick="document.querySelector('[data-tab=testbank]').click()">
-            <div class="stat-icon">⏳</div>
+            <div class="stat-icon">🗄️</div>
             <div class="stat-num" id="stat-pending-testbank">—</div>
-            <div class="stat-label">Pending Test Bank</div>
+            <div class="stat-label">Archived Exams</div>
           </div>
         </div>
         <div class="section-card">
@@ -205,34 +205,42 @@
         </div>
       </div>
 
-      <!-- TEST BANK TAB -->
+      <!-- TEST BANK / ARCHIVE TAB -->
       <div class="tab-content" id="tab-testbank">
-        <div class="tab-header">
-          <h2 class="tab-title">Test Bank</h2>
-          <p class="tab-sub">Review and approve questions suggested by teachers</p>
+        <div class="tab-header-row">
+          <div>
+            <h2 class="tab-title">Test Bank Archive</h2>
+            <p class="tab-sub">Questionnaires deleted by teachers — restore or permanently remove them</p>
+          </div>
+          <button class="refresh-btn" onclick="loadArchive()">🔄 Refresh</button>
         </div>
         <div class="section-card">
           <div class="logs-filters">
-            <input type="text" id="tbSearch" placeholder="🔍 Search questions..."
+            <input type="text" id="archiveSearch" placeholder="🔍 Search archived exams..."
               style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;outline:none;flex:1;min-width:200px;"
-              oninput="filterTestBank()" />
-            <select id="tbStatusFilter" onchange="filterTestBank()">
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-            </select>
-            <select id="tbTypeFilter" onchange="filterTestBank()">
+              oninput="filterArchive()" />
+            <select id="archiveTypeFilter" onchange="filterArchive()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;">
               <option value="">All Types</option>
-              <option value="multiple_choice">Multiple Choice</option>
-              <option value="true_false">True or False</option>
-              <option value="identification">Identification</option>
-              <option value="essay">Essay</option>
+              <option value="Quiz">Quiz</option>
+              <option value="Exam">Exam</option>
+              <option value="Activity">Activity</option>
+              <option value="Seatwork">Seatwork</option>
             </select>
-            <button class="refresh-btn" onclick="loadTestBank()">🔄 Refresh</button>
           </div>
-          <div id="tbList">
-            <div style="text-align:center;padding:48px;color:#9ca3af;">Click the Test Bank tab to load questions.</div>
+          <div id="archiveList">
+            <div style="text-align:center;padding:48px;color:#9ca3af;">Click the Test Bank tab to load archived exams.</div>
           </div>
+        </div>
+      </div>
+
+      <!-- ARCHIVE VIEW MODAL -->
+      <div class="modal-overlay" id="archiveViewOverlay" style="display:none;">
+        <div class="modal-box" style="max-width:700px;max-height:85vh;overflow-y:auto;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h3 id="archiveViewTitle" style="margin:0;font-size:16px;color:#1e2d6b;"></h3>
+            <button onclick="document.getElementById('archiveViewOverlay').style.display='none'" style="background:#f3f4f6;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;">×</button>
+          </div>
+          <div id="archiveViewBody"></div>
         </div>
       </div>
 
