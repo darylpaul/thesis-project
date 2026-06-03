@@ -244,12 +244,6 @@ function renderParts() {
       } else showToast('Each part needs at least 1 question.', 'error');
     });
   });
-  container.querySelectorAll('.btn-save-bank').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const pi = +e.target.dataset.pi, qi = +e.target.dataset.qi;
-      openSaveToBankModal(pi, qi);
-    });
-  });
   container.querySelectorAll('.q-text-input').forEach(inp => {
     inp.addEventListener('input', e => { parts[+e.target.dataset.pi].questions[+e.target.dataset.qi].text = e.target.value; });
   });
@@ -338,7 +332,6 @@ function renderQuestionHTML(pi, qi, type, q) {
           ${answerHTML}
           ${indicator}
         </div>
-        <button class="btn-save-bank" data-pi="${pi}" data-qi="${qi}" title="Save to Test Bank">🏦</button>
         <button class="btn-remove-question" data-pi="${pi}" data-qi="${qi}" title="Remove">✕</button>
       </div>
     </div>`;
@@ -663,70 +656,3 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeDeleteModal(); viewOverlay.classList.remove('open'); closeUploadModal(); closeSaveToBankModal(); document.body.style.overflow = ''; }
 });
 
-// ===========================
-// SAVE TO TEST BANK
-// ===========================
-let saveBankPi = null, saveBankQi = null;
-const saveBankOverlay = document.getElementById('saveBankOverlay');
-
-function openSaveToBankModal(pi, qi) {
-  const subjectId = document.getElementById('qSubject').value;
-  if (!subjectId) { showToast('Please select a subject first.', 'error'); return; }
-  const q = parts[pi]?.questions[qi];
-  if (!q || !q.text.trim()) { showToast('Question text is empty.', 'error'); return; }
-  saveBankPi = pi; saveBankQi = qi;
-  document.getElementById('saveBankPreview').textContent = q.text;
-  document.getElementById('saveBankTopic').value = '';
-  saveBankOverlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('saveBankTopic').focus(), 100);
-}
-
-function closeSaveToBankModal() {
-  saveBankOverlay.classList.remove('open');
-  document.body.style.overflow = '';
-  saveBankPi = null; saveBankQi = null;
-}
-
-document.getElementById('saveBankClose').addEventListener('click', closeSaveToBankModal);
-document.getElementById('saveBankCancel').addEventListener('click', closeSaveToBankModal);
-saveBankOverlay.addEventListener('click', e => { if (e.target === saveBankOverlay) closeSaveToBankModal(); });
-
-document.getElementById('saveBankConfirm').addEventListener('click', async () => {
-  const topic = document.getElementById('saveBankTopic').value.trim();
-  if (!topic) { showToast('Topic is required.', 'error'); return; }
-
-  const subjectId = document.getElementById('qSubject').value;
-  const part = parts[saveBankPi];
-  const q    = part.questions[saveBankQi];
-
-  const payload = {
-    subject_id:    subjectId,
-    topic,
-    type:          part.type,
-    question_text: q.text,
-    answer:        q.answer || null,
-    choices:       part.type === 'multiple_choice' ? q.choices : null
-  };
-
-  if (!confirm(`Save this question to the Test Bank under topic "${topic}"?`)) return;
-
-  const btn = document.getElementById('saveBankConfirm');
-  btn.disabled = true; btn.textContent = 'Saving...';
-
-  try {
-    const res  = await fetch(`${API}/test-bank`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token') },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error');
-    showToast(data.message || 'Saved to Test Bank!', 'success');
-    closeSaveToBankModal();
-  } catch (err) {
-    showToast(err.message || 'Failed to save.', 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Save to Test Bank';
-  }
-});
