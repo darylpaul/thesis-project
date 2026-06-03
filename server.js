@@ -676,10 +676,11 @@ app.get('/api/admin/subjects', requireAdmin, async (req, res) => {
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 app.post('/api/admin/subjects', requireAdmin, async (req, res) => {
+  const admin = getUser(req);
   const { name, code } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Subject name is required' });
   try {
-    await db.query('INSERT INTO subjects (name, code, is_global, user_id) VALUES (?,?,1,0)', [name.trim(), code||null]);
+    await db.query('INSERT INTO subjects (name, code, is_global, user_id) VALUES (?,?,1,?)', [name.trim(), code||null, admin.id]);
     res.json({ message: 'Subject created!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
