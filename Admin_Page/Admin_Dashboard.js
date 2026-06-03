@@ -137,12 +137,13 @@ async function saveSubject() {
     const url    = editingSubjectId ? `${API}/admin/subjects/${editingSubjectId}` : `${API}/admin/subjects`;
     const method = editingSubjectId ? 'PUT' : 'POST';
     const res = await fetch(url, { method, headers, body: JSON.stringify({ name, code }) });
-    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not save subject');
     closeSubjectModal();
     loadAdminSubjects();
     showToast(editingSubjectId ? 'Subject updated!' : 'Subject added!', 'success');
-  } catch {
-    showToast('Could not save subject', 'error');
+  } catch (err) {
+    showToast(err.message || 'Could not save subject', 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Save';
   }

@@ -34,12 +34,11 @@ app.use(cors({
 // STARTUP MIGRATION
 // ===========================
 (async () => {
-  try {
-    await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS is_archived TINYINT(1) DEFAULT 0`);
-    await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
-    await db.query(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
-    await db.query(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
-  } catch (e) { console.log('Migration note:', e.message); }
+  const migrate = async (sql) => { try { await db.query(sql); } catch (e) { console.log('Migration note:', e.message); } };
+  await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS is_archived TINYINT(1) DEFAULT 0`);
+  await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
+  await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
+  await migrate(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
 })();
 
 // ===========================
@@ -682,7 +681,7 @@ app.post('/api/admin/subjects', requireAdmin, async (req, res) => {
   try {
     await db.query('INSERT INTO subjects (name, code, is_global, user_id) VALUES (?,?,1,?)', [name.trim(), code||null, admin.id]);
     res.json({ message: 'Subject created!' });
-  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+  } catch (err) { console.log(err); res.status(500).json({ error: err.message }); }
 });
 app.put('/api/admin/subjects/:id', requireAdmin, async (req, res) => {
   const { name, code } = req.body;
