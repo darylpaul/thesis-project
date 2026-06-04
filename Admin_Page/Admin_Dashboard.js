@@ -767,17 +767,19 @@ async function loadQArchive() {
   list.innerHTML = '<div style="text-align:center;padding:24px;color:#9ca3af;">Loading...</div>';
   try {
     const res = await fetch(`${API}/questionnaires/archived/list`, { headers });
-    allQArchiveData = await res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allQArchiveData = Array.isArray(data) ? data : [];
     filterQArchive();
-  } catch {
-    list.innerHTML = '<div style="text-align:center;padding:24px;color:#dc2626;">Could not load archive.</div>';
+  } catch (err) {
+    list.innerHTML = `<div style="text-align:center;padding:24px;color:#dc2626;">Could not load archive: ${err.message}</div>`;
   }
 }
 
 function filterQArchive() {
   const search = (document.getElementById('qArchiveSearch')?.value || '').toLowerCase();
   const type   = document.getElementById('qArchiveTypeFilter')?.value || '';
-  let filtered = allQArchiveData;
+  let filtered = Array.isArray(allQArchiveData) ? allQArchiveData : [];
   if (type)   filtered = filtered.filter(q => q.type === type);
   if (search) filtered = filtered.filter(q =>
     (q.title||'').toLowerCase().includes(search) ||

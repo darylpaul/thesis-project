@@ -35,9 +35,9 @@ app.use(cors({
 // ===========================
 (async () => {
   const migrate = async (sql) => { try { await db.query(sql); } catch (e) { console.log('Migration note:', e.message); } };
-  await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS is_archived TINYINT(1) DEFAULT 0`);
-  await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_at DATETIME DEFAULT NULL`);
-  await migrate(`ALTER TABLE questionnaires ADD COLUMN IF NOT EXISTS archived_by_name VARCHAR(255) DEFAULT NULL`);
+  await migrate(`ALTER TABLE questionnaires ADD COLUMN is_archived TINYINT(1) DEFAULT 0`);
+  await migrate(`ALTER TABLE questionnaires ADD COLUMN archived_at DATETIME DEFAULT NULL`);
+  await migrate(`ALTER TABLE questionnaires ADD COLUMN archived_by_name VARCHAR(255) DEFAULT NULL`);
   await migrate(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
 })();
 
@@ -576,6 +576,8 @@ app.put('/api/admin/sections/:id', requireAdmin, async (req, res) => {
 });
 app.delete('/api/admin/sections/:id', requireAdmin, async (req, res) => {
   try {
+    await db.query('UPDATE questionnaires SET section_id=NULL WHERE section_id=?', [req.params.id]);
+    await db.query('UPDATE answerkeys SET section_id=NULL WHERE section_id=?', [req.params.id]);
     await db.query('DELETE FROM records  WHERE section_id=?',  [req.params.id]);
     await db.query('DELETE FROM section_teachers WHERE section_id=?', [req.params.id]);
     await db.query('DELETE FROM students WHERE section_id=?',  [req.params.id]);

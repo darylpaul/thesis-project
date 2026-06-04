@@ -55,6 +55,15 @@ async function renderQuestionnaires() {
   const empty     = document.getElementById('emptyState');
   const list      = document.getElementById('questionnairesList');
   list.innerHTML  = '';
+  empty.style.display  = 'none';
+  list.style.display   = 'none';
+
+  // Show prompt when no section and no subject are selected
+  if (!sectionId && !subjectId) {
+    prompt.style.display = 'flex';
+    allQuestionnairesData = [];
+    return;
+  }
   prompt.style.display = 'none';
 
   const params = new URLSearchParams();
@@ -64,14 +73,16 @@ async function renderQuestionnaires() {
 
   try {
     const res  = await fetch(`${API}/questionnaires${qs ? '?' + qs : ''}`, { headers: { 'Authorization': localStorage.getItem('token') } });
-    allQuestionnairesData = await res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allQuestionnairesData = Array.isArray(data) ? data : [];
     // Reapply search if active
     const q = document.getElementById('searchInput')?.value || '';
     displayQuestionnaires(q ? allQuestionnairesData.filter(item =>
       (item.title||'').toLowerCase().includes(q.toLowerCase()) ||
       (item.type||'').toLowerCase().includes(q.toLowerCase())
     ) : allQuestionnairesData);
-  } catch { showToast('Could not load questionnaires.', 'error'); }
+  } catch (err) { showToast(err.message || 'Could not load questionnaires.', 'error'); }
 }
 
 function displayQuestionnaires(data) {
