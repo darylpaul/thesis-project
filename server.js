@@ -773,18 +773,18 @@ app.get('/api/questionnaires', async (req, res) => {
   const userQ = getUser(req);
   if (!userQ) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE (questionnaires.is_archived=0 OR questionnaires.is_archived IS NULL)`;
+    const base = `SELECT questionnaires.*, sections.name AS section_name, subjects.name AS subject_name FROM questionnaires LEFT JOIN sections ON questionnaires.section_id=sections.id LEFT JOIN subjects ON questionnaires.subject_id=subjects.id WHERE (questionnaires.is_archived=0 OR questionnaires.is_archived IS NULL) AND questionnaires.user_id=?`;
     let query = base + ` ORDER BY questionnaires.title ASC`;
-    let params = [];
+    let params = [userQ.id];
     if (req.query.section_id && req.query.subject_id) {
       query = base + ` AND questionnaires.section_id=? AND (questionnaires.subject_id=? OR questionnaires.subject_id IS NULL) ORDER BY questionnaires.title ASC`;
-      params = [req.query.section_id, req.query.subject_id];
+      params = [userQ.id, req.query.section_id, req.query.subject_id];
     } else if (req.query.section_id) {
       query = base + ` AND questionnaires.section_id=? ORDER BY questionnaires.title ASC`;
-      params = [req.query.section_id];
+      params = [userQ.id, req.query.section_id];
     } else if (req.query.subject_id) {
       query = base + ` AND (questionnaires.subject_id=? OR questionnaires.subject_id IS NULL) ORDER BY questionnaires.title ASC`;
-      params = [req.query.subject_id];
+      params = [userQ.id, req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
     res.json(rows);
