@@ -110,11 +110,11 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
   margin-bottom: 6px; line-height: 1.5;
 }
 
-/* ── MULTIPLE CHOICE — 4-column single row ── */
+/* ── MULTIPLE CHOICE — 2-column 2-row ── */
 .mc-choices-ocr { margin-top: 3px; }
 .mc-row-4 {
-  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 2px 6px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px 6px;
 }
 .mc-item {
   display: flex; align-items: flex-start; gap: 4px;
