@@ -436,11 +436,13 @@ app.delete('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
     // Remove their subject-teacher assignments
     await db.query('DELETE FROM section_teachers WHERE teacher_id=?', [req.params.id]);
 
-    // Reassign orphaned sections to admin so they stay visible
+    // Reassign orphaned sections, students, and records to admin so they stay visible
     const [adminRows] = await db.query('SELECT id, fullname FROM users WHERE role="admin" LIMIT 1');
     if (adminRows.length) {
       const admin = adminRows[0];
       await db.query('UPDATE sections SET user_id=?, adviser=? WHERE user_id=?', [admin.id, admin.fullname, teacher.id]);
+      await db.query('UPDATE students SET user_id=? WHERE user_id=?', [admin.id, teacher.id]);
+      await db.query('UPDATE records SET user_id=? WHERE user_id=?', [admin.id, teacher.id]);
     }
 
     if (adminUser) await logActivity(adminUser.id, adminUser.fullname, 'DELETE_TEACHER',
@@ -468,6 +470,8 @@ app.put('/api/admin/teachers/:id/reassign', requireAdmin, async (req, res) => {
     await db.query('UPDATE section_teachers SET teacher_id=? WHERE teacher_id=?', [new_teacher_id, req.params.id]);
     // Transfer student ownership
     await db.query('UPDATE students SET user_id=? WHERE user_id=?', [new_teacher_id, req.params.id]);
+    // Transfer scan records so new teacher sees full history
+    await db.query('UPDATE records SET user_id=? WHERE user_id=?', [new_teacher_id, req.params.id]);
 
     await logActivity(adminUser.id, adminUser.fullname, 'REASSIGN_TEACHER',
       `Reassigned from ${oldRows[0].fullname} to ${newName}`, 'web');
@@ -699,6 +703,7 @@ app.delete('/api/students/:id', async (req, res) => {
   try {
     const [result] = await db.query('DELETE FROM students WHERE id=? AND user_id=?', [req.params.id, user.id]);
     if (result.affectedRows === 0) return res.status(403).json({ error: 'Only the class teacher can delete this student.' });
+    await db.query('DELETE FROM records WHERE student_id_fk=?', [req.params.id]);
     res.json({ message: 'Student deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -751,6 +756,9 @@ app.put('/api/admin/subjects/:id', requireAdmin, async (req, res) => {
 });
 app.delete('/api/admin/subjects/:id', requireAdmin, async (req, res) => {
   try {
+    await db.query('UPDATE questionnaires SET subject_id=NULL WHERE subject_id=?', [req.params.id]);
+    await db.query('UPDATE answerkeys SET subject_id=NULL WHERE subject_id=?', [req.params.id]);
+    await db.query('UPDATE records SET subject_id=NULL WHERE subject_id=?', [req.params.id]);
     await db.query('DELETE FROM subjects WHERE id=?', [req.params.id]);
     res.json({ message: 'Subject deleted!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }

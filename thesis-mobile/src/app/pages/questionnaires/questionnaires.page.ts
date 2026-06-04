@@ -105,7 +105,7 @@ export class QuestionnairesPage implements OnInit {
     const sId  = this.selectedSection ? parseInt(this.selectedSection) : undefined;
     const subId = this.selectedSubject ? parseInt(this.selectedSubject) : undefined;
     this.api.getQuestionnaires(sId, subId).subscribe({
-      next: (d: any) => { this.questionnaires = d; this.isLoading = false; },
+      next: (d: any) => { this.questionnaires = d; this.filtered = d; this.isLoading = false; },
       error: () => { this.isLoading = false; this.toast('Could not load questionnaires', 'danger'); }
     });
   }
