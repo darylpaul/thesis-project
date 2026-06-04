@@ -61,11 +61,10 @@ function renderSections(sections) {
 }
 
 function createSectionCard(section, index) {
-  const card = document.createElement('div');
+  const card = document.createElement('a');
+  card.href = `../Student_Page/Student_Page.html?section_id=${section.id}`;
   card.className = 'section-card';
   card.style.animationDelay = `${index * 0.06}s`;
-
-  card.style.cursor = 'pointer';
   card.title = 'View students in this section';
 
   card.innerHTML = `
@@ -109,10 +108,6 @@ function createSectionCard(section, index) {
       <span style="font-size:11px;color:#6b7280;">View Students →</span>
     </div>
   `;
-
-  card.addEventListener('click', () => {
-    window.location.href = `../Student_Page/Student_Page.html?section_id=${section.id}`;
-  });
 
   return card;
 }

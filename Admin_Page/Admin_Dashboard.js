@@ -13,6 +13,48 @@ function escHtml(str) {
   return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Custom confirm modal ──
+function showConfirm({ title, message, confirmText = 'Confirm', type = 'danger', onConfirm }) {
+  const overlay   = document.getElementById('adminConfirmOverlay');
+  const iconEl    = document.getElementById('adminConfirmIcon');
+  const titleEl   = document.getElementById('adminConfirmTitle');
+  const msgEl     = document.getElementById('adminConfirmMsg');
+  const okBtn     = document.getElementById('adminConfirmOk');
+  const cancelBtn = document.getElementById('adminConfirmCancel');
+
+  const styles = {
+    danger:  { bg: '#fee2e2', stroke: '#dc2626', btnBg: '#dc2626', icon: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>' },
+    warning: { bg: '#fef3c7', stroke: '#d97706', btnBg: '#d97706', icon: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
+    restore: { bg: '#d1fae5', stroke: '#16a34a', btnBg: '#16a34a', icon: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/>' },
+  };
+  const s = styles[type] || styles.danger;
+
+  iconEl.style.background = s.bg;
+  iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${s.stroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${s.icon}</svg>`;
+  titleEl.textContent = title;
+  msgEl.textContent   = message;
+  okBtn.textContent   = confirmText;
+  okBtn.style.background = s.btnBg;
+  okBtn.style.color      = '#fff';
+
+  overlay.style.display = 'flex';
+
+  function close() { overlay.style.display = 'none'; }
+
+  const newOk = okBtn.cloneNode(true);
+  newOk.textContent      = confirmText;
+  newOk.style.background = s.btnBg;
+  newOk.style.color      = '#fff';
+  okBtn.replaceWith(newOk);
+
+  const newCancel = cancelBtn.cloneNode(true);
+  cancelBtn.replaceWith(newCancel);
+
+  document.getElementById('adminConfirmOk').addEventListener('click', () => { close(); onConfirm(); });
+  document.getElementById('adminConfirmCancel').addEventListener('click', close);
+  overlay.onclick = (e) => { if (e.target === overlay) close(); };
+}
+
 // ── Auth guard ──
 const adminToken = localStorage.getItem('adminToken');
 const adminName  = localStorage.getItem('adminName');
@@ -152,15 +194,22 @@ async function saveSubject() {
 }
 
 async function deleteSubject(id, name) {
-  if (!confirm(`Delete subject "${name}"?\n\nThis cannot be undone. Any existing questionnaires linked to this subject will keep their reference.`)) return;
-  try {
-    const res = await fetch(`${API}/admin/subjects/${id}`, { method: 'DELETE', headers });
-    if (!res.ok) throw new Error();
-    loadAdminSubjects();
-    showToast('Subject deleted', 'success');
-  } catch {
-    showToast('Could not delete subject', 'error');
-  }
+  showConfirm({
+    title: `Delete Subject`,
+    message: `Delete "${name}"? This cannot be undone. Questionnaires linked to this subject will keep their reference.`,
+    confirmText: 'Delete',
+    type: 'danger',
+    onConfirm: async () => {
+      try {
+        const res = await fetch(`${API}/admin/subjects/${id}`, { method: 'DELETE', headers });
+        if (!res.ok) throw new Error();
+        loadAdminSubjects();
+        showToast('Subject deleted', 'success');
+      } catch {
+        showToast('Could not delete subject', 'error');
+      }
+    }
+  });
 }
 
 
@@ -972,31 +1021,45 @@ function archiveView(id, itemType) {
 
 async function archiveRestore(id, itemType, title) {
   const label = itemType === 'answerkey' ? 'answer key' : 'questionnaire';
-  if (!confirm(`Restore "${title}"?\nIt will reappear in the teacher's ${label} list.`)) return;
-  const endpoint = itemType === 'answerkey'
-    ? `${API}/answerkeys/${id}/restore`
-    : `${API}/questionnaires/${id}/restore`;
-  try {
-    const res = await fetch(endpoint, { method: 'PUT', headers });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    showToast(`"${title}" restored successfully.`, 'success');
-    loadQArchive(); loadStats();
-  } catch (err) { showToast(err.message || 'Could not restore.', 'error'); }
+  showConfirm({
+    title: 'Restore Item',
+    message: `Restore "${title}"? It will reappear in the teacher's ${label} list.`,
+    confirmText: 'Restore',
+    type: 'restore',
+    onConfirm: async () => {
+      const endpoint = itemType === 'answerkey'
+        ? `${API}/answerkeys/${id}/restore`
+        : `${API}/questionnaires/${id}/restore`;
+      try {
+        const res = await fetch(endpoint, { method: 'PUT', headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast(`"${title}" restored successfully.`, 'success');
+        loadQArchive(); loadStats();
+      } catch (err) { showToast(err.message || 'Could not restore.', 'error'); }
+    }
+  });
 }
 
 async function archiveDelete(id, itemType, title) {
-  if (!confirm(`Permanently delete "${title}"?\nThis cannot be undone.`)) return;
-  const endpoint = itemType === 'answerkey'
-    ? `${API}/answerkeys/${id}/permanent`
-    : `${API}/questionnaires/${id}/permanent`;
-  try {
-    const res = await fetch(endpoint, { method: 'DELETE', headers });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    showToast(`"${title}" permanently deleted.`, 'success');
-    loadQArchive(); loadStats();
-  } catch (err) { showToast(err.message || 'Could not delete.', 'error'); }
+  showConfirm({
+    title: 'Permanently Delete',
+    message: `Permanently delete "${title}"? This cannot be undone.`,
+    confirmText: 'Delete Forever',
+    type: 'danger',
+    onConfirm: async () => {
+      const endpoint = itemType === 'answerkey'
+        ? `${API}/answerkeys/${id}/permanent`
+        : `${API}/questionnaires/${id}/permanent`;
+      try {
+        const res = await fetch(endpoint, { method: 'DELETE', headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast(`"${title}" permanently deleted.`, 'success');
+        loadQArchive(); loadStats();
+      } catch (err) { showToast(err.message || 'Could not delete.', 'error'); }
+    }
+  });
 }
 
 function loadTestBank() { loadQArchive(); }
@@ -1080,13 +1143,20 @@ async function doAddAssignment() {
 }
 
 async function removeAssignment(id) {
-  if (!confirm('Remove this subject teacher assignment?')) return;
-  try {
-    const res = await fetch(`${API}/admin/section-assignments/${id}`, { method: 'DELETE', headers });
-    if (!res.ok) throw new Error('Failed');
-    showToast('Assignment removed.', 'success');
-    loadAssignments();
-  } catch { showToast('Could not remove assignment.', 'error'); }
+  showConfirm({
+    title: 'Remove Assignment',
+    message: 'Remove this subject-teacher assignment? The teacher will no longer be assigned to this section for that subject.',
+    confirmText: 'Remove',
+    type: 'warning',
+    onConfirm: async () => {
+      try {
+        const res = await fetch(`${API}/admin/section-assignments/${id}`, { method: 'DELETE', headers });
+        if (!res.ok) throw new Error('Failed');
+        showToast('Assignment removed.', 'success');
+        loadAssignments();
+      } catch { showToast('Could not remove assignment.', 'error'); }
+    }
+  });
 }
 
 function renderAssignments(data) {
@@ -1241,10 +1311,17 @@ async function saveAdminSection() {
 }
 
 async function deleteAdminSection(id, name) {
-  if (!confirm(`Delete section "${name}"? This will also remove all students in this section.`)) return;
-  try {
-    const res = await fetch(`${API}/admin/sections/${id}`, { method: 'DELETE', headers });
-    if (res.ok) { showToast('Section deleted.', 'success'); loadAdminSections(); }
-    else showToast('Could not delete section.', 'error');
-  } catch { showToast('Could not connect to server.', 'error'); }
+  showConfirm({
+    title: 'Delete Section',
+    message: `Delete "${name}"? This will also remove all students in this section.`,
+    confirmText: 'Delete',
+    type: 'danger',
+    onConfirm: async () => {
+      try {
+        const res = await fetch(`${API}/admin/sections/${id}`, { method: 'DELETE', headers });
+        if (res.ok) { showToast('Section deleted.', 'success'); loadAdminSections(); }
+        else showToast('Could not delete section.', 'error');
+      } catch { showToast('Could not connect to server.', 'error'); }
+    }
+  });
 }
