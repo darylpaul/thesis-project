@@ -107,17 +107,6 @@
               </div>
             </div>
 
-            <!-- True/False -->
-            <div *ngIf="part.type === 'true_false'" class="tf-choices">
-              <span class="tf-option">○ True</span>
-              <span class="tf-option">○ False</span>
-            </div>
-
-            <!-- Identification -->
-            <div *ngIf="part.type === 'identification'" class="id-blank">
-              Answer: ___________________________
-            </div>
-
             <!-- Essay -->
             <div *ngIf="part.type === 'essay'" class="essay-lines">
               <div class="essay-line" *ngFor="let l of [1,2,3,4,5]"></div>

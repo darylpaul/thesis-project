@@ -120,6 +120,7 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
   display: flex; align-items: flex-start; gap: 4px;
   font-size: 12px; color: #000; line-height: 1.4;
 }
+.mc-label { font-size: 12px; font-weight: 800; color: #000; flex-shrink: 0; }
 
 /* ── TRUE OR FALSE — OMR optimized ──
    Large empty circles for True and False
