@@ -249,7 +249,7 @@ document.getElementById('addStudentBtn').addEventListener('click', openAddModal)
 document.getElementById('addFirstStudentBtn').addEventListener('click', openAddModal);
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('modalCancel').addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+// Outside click disabled — prevents accidental loss of student form data
 
 firstNameInput.addEventListener('input', () => clearError(firstNameInput, firstNameError));
 lastNameInput.addEventListener('input',  () => clearError(lastNameInput, lastNameError));

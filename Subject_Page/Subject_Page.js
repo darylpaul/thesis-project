@@ -198,7 +198,7 @@ document.getElementById('addSubjectBtn').addEventListener('click', openAddModal)
 document.getElementById('createFirstBtn').addEventListener('click', openAddModal);
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('modalCancel').addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+// Outside click disabled — prevents accidental loss of subject form data
 
 subjectNameInput.addEventListener('input', () => {
   subjectNameInput.classList.remove('input-error');
