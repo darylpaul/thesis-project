@@ -16,9 +16,17 @@ function getInitials(firstName, lastName) {
 // ===========================
 // ON PAGE LOAD
 // ===========================
-window.addEventListener('DOMContentLoaded', () => {
-  populateSectionDropdowns();
-  loadStudents();
+window.addEventListener('DOMContentLoaded', async () => {
+  await populateSectionDropdowns();
+  const params = new URLSearchParams(window.location.search);
+  const preSection = params.get('section_id');
+  if (preSection) {
+    const filter = document.getElementById('sectionFilter');
+    if (filter) filter.value = preSection;
+    loadStudents(preSection);
+  } else {
+    loadStudents();
+  }
 });
 
 // ===========================

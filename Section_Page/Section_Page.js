@@ -65,6 +65,9 @@ function createSectionCard(section, index) {
   card.className = 'section-card';
   card.style.animationDelay = `${index * 0.06}s`;
 
+  card.style.cursor = 'pointer';
+  card.title = 'View students in this section';
+
   card.innerHTML = `
     <div class="section-card-header">
       <div class="section-card-icon">
@@ -103,8 +106,13 @@ function createSectionCard(section, index) {
         </svg>
         ${section.students || 0} Students
       </span>
+      <span style="font-size:11px;color:#6b7280;">View Students →</span>
     </div>
   `;
+
+  card.addEventListener('click', () => {
+    window.location.href = `../Student_Page/Student_Page.html?section_id=${section.id}`;
+  });
 
   return card;
 }
