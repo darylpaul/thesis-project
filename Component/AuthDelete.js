@@ -25,7 +25,7 @@
 
         <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#dc2626;line-height:1.5;">
           Deleting: <strong id="authDeleteItemName"></strong><br/>
-          <span style="font-size:11px;color:#6b7280;">Admin can restore this from the Test Bank or Archive tab in the dashboard.</span>
+          <span style="font-size:11px;color:#6b7280;">Admin can restore this from the dashboard.</span>
         </div>
 
         <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Reason for deleting *</label>

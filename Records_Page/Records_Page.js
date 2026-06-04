@@ -177,7 +177,7 @@ function renderSummary(records) {
     <div class="summary-card">
       <div class="summary-label">Passing Rate</div>
       <div class="summary-value">${Math.round((passing/total)*100)}%</div>
-      <div class="summary-sub">${passing} of ${total} passed</div>
+      <div class="summary-sub">${passing} of ${total} passed (60%+)</div>
     </div>
   `;
 }
