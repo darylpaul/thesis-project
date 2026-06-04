@@ -207,12 +207,13 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
     padding: 10px 18px; max-width: 100%; margin: 0;
   }
 
-  /* Bigger bubbles on print for easier filling */
-  .mc-bubble { width: 20px; height: 20px; font-size: 11px; }
-  .tf-bubble  { width: 18px; height: 18px; }
-
-  .print-question { margin-bottom: 8px; }
-  .print-part     { margin-bottom: 12px; page-break-inside: avoid; }
+  /* 2-column question layout — part headers stay full width */
+  .questions-grid {
+    column-count: 2;
+    column-gap: 24px;
+  }
+  .print-question { break-inside: avoid; margin-bottom: 8px; }
+  .print-part     { margin-bottom: 10px; }
 }
 
 @page { margin: 10mm 12mm; size: A4; }

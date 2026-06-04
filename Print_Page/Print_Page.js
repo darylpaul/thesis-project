@@ -112,7 +112,10 @@ function renderPreview(q) {
         <span class="part-roman">${toRoman(pi + 1)}.</span>
         <span class="part-label-text">${PART_LABELS[part.type] || part.type}</span>
       </div>
-      ${part.direction ? `<div class="part-direction">${escHtml(part.direction)}</div>` : ''}`;
+      ${part.direction ? `<div class="part-direction">${escHtml(part.direction)}</div>` : ''}
+      <div class="questions-grid"></div>`;
+
+    const questionsGrid = partDiv.querySelector('.questions-grid');
 
     part.questions.forEach(qt => {
       const qDiv = document.createElement('div');
@@ -121,7 +124,6 @@ function renderPreview(q) {
       let answerHTML = '';
 
       if (part.type === 'multiple_choice') {
-        // Show choices as plain text — no bubbles, no answer input
         const c = qt.choices || {};
         answerHTML = `
           <div class="mc-choices-ocr">
@@ -133,14 +135,7 @@ function renderPreview(q) {
             </div>
           </div>`;
 
-      } else if (part.type === 'true_false') {
-        answerHTML = '';
-
-      } else if (part.type === 'identification') {
-        answerHTML = '';
-
       } else if (part.type === 'essay') {
-        // Essay lines stay — students write on exam paper
         answerHTML = `
           <div class="essay-lines-ocr">
             <div class="essay-line"></div>
@@ -151,7 +146,6 @@ function renderPreview(q) {
           </div>`;
       }
 
-      // OCR anchor: question number is LARGE and clear on its own
       qDiv.innerHTML = `
         <div class="print-q-row">
           <span class="print-q-num">${qNum}.</span>
@@ -161,7 +155,7 @@ function renderPreview(q) {
           </div>
         </div>`;
 
-      partDiv.appendChild(qDiv);
+      questionsGrid.appendChild(qDiv);
       qNum++;
     });
 

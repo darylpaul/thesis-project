@@ -93,6 +93,7 @@
         </div>
         <div class="part-direction" *ngIf="part.direction">{{ part.direction }}</div>
 
+        <div class="questions-grid">
         <div *ngFor="let q of part.questions; let qi = index" class="question-item">
           <span class="q-num">{{ getQuestionNumber(pi, qi) }}.</span>
           <div class="q-body">
@@ -123,6 +124,7 @@
             </div>
           </div>
         </div>
+        </div><!-- /questions-grid -->
       </div>
 
       <!-- Score box -->
