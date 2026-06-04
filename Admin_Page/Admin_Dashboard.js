@@ -1238,7 +1238,7 @@ function openEditSectionModal(id) {
   const s = allAdminSections.find(x => x.id === id);
   if (!s) return;
   editingSectionId = id;
-  document.getElementById('sectionModalTitle').textContent = 'Edit Section';
+  document.getElementById('sectionModalTitle').textContent = `Edit Section: ${s.name}`;
   document.getElementById('secNameInput').value  = s.name || '';
   document.getElementById('secGradeInput').value = s.grade || '';
   populateTeacherDropdown();
