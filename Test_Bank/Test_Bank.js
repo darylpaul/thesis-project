@@ -354,29 +354,43 @@ function closeViewModal() {
 
 // ── Admin actions ─────────────────────────────────────────
 async function approveQuestion(id) {
-  if (!confirm('Approve this question?')) return;
-  try {
-    const res = await fetch(`${API}/test-bank/${id}/approve`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: token }
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    showToast('Question approved!', 'success');
-    await loadQuestions();
-  } catch (err) { showToast(err.message || 'Failed to approve', 'error'); }
+  showConfirm({
+    title: 'Approve Question',
+    message: 'Approve this question and add it to the Test Bank?',
+    confirmText: 'Approve',
+    type: 'restore',
+    onConfirm: async () => {
+      try {
+        const res = await fetch(`${API}/test-bank/${id}/approve`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast('Question approved!', 'success');
+        await loadQuestions();
+      } catch (err) { showToast(err.message || 'Failed to approve', 'error'); }
+    }
+  });
 }
 
 async function deleteQuestion(id) {
-  if (!confirm('Permanently delete this question from the bank?')) return;
-  try {
-    const res = await fetch(`${API}/test-bank/${id}`, {
-      method: 'DELETE', headers: { Authorization: token }
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    showToast('Question deleted', 'success');
-    await loadQuestions();
-  } catch (err) { showToast(err.message || 'Failed to delete', 'error'); }
+  showConfirm({
+    title: 'Delete Question',
+    message: 'Permanently delete this question from the bank? This cannot be undone.',
+    confirmText: 'Delete',
+    type: 'danger',
+    onConfirm: async () => {
+      try {
+        const res = await fetch(`${API}/test-bank/${id}`, {
+          method: 'DELETE', headers: { Authorization: token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast('Question deleted', 'success');
+        await loadQuestions();
+      } catch (err) { showToast(err.message || 'Failed to delete', 'error'); }
+    }
+  });
 }
 
 // ── Helpers ───────────────────────────────────────────────

@@ -270,8 +270,13 @@ function renderParts() {
     btn.addEventListener('click', e => {
       const pi = +e.target.dataset.pi, qi = +e.target.dataset.qi;
       if (parts[pi].questions.length > 1) {
-        if (!confirm(`Remove question ${qi + 1}? This cannot be undone.`)) return;
-        parts[pi].questions.splice(qi, 1); renderParts();
+        showConfirm({
+          title: 'Remove Question',
+          message: `Remove question ${qi + 1}? This cannot be undone.`,
+          confirmText: 'Remove',
+          type: 'danger',
+          onConfirm: () => { parts[pi].questions.splice(qi, 1); renderParts(); }
+        });
       } else showToast('Each part needs at least 1 question.', 'error');
     });
   });
@@ -444,7 +449,6 @@ document.getElementById('exportBtn').addEventListener('click', () => {
 
 document.getElementById('modalSave').addEventListener('click', async () => {
   const title     = document.getElementById('qTitle').value.trim();
-  const type      = document.getElementById('qType').value;
   const sectionId = document.getElementById('qSection').value;
   const subjectId = document.getElementById('qSubject').value;
   let valid = true;
@@ -457,12 +461,28 @@ document.getElementById('modalSave').addEventListener('click', async () => {
   if (!valid) return;
 
   const hasMissingAnswer = parts.filter(p => p.type !== 'essay').some(p => p.questions.some(q => !q.answer));
-  if (hasMissingAnswer && !confirm('Some questions have no answer set. Save anyway?')) return;
+  if (hasMissingAnswer) {
+    showConfirm({
+      title: 'Missing Answers',
+      message: 'Some questions have no answer set. Save anyway?',
+      confirmText: 'Save Anyway',
+      type: 'warning',
+      onConfirm: () => doSaveQuestionnaire()
+    });
+    return;
+  }
 
-  const payload = { title, type, section_id: sectionId, subject_id: subjectId, questions: JSON.stringify(parts) };
+  await doSaveQuestionnaire();
+});
+
+async function doSaveQuestionnaire() {
+  const title     = document.getElementById('qTitle').value.trim();
+  const type      = document.getElementById('qType').value;
+  const sectionId = document.getElementById('qSection').value;
+  const subjectId = document.getElementById('qSubject').value;
+  const payload   = { title, type, section_id: sectionId, subject_id: subjectId, questions: JSON.stringify(parts) };
 
   try {
-    // Use PUT for edit, POST for create
     const url    = editingId ? `${API}/questionnaires/${editingId}` : `${API}/questionnaires`;
     const method = editingId ? 'PUT' : 'POST';
     const res = await fetch(url, {
@@ -479,7 +499,7 @@ document.getElementById('modalSave').addEventListener('click', async () => {
       renderQuestionnaires();
     } else { showToast('Something went wrong.', 'error'); }
   } catch { showToast('Could not connect to server.', 'error'); }
-});
+}
 
 async function autoSyncAnswerKey(questionnaireId, title, type, sectionId, subjectId) {
   const answers = [];
@@ -621,7 +641,15 @@ viewOverlay.addEventListener('click', e => { if (e.target === viewOverlay) { vie
 // DUPLICATE
 // ===========================
 async function duplicateQuestionnaire(q) {
-  if (!confirm(`Duplicate "${q.title}"?\nA copy will be created in the same section and subject.`)) return;
+  showConfirm({
+    title: 'Duplicate Questionnaire',
+    message: `Duplicate "${q.title}"? A copy will be created in the same section and subject.`,
+    confirmText: 'Duplicate',
+    type: 'info',
+    onConfirm: () => _doDuplicate(q)
+  });
+}
+async function _doDuplicate(q) {
   try {
     const res = await fetch(`${API}/questionnaires/${q.id}/duplicate`, {
       method: 'POST',
