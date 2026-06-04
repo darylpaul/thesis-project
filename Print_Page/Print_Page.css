@@ -78,7 +78,7 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
 .info-val   { font-weight: 700; color: #000; font-size: 12px; }
 
 /* PARTS */
-.print-part { margin-bottom: 10px; }
+.print-part { margin-bottom: 16px; }
 
 .part-header {
   display: flex; align-items: center; gap: 6px;
@@ -93,11 +93,11 @@ body { font-family: 'Open Sans', sans-serif; background: #f3f4f6; min-height: 10
 }
 .part-direction {
   font-size: 11px; color: #374151; font-style: italic;
-  padding: 3px 0 4px 10px; border-left: 3px solid #000; margin-bottom: 5px;
+  padding: 3px 0 4px 10px; border-left: 3px solid #000; margin-bottom: 8px;
 }
 
 /* QUESTIONS */
-.print-question { margin-bottom: 6px; }
+.print-question { margin-bottom: 12px; }
 .print-q-row    { display: flex; gap: 8px; align-items: flex-start; }
 .print-q-num {
   /* LARGE clear number for OCR anchor */

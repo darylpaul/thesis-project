@@ -134,12 +134,14 @@ function renderPreview(q) {
           </div>`;
 
       } else if (part.type === 'true_false') {
-        // No bubbles — just show the statement, students answer on sheet
-        answerHTML = '';
+        answerHTML = `
+          <div class="tf-bubbles">
+            <div class="tf-option"><span class="tf-bubble">○</span><span class="tf-word">True</span></div>
+            <div class="tf-option"><span class="tf-bubble">○</span><span class="tf-word">False</span></div>
+          </div>`;
 
       } else if (part.type === 'identification') {
-        // No answer line — students write on answer sheet
-        answerHTML = '';
+        answerHTML = `<div class="id-answer-ocr"><span class="id-label">Answer:</span><div class="id-underline"></div></div>`;
 
       } else if (part.type === 'essay') {
         // Essay lines stay — students write on exam paper
