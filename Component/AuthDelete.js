@@ -18,14 +18,14 @@
           </div>
           <div style="flex:1;">
             <div style="font-size:16px;font-weight:800;color:#111827;">Delete and Archive</div>
-            <div style="font-size:12px;color:#9ca3af;margin-top:2px;">Archived for 30 days — admin can restore</div>
+            <div style="font-size:12px;color:#9ca3af;margin-top:2px;">Admin can restore from the dashboard</div>
           </div>
           <button onclick="closeAuthDelete()" style="background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer;">x</button>
         </div>
 
         <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#dc2626;line-height:1.5;">
           Deleting: <strong id="authDeleteItemName"></strong><br/>
-          <span style="font-size:11px;color:#6b7280;">Admin can restore this within 30 days from the Archive tab.</span>
+          <span style="font-size:11px;color:#6b7280;">Admin can restore this from the Test Bank or Archive tab in the dashboard.</span>
         </div>
 
         <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Reason for deleting *</label>
