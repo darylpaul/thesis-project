@@ -365,7 +365,7 @@
         <div class="tab-header-row">
           <div>
             <h2 class="tab-title">Test Bank Archive</h2>
-            <p class="tab-sub">Questionnaires deleted by teachers — restore or permanently remove them</p>
+            <p class="tab-sub">Deleted questionnaires and answer keys — restore or permanently remove them</p>
           </div>
           <button class="refresh-btn" onclick="loadArchive()">🔄 Refresh</button>
         </div>
@@ -390,16 +390,6 @@
         </div>
       </div>
 
-      <!-- ARCHIVE VIEW MODAL -->
-      <div class="modal-overlay" id="archiveViewOverlay" style="display:none;">
-        <div class="modal-box" style="max-width:700px;max-height:85vh;overflow-y:auto;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <h3 id="archiveViewTitle" style="margin:0;font-size:16px;color:#1e2d6b;"></h3>
-            <button onclick="document.getElementById('archiveViewOverlay').style.display='none'" style="background:#f3f4f6;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;">×</button>
-          </div>
-          <div id="archiveViewBody"></div>
-        </div>
-      </div>
 
     </main>
   </div>

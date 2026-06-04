@@ -839,7 +839,7 @@ app.get('/api/questionnaires/archived/list', requireAdmin, async (req, res) => {
        FROM answerkeys ak
        LEFT JOIN sections s ON ak.section_id=s.id
        LEFT JOIN subjects sub ON ak.subject_id=sub.id
-       WHERE ak.is_archived=1
+       WHERE ak.is_archived=1 AND ak.questionnaire_id IS NULL
        ORDER BY archived_at DESC`
     );
     res.json(rows);
@@ -850,6 +850,7 @@ app.put('/api/questionnaires/:id/restore', requireAdmin, async (req, res) => {
   const user = getUser(req);
   try {
     await db.query('UPDATE questionnaires SET is_archived=0, archived_at=NULL, archived_by_name=NULL WHERE id=?', [req.params.id]);
+    await db.query('UPDATE answerkeys SET is_archived=0, archived_at=NULL, archived_by_name=NULL WHERE questionnaire_id=?', [req.params.id]);
     await logActivity(user.id, user.fullname, 'RESTORE_QUESTIONNAIRE', `Restored ID: ${req.params.id}`, 'web');
     res.json({ message: 'Questionnaire restored successfully.' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
