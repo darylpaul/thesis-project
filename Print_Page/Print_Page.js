@@ -296,16 +296,16 @@ body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
 .instr li strong  { color:#111; }
 
 /* 3 columns */
-.cols { display:flex; gap:5px; flex:1; margin-top:5px; min-height:0; }
-.col  { flex:1; display:flex; flex-direction:column; border:1px solid #c8cdd5; min-height:0; }
+.cols { display:flex; gap:5px; margin-top:5px; }
+.col  { flex:1; display:flex; flex-direction:column; border:1px solid #c8cdd5; }
 
 .col-head { display:grid; grid-template-columns:26px 1fr 32px; background:#f0f1f3; border-bottom:1px solid #c8cdd5; flex-shrink:0; }
 .col-head span { font-size:6.5pt; font-weight:700; color:#777; text-align:center; padding:3px 2px; text-transform:uppercase; letter-spacing:0.3px; }
 .col-head .ach { text-align:left; padding-left:5px; }
 
-.col-rows { flex:1; display:flex; flex-direction:column; min-height:0; }
+.col-rows { display:flex; flex-direction:column; }
 
-.arow { display:grid; grid-template-columns:26px 1fr 32px; flex:1; min-height:0; border-bottom:1px solid #f0f0f0; }
+.arow { display:grid; grid-template-columns:26px 1fr 32px; min-height:46px; border-bottom:1px solid #f0f0f0; }
 .arow:last-child { border-bottom:none; }
 
 .anum  { font-size:9pt; font-weight:900; color:#1a2eaa; display:flex; align-items:flex-end; justify-content:center; padding-bottom:3px; }
@@ -315,7 +315,7 @@ body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
 .abadge { font-size:6pt; font-weight:700; color:#666; background:#f4f5f7; border:1px solid #ddd; border-radius:2px; padding:1px 3px; }
 
 /* Score slot inside col3 */
-.score-slot { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:4px 6px; }
+.score-slot { min-height:46px; display:flex; align-items:center; justify-content:center; padding:4px 6px; }
 .score-slot .score-box { width:100%; }
 
 /* Score box fallback (when all cols equal) */
