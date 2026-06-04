@@ -860,34 +860,114 @@ function renderQArchive(data) {
     </div>`;
 }
 
+const PART_LABELS_ADMIN = {
+  multiple_choice: 'Letter Shading / Multiple Choice',
+  true_false:      'True or False',
+  identification:  'Identification',
+  essay:           'Essay'
+};
+
+function toRomanAdmin(num) {
+  const v=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  const n=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  let r=''; for(let i=0;i<n.length;i++) while(num>=n[i]){r+=v[i];num-=n[i];} return r;
+}
+
 function archiveView(id, itemType) {
   const q = allQArchiveData.find(x => x.id === id && x.item_type === itemType);
   if (!q) return;
-  document.getElementById('archiveViewTitle').textContent = q.title;
+
   let parts = [];
-  try { parts = JSON.parse(q.content); } catch {}
-  const partLabels = { multiple_choice:'Multiple Choice', true_false:'True or False', identification:'Identification', essay:'Essay' };
-  let html = `<div style="font-size:12px;color:#6b7280;margin-bottom:12px;">
-    <strong>Section:</strong> ${escHtml(q.section_name||'—')} &nbsp;&middot;&nbsp;
-    <strong>Subject:</strong> ${escHtml(q.subject_name||'—')} &nbsp;&middot;&nbsp;
-    <strong>Type:</strong> ${escHtml(q.type)}
-  </div>`;
-  if (parts.length && parts[0].questions) {
-    let num = 1;
-    parts.forEach((part, pi) => {
-      html += `<div style="margin-bottom:12px;"><strong style="font-size:13px;">Part ${pi+1} — ${partLabels[part.type]||part.type}</strong>`;
-      html += `<ol style="margin:6px 0 0 18px;font-size:13px;color:#374151;">`;
-      part.questions.forEach(qt => {
-        html += `<li style="margin-bottom:4px;" value="${num}">${escHtml(qt.text)}</li>`;
-        num++;
-      });
-      html += `</ol></div>`;
+  try {
+    const p = JSON.parse(q.content);
+    if (Array.isArray(p) && p[0] && p[0].questions) parts = p;
+    else if (Array.isArray(p)) parts = [{ type:'multiple_choice', direction:'Choose the letter of the best answer.', questions: p.map(qt => ({ text:qt.text||'', choices:qt.choices||{A:'',B:'',C:'',D:''} })) }];
+  } catch {}
+
+  const totalItems = parts.reduce((t, p) => t + p.questions.length, 0);
+
+  let partsHTML = '';
+  let qNum = 1;
+  parts.forEach((part, pi) => {
+    partsHTML += `<div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">
+        <span style="font-weight:900;font-size:15px;color:#1a2eaa;">${toRomanAdmin(pi+1)}.</span>
+        <span style="font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;">${PART_LABELS_ADMIN[part.type]||part.type}</span>
+      </div>
+      ${part.direction ? `<div style="font-style:italic;font-size:12px;color:#6b7280;border-left:3px solid #c7d2fe;padding-left:8px;margin-bottom:10px;">${escHtml(part.direction)}</div>` : ''}`;
+
+    part.questions.forEach(qt => {
+      partsHTML += `<div style="margin-bottom:10px;">
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <span style="font-weight:800;font-size:13px;min-width:24px;color:#1a2eaa;">${qNum}.</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;color:#111827;margin-bottom:4px;">${escHtml(qt.text)}</div>`;
+
+      if (part.type === 'multiple_choice') {
+        const c = qt.choices || {};
+        partsHTML += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;font-size:12px;color:#374151;margin-top:4px;">
+          <span><strong>A.</strong> ${escHtml(c.A||'')}</span>
+          <span><strong>B.</strong> ${escHtml(c.B||'')}</span>
+          <span><strong>C.</strong> ${escHtml(c.C||'')}</span>
+          <span><strong>D.</strong> ${escHtml(c.D||'')}</span>
+        </div>`;
+      }
+
+      partsHTML += `</div></div></div>`;
+      qNum++;
     });
-  } else {
-    html += '<p style="color:#9ca3af;font-size:13px;">No questions preview available.</p>';
-  }
-  document.getElementById('archiveViewBody').innerHTML = html;
-  document.getElementById('archiveViewOverlay').style.display = 'flex';
+    partsHTML += `</div>`;
+  });
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>${escHtml(q.title)}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;background:#f3f4f6;color:#000;padding-top:52px;}
+    #toolbar{position:fixed;top:0;left:0;right:0;height:52px;background:#1e2d6b;display:flex;align-items:center;padding:0 20px;gap:10px;z-index:100;}
+    #toolbar span{flex:1;color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;}
+    #toolbar button{padding:7px 18px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;}
+    .btn-print{background:rgba(255,255,255,0.15);color:#fff;}
+    .btn-print:hover{background:rgba(255,255,255,0.25);}
+    #paper{background:#fff;max-width:820px;margin:20px auto;padding:32px 40px;box-shadow:0 2px 16px rgba(0,0,0,0.1);}
+    .hdr{text-align:center;border-bottom:2.5px solid #1a2eaa;padding-bottom:12px;margin-bottom:16px;}
+    .school{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#1a2eaa;}
+    .title{font-size:22px;font-weight:900;margin:6px 0 4px;}
+    .badge{background:#1a2eaa;color:#fff;font-size:11px;font-weight:700;padding:2px 14px;border-radius:20px;display:inline-block;}
+    .meta{font-size:12px;color:#6b7280;margin-top:4px;}
+    .info-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:10px;font-size:12px;font-weight:700;}
+    .info-field{display:flex;align-items:flex-end;gap:4px;}
+    .info-line{flex:1;border-bottom:1.5px solid #000;height:16px;}
+    @media print{#toolbar{display:none;}body{padding-top:0;background:#fff;}#paper{box-shadow:none;margin:0;padding:15mm;max-width:100%;}@page{size:A4;margin:10mm;}}
+  </style></head><body>
+  <div id="toolbar">
+    <span>${escHtml(q.title)} — Test Bank Preview</span>
+    <button class="btn-print" onclick="window.print()">🖨️ Print</button>
+  </div>
+  <div id="paper">
+    <div class="hdr">
+      <div class="school">Mindful School of Berlyn Achievers</div>
+      <div class="title">${escHtml(q.title)}</div>
+      <span class="badge">${escHtml(q.type||'Exam')}</span>
+      <div class="meta">Total: ${totalItems} item${totalItems!==1?'s':''}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-field">Name: <div class="info-line"></div></div>
+      <div class="info-field">Section: <strong>${escHtml(q.section_name||'—')}</strong></div>
+      <div class="info-field">Date: <div class="info-line"></div></div>
+    </div>
+    <div style="margin-bottom:16px;font-size:12px;font-weight:700;">Subject: <span style="font-weight:400;">${escHtml(q.subject_name||'—')}</span></div>
+    ${partsHTML || '<p style="color:#9ca3af;font-size:13px;">No questions available.</p>'}
+    <div style="display:flex;justify-content:flex-end;margin-top:24px;">
+      <div style="border:2.5px solid #1a2eaa;border-radius:8px;padding:8px 24px;text-align:center;min-width:120px;">
+        <div style="font-size:9px;font-weight:700;color:#1a2eaa;letter-spacing:1.5px;text-transform:uppercase;">Score</div>
+        <div style="font-size:20px;font-weight:900;margin-top:4px;">_____ / ${totalItems}</div>
+      </div>
+    </div>
+  </div>
+  </body></html>`);
+  win.document.close();
 }
 
 async function archiveRestore(id, itemType, title) {
