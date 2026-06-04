@@ -35,7 +35,9 @@ let allSubjectsData = [];
 async function loadSubjects() {
   try {
     const res = await fetch(`${API}/subjects`, { headers: { 'Authorization': localStorage.getItem('token') } });
-    allSubjectsData = await res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allSubjectsData = Array.isArray(data) ? data : [];
     renderSubjects(allSubjectsData);
   } catch (err) {
     showToast('Could not load subjects. Is the server running?', 'error');

@@ -55,7 +55,8 @@ async function loadQuestionnaires() {
   try {
     const res  = await fetch(`${API}/questionnaires?${params}`, { headers: { 'Authorization': localStorage.getItem('token') } });
     const data = await res.json();
-    if (!data.length) { qSel.innerHTML = '<option value="">No questionnaires found</option>'; return; }
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    if (!Array.isArray(data) || !data.length) { qSel.innerHTML = '<option value="">No questionnaires found</option>'; return; }
     data.forEach(q => { const o = document.createElement('option'); o.value = q.id; o.textContent = q.title; qSel.appendChild(o); });
     // Auto-select first and render preview
     qSel.selectedIndex = 1;
@@ -69,6 +70,7 @@ document.getElementById('questionnaireSelect').addEventListener('change', async 
   try {
     const res = await fetch(`${API}/questionnaires/${id}`, { headers: { 'Authorization': localStorage.getItem('token') } });
     const q   = await res.json();
+    if (!res.ok) throw new Error(q.error || `Server error (${res.status})`);
     renderPreview(q);
   } catch { showToast('Could not load questionnaire.', 'error'); }
 });

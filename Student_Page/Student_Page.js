@@ -30,6 +30,7 @@ async function populateSectionDropdowns() {
       headers: { 'Authorization': localStorage.getItem('token') }
     });
     const sections = await res.json();
+    if (!res.ok) throw new Error(sections.error || `Server error (${res.status})`);
 
     const filterSelect = document.getElementById('sectionFilter');
     const modalSection = document.getElementById('studentSection');
@@ -65,7 +66,9 @@ async function loadStudents(sectionId = '') {
   try {
     const url = sectionId ? `${API}/students?section_id=${sectionId}` : `${API}/students`;
     const res = await fetch(url, { headers: { 'Authorization': localStorage.getItem('token') } });
-    allStudentsData = await res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allStudentsData = Array.isArray(data) ? data : [];
     renderStudents(allStudentsData);
     // Reapply search if active
     const q = document.getElementById('searchInput')?.value || '';

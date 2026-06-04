@@ -45,6 +45,14 @@ async function renderAnswerKeys() {
   const emptyState  = document.getElementById('emptyState');
   const listEl      = document.getElementById('answerkeysList');
   listEl.innerHTML  = '';
+  emptyState.style.display = 'none';
+  listEl.style.display     = 'none';
+
+  if (!sectionId && !subjectId) {
+    promptState.style.display = 'flex';
+    allAnswerKeysData = [];
+    return;
+  }
   promptState.style.display = 'none';
 
   const params = new URLSearchParams();
@@ -56,14 +64,16 @@ async function renderAnswerKeys() {
     const res = await fetch(`${API}/answerkeys${qs ? '?' + qs : ''}`, {
       headers: { 'Authorization': localStorage.getItem('token') }
     });
-    allAnswerKeysData = await res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allAnswerKeysData = Array.isArray(data) ? data : [];
     const q = document.getElementById('searchInput')?.value || '';
     displayAnswerKeys(q ? allAnswerKeysData.filter(ak =>
       (ak.title||'').toLowerCase().includes(q.toLowerCase()) ||
       (ak.type||'').toLowerCase().includes(q.toLowerCase())
     ) : allAnswerKeysData);
-  } catch {
-    showToast('Could not load answer keys.', 'error');
+  } catch (err) {
+    showToast(err.message || 'Could not load answer keys.', 'error');
   }
 }
 

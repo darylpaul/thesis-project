@@ -99,14 +99,16 @@ async function renderRecords() {
     const res = await fetch(`${API}/records?section_id=${sectionId}&subject_id=${subjectId}`, {
       headers: { 'Authorization': localStorage.getItem('token') }
     });
-    allRecordsData = await res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allRecordsData = Array.isArray(data) ? data : [];
     const q = document.getElementById('recordsSearch')?.value || '';
     displayRecords(q ? allRecordsData.filter(r =>
       (r.student_name||'').toLowerCase().includes(q.toLowerCase()) ||
       (r.student_id||'').toLowerCase().includes(q.toLowerCase())
     ) : allRecordsData);
   } catch (err) {
-    showToast('Could not load records.', 'error');
+    showToast(err.message || 'Could not load records.', 'error');
   }
 }
 

@@ -71,8 +71,9 @@ async function loadAdminSubjects() {
   try {
     const res  = await fetch(`${API}/admin/subjects`, { headers });
     const data = await res.json();
-    allSubjectsData = data;
-    renderSubjects(data);
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allSubjectsData = Array.isArray(data) ? data : [];
+    renderSubjects(allSubjectsData);
   } catch {
     document.getElementById('subjectsBody').innerHTML =
       '<tr><td colspan="3" style="text-align:center;padding:24px;color:#dc2626;">Could not load subjects.</td></tr>';
@@ -174,8 +175,9 @@ async function loadArchive() {
   try {
     const res  = await fetch(`${API}/archives`, { headers });
     const data = await res.json();
-    allArchiveData = data;
-    renderArchive(data);
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    allArchiveData = Array.isArray(data) ? data : [];
+    renderArchive(allArchiveData);
   } catch {
     list.innerHTML = '<div style="text-align:center;padding:24px;color:#dc2626;">Could not load archive.</div>';
   }
@@ -342,6 +344,7 @@ async function loadStats() {
   try {
     const res  = await fetch(`${API}/admin/stats`, { headers });
     const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
     document.getElementById('stat-teachers').textContent           = data.teachers       ?? 0;
     document.getElementById('stat-questionnaires').textContent     = data.questionnaires  ?? 0;
     document.getElementById('stat-answerkeys').textContent         = data.answerkeys      ?? 0;
@@ -359,7 +362,8 @@ async function loadRecentLogs() {
   try {
     const res  = await fetch(`${API}/admin/logs`, { headers });
     const logs = await res.json();
-    renderLogs(document.getElementById('recentLogs'), logs.slice(0, 20));
+    if (!res.ok) throw new Error(logs.error || `Server error (${res.status})`);
+    renderLogs(document.getElementById('recentLogs'), (Array.isArray(logs) ? logs : []).slice(0, 20));
   } catch { document.getElementById('recentLogs').innerHTML = '<p class="empty-msg">Could not load logs.</p>'; }
 }
 
@@ -371,7 +375,9 @@ let allLogsData = [];
 async function loadAllLogs() {
   try {
     const res  = await fetch(`${API}/admin/logs`, { headers });
-    allLogsData = await res.json();
+    const logsData = await res.json();
+    if (!res.ok) throw new Error(logsData.error || `Server error (${res.status})`);
+    allLogsData = Array.isArray(logsData) ? logsData : [];
     filterLogs();
   } catch { document.getElementById('allLogs').innerHTML = '<p class="empty-msg">Could not load logs.</p>'; }
 }
@@ -439,7 +445,9 @@ let teachersData = [];
 async function loadTeachers() {
   try {
     const res  = await fetch(`${API}/admin/teachers`, { headers });
-    teachersData = await res.json();
+    const tData = await res.json();
+    if (!res.ok) throw new Error(tData.error || `Server error (${res.status})`);
+    teachersData = Array.isArray(tData) ? tData : [];
     renderTeachers(teachersData);
   } catch { document.getElementById('teachersBody').innerHTML = '<tr><td colspan="7">Could not load teachers.</td></tr>'; }
 }
@@ -479,7 +487,9 @@ function viewTeacherLogs(userId, name) {
   setTimeout(async () => {
     try {
       const res  = await fetch(`${API}/admin/logs?user_id=${userId}`, { headers });
-      allLogsData = await res.json();
+      const tlData = await res.json();
+      if (!res.ok) throw new Error(tlData.error || `Server error (${res.status})`);
+      allLogsData = Array.isArray(tlData) ? tlData : [];
       document.getElementById('logsFilter').value    = '';
       document.getElementById('platformFilter').value = '';
       filterLogs();

@@ -908,18 +908,18 @@ app.get('/api/answerkeys', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE 1=1`;
+    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE answerkeys.user_id=?`;
     let query = akBase + ` ORDER BY answerkeys.title ASC`;
-    let params = [];
+    let params = [user.id];
     if (req.query.section_id && req.query.subject_id) {
       query = akBase + ` AND answerkeys.section_id=? AND (answerkeys.subject_id=? OR answerkeys.subject_id IS NULL) ORDER BY answerkeys.title ASC`;
-      params = [req.query.section_id, req.query.subject_id];
+      params = [user.id, req.query.section_id, req.query.subject_id];
     } else if (req.query.section_id) {
       query = akBase + ` AND answerkeys.section_id=? ORDER BY answerkeys.title ASC`;
-      params = [req.query.section_id];
+      params = [user.id, req.query.section_id];
     } else if (req.query.subject_id) {
       query = akBase + ` AND (answerkeys.subject_id=? OR answerkeys.subject_id IS NULL) ORDER BY answerkeys.title ASC`;
-      params = [req.query.subject_id];
+      params = [user.id, req.query.subject_id];
     }
     const [rows] = await db.query(query, params);
     res.json(rows);
