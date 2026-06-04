@@ -530,6 +530,8 @@ function validatePassword(password) {
     return 'Password must be at least 8 characters.';
   if (!/[A-Z]/.test(password))
     return 'Password must contain at least one uppercase letter (A-Z).';
+  if (!/[0-9]/.test(password))
+    return 'Password must contain at least one number (0-9).';
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?]/.test(password))
     return 'Password must contain at least one special character (!@#$%).';
   return null;

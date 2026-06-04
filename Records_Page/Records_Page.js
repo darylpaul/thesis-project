@@ -153,8 +153,9 @@ function renderSummary(records) {
   const total   = records.length;
   const avgRaw  = records.reduce((a, r) => a + (parseFloat(r.percentage) || 0), 0) / total;
   const avg     = isNaN(avgRaw) ? 0 : Math.round(avgRaw);
-  const highest = Math.max(...records.map(r => r.percentage));
-  const lowest  = Math.min(...records.map(r => r.percentage));
+  const pcts    = records.map(r => parseFloat(r.percentage) || 0);
+  const highest = pcts.length ? Math.max(...pcts) : 0;
+  const lowest  = pcts.length ? Math.min(...pcts) : 0;
   const passing = records.filter(r => r.percentage >= 60).length;
 
   document.getElementById('summaryRow').innerHTML = `
