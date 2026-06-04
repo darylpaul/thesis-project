@@ -206,36 +206,42 @@ document.getElementById('printBothBtn').addEventListener('click', () => {
 function openAnswerSheet(q, parts, section, subject) {
   const win = window.open('', '_blank');
 
-  // Build answer items list
+  // Build items with types
   const items = [];
   parts.forEach(part => {
-    part.questions.forEach(() => {
-      const typ = part.type === 'multiple_choice' ? 'MC'
-                : part.type === 'true_false'      ? 'T/F'
-                : part.type === 'essay'           ? 'ES' : 'ID';
-      items.push({ num: items.length + 1, typ });
-    });
+    const typ = part.type === 'multiple_choice' ? 'MC'
+              : part.type === 'true_false'      ? 'T/F'
+              : part.type === 'essay'           ? 'ESS' : 'ID';
+    part.questions.forEach(() => items.push({ num: items.length + 1, typ }));
   });
 
-  const total = items.length;
-  const half  = Math.ceil(total / 2);
+  const total  = items.length;
+  const s1     = Math.ceil(total / 3);
+  const s2     = Math.ceil((total - s1) / 2);
+  const cols   = [items.slice(0, s1), items.slice(s1, s1 + s2), items.slice(s1 + s2)];
+  const hasGap = cols[2].length < cols[0].length;
 
-  // Build two-column rows
-  let rows = '';
-  for (let i = 0; i < half; i++) {
-    const left  = items[i];
-    const right = items[i + half];
-    rows += `<tr>
-      <td class="qn">${left.num}</td>
-      <td class="ans-cell"><div class="write-line"></div></td>
-      <td class="typ">${left.typ}</td>
-      <td class="col-gap"></td>
-      ${right ? `
-      <td class="qn">${right.num}</td>
-      <td class="ans-cell"><div class="write-line"></div></td>
-      <td class="typ">${right.typ}</td>` : `<td colspan="3"></td>`}
-    </tr>`;
-  }
+  const buildCol = (colItems, isLast) => `
+    <div class="col">
+      <div class="col-head">
+        <span>#</span><span class="ach">Answer</span><span>Type</span>
+      </div>
+      <div class="col-rows">
+        ${colItems.map(it => `
+          <div class="arow">
+            <div class="anum">${it.num}</div>
+            <div class="acell"><div class="aline"></div></div>
+            <div class="atype"><span class="abadge">${it.typ}</span></div>
+          </div>`).join('')}
+        ${isLast && hasGap ? `
+          <div class="score-slot">
+            <div class="score-box">
+              <div class="score-lbl">Score</div>
+              <div class="score-val"><span class="score-line"></span> / ${total}</div>
+            </div>
+          </div>` : ''}
+      </div>
+    </div>`;
 
   win.document.write(`<!DOCTYPE html>
 <html>
@@ -244,132 +250,145 @@ function openAnswerSheet(q, parts, section, subject) {
 <title>OCR Answer Sheet – ${escHtml(q.title)}</title>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:Arial,sans-serif; background:#f3f4f6; color:#000; padding-top:56px; }
+body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
 
-/* ── FLOATING TOOLBAR ── */
+/* ── TOOLBAR ── */
 #as-toolbar {
   position:fixed; top:0; left:0; right:0; height:56px;
   background:#1e2d6b; display:flex; align-items:center;
-  justify-content:flex-end; gap:10px; padding:0 20px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.25); z-index:1000;
+  gap:10px; padding:0 20px; box-shadow:0 2px 10px rgba(0,0,0,0.25); z-index:1000;
 }
-#as-toolbar .tb-label {
-  flex:1; color:rgba(255,255,255,0.75); font-size:12px; font-weight:600;
-}
-.tb-btn {
-  display:flex; align-items:center; gap:6px;
-  padding:8px 18px; border-radius:8px; border:none;
-  font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
-}
+#as-toolbar .tb-label { flex:1; color:rgba(255,255,255,0.75); font-size:12px; font-weight:600; }
+.tb-btn { display:flex; align-items:center; gap:6px; padding:8px 18px; border-radius:8px; border:none; font-size:13px; font-weight:700; cursor:pointer; }
 .tb-btn-print { background:rgba(255,255,255,0.15); color:#fff; }
 .tb-btn-print:hover { background:rgba(255,255,255,0.25); }
-.tb-btn-pdf { background:#fff; color:#1e2d6b; }
-.tb-btn-pdf:hover { background:#e8eeff; }
-.tb-btn:disabled { opacity:0.6; cursor:not-allowed; }
 
 /* ── PAPER ── */
-#as-paper { background:#fff; max-width:860px; margin:20px auto; padding:10mm; box-shadow:0 2px 16px rgba(0,0,0,0.1); }
+#as-paper {
+  background:#fff; max-width:820px; margin:20px auto;
+  padding:8mm 10mm; box-shadow:0 2px 16px rgba(0,0,0,0.12);
+  min-height:297mm; display:flex; flex-direction:column;
+}
 
-/* ── HEADER ── */
-.hdr { text-align:center; border-bottom:3px solid #1a2eaa; padding-bottom:8px; margin-bottom:10px; }
-.school { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#1a2eaa; }
-.title  { font-size:18px; font-weight:900; margin:4px 0 2px; color:#000; }
-.badge  { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:2px 14px; border-radius:20px; display:inline-block; margin-top:2px; }
-.ocr-tag { font-size:9px; color:#666; margin-top:3px; letter-spacing:0.5px; }
+/* Corner markers */
+.corners { display:flex; justify-content:space-between; flex-shrink:0; }
+.marker  { width:9px; height:9px; background:#111; }
 
-/* ── INFO ROW ── */
-.info { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; margin-bottom:6px; }
-.info2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
-.ifield { display:flex; align-items:flex-end; gap:5px; font-size:10px; font-weight:700; }
-.iline { flex:1; border-bottom:2px solid #000; height:16px; }
+/* Header */
+.school    { text-align:center; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#1a2eaa; margin-top:4px; flex-shrink:0; }
+.sheet-sub { text-align:center; font-size:16px; font-weight:900; color:#000; margin:3px 0 1px; flex-shrink:0; }
+.exam-ttl  { text-align:center; font-size:10px; font-weight:700; text-transform:uppercase; color:#374151; letter-spacing:0.3px; margin-bottom:3px; flex-shrink:0; }
+.divider   { border:none; border-top:1.5px solid #111; margin:3px 0; flex-shrink:0; }
 
-/* ── INSTRUCTIONS ── */
-.instr { border:2px solid #1a2eaa; border-radius:6px; padding:8px 12px; margin-bottom:10px; background:#f0f4ff; }
-.instr p { font-size:10px; color:#000; line-height:1.8; }
+/* Info rows */
+.info-row { display:flex; gap:12px; align-items:flex-end; margin-bottom:3px; flex-shrink:0; }
+.ifield   { display:flex; align-items:flex-end; gap:4px; font-size:8pt; font-weight:700; }
+.ifield.grow { flex:1; }
+.iline    { flex:1; min-width:50px; border-bottom:1px solid #111; height:14px; }
+.ival     { font-size:8pt; font-weight:700; color:#1a2eaa; border-bottom:1px solid #bbb; height:14px; line-height:14px; }
 
-/* ── TABLE ── */
-table { width:100%; border-collapse:collapse; }
-th { background:#1a2eaa; color:#fff; font-size:10px; font-weight:700; padding:6px; text-align:center; border:1px solid #1a2eaa; }
-td { border:1px solid #ccc; vertical-align:middle; }
-tr:nth-child(even) td:not(.col-gap) { background:#f8f9ff; }
-.qn { font-weight:900; font-size:14px; text-align:center; width:28px; color:#1a2eaa; padding:5px 3px; }
-.ans-cell { padding:5px 8px; }
-.col-gap { width:10px; background:#fff !important; border:none; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; }
-.write-line { border-bottom:2px solid #000; height:30px; width:100%; }
-.typ { font-size:9px; color:#888; text-align:center; width:32px; font-weight:700; padding:4px; }
+/* Instructions */
+.instr       { border:1.5px solid #1a2eaa; border-radius:4px; padding:5px 10px; margin:5px 0; flex-shrink:0; }
+.instr-title { font-size:8pt; font-weight:bold; margin-bottom:2px; }
+.instr ul    { list-style:none; padding:0; }
+.instr li    { font-size:7.5pt; color:#333; line-height:1.6; }
+.instr li::before { content:"• "; }
+.instr li strong  { color:#111; }
 
-/* ── SCORE BOX ── */
-.score-wrap { display:flex; justify-content:flex-end; margin-top:14px; }
-.score-box { border:3px solid #1a2eaa; border-radius:8px; padding:8px 24px; text-align:center; min-width:120px; }
-.score-lbl { font-size:9px; font-weight:700; color:#1a2eaa; letter-spacing:1.5px; text-transform:uppercase; }
-.score-val { font-size:20px; font-weight:900; color:#000; margin-top:4px; }
+/* 3 columns */
+.cols { display:flex; gap:5px; flex:1; margin-top:5px; min-height:0; }
+.col  { flex:1; display:flex; flex-direction:column; border:1px solid #c8cdd5; min-height:0; }
+
+.col-head { display:grid; grid-template-columns:26px 1fr 32px; background:#f0f1f3; border-bottom:1px solid #c8cdd5; flex-shrink:0; }
+.col-head span { font-size:6.5pt; font-weight:700; color:#777; text-align:center; padding:3px 2px; text-transform:uppercase; letter-spacing:0.3px; }
+.col-head .ach { text-align:left; padding-left:5px; }
+
+.col-rows { flex:1; display:flex; flex-direction:column; min-height:0; }
+
+.arow { display:grid; grid-template-columns:26px 1fr 32px; flex:1; min-height:0; border-bottom:1px solid #f0f0f0; }
+.arow:last-child { border-bottom:none; }
+
+.anum  { font-size:9pt; font-weight:900; color:#1a2eaa; display:flex; align-items:flex-end; justify-content:center; padding-bottom:3px; }
+.acell { display:flex; align-items:flex-end; padding:0 5px 3px; }
+.aline { width:100%; border-bottom:1.5px solid #555; }
+.atype { display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px; }
+.abadge { font-size:6pt; font-weight:700; color:#666; background:#f4f5f7; border:1px solid #ddd; border-radius:2px; padding:1px 3px; }
+
+/* Score slot inside col3 */
+.score-slot { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:4px 6px; }
+.score-slot .score-box { width:100%; }
+
+/* Score box fallback (when all cols equal) */
+.score-wrap { display:flex; justify-content:flex-end; margin-top:8px; flex-shrink:0; }
+.score-box  { border:2px solid #1a2eaa; border-radius:5px; padding:5px 18px; text-align:center; min-width:120px; }
+.score-lbl  { font-size:7pt; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.8px; }
+.score-val  { font-size:14pt; font-weight:900; color:#111; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:2px; }
+.score-line { display:inline-block; width:34px; border-bottom:1.5px solid #111; }
 
 @media print {
   #as-toolbar { display:none; }
   body { background:#fff; padding-top:0; }
-  #as-paper { box-shadow:none; margin:0; padding:8mm; max-width:100%; }
-  @page { size:A4; margin:8mm; }
+  #as-paper { box-shadow:none; margin:0; max-width:100%; height:297mm; }
+  @page { size:A4 portrait; margin:8mm 10mm; }
 }
 </style>
 </head>
 <body>
 
-<!-- TOOLBAR (right-side buttons) -->
 <div id="as-toolbar">
   <span class="tb-label">OCR Answer Sheet · ${escHtml(q.title)}</span>
   <button class="tb-btn tb-btn-print" onclick="window.print()">🖨️ Print</button>
 </div>
 
-<!-- PAPER -->
 <div id="as-paper">
-  <div class="hdr">
-    <div class="school">Mindful School of Berlyn Achievers</div>
-    <div class="title">OCR Answer Sheet</div>
-    <span class="badge">${escHtml(q.title)}</span>
-    <div class="ocr-tag">AI-Powered Optical Character Recognition</div>
+
+  <div class="corners" style="margin-bottom:4px;">
+    <div class="marker"></div><div class="marker"></div>
   </div>
 
-  <div class="info">
-    <div class="ifield">Name: <div class="iline"></div></div>
-    <div class="ifield">Section: <strong>${escHtml(section)}</strong></div>
-    <div class="ifield">Date: <div class="iline"></div></div>
+  <div class="school">Mindful School of Berlyn Achievers</div>
+  <div class="sheet-sub">OCR Answer Sheet</div>
+  <div class="exam-ttl">${escHtml(q.title)}</div>
+  <hr class="divider"/>
+
+  <div class="info-row">
+    <div class="ifield grow">Name: <div class="iline"></div></div>
+    <div class="ifield">Section: <span class="ival">${escHtml(section)}</span></div>
+    <div class="ifield">Date: <div class="iline" style="min-width:70px;"></div></div>
   </div>
-  <div class="info2">
-    <div class="ifield">Subject: <strong>${escHtml(subject)}</strong></div>
-    <div class="ifield">Total Items: <strong>${total}</strong></div>
+  <div class="info-row">
+    <div class="ifield grow">Subject: <span class="ival">${escHtml(subject)}</span></div>
+    <div class="ifield">Total Items: <span class="ival" style="min-width:28px;text-align:center;">${total}</span></div>
   </div>
 
   <div class="instr">
-    <p>
-      <strong>Instructions:</strong><br/>
-      • <strong>Multiple Choice (MC):</strong> Write only the letter — <strong>A, B, C, or D</strong> — on the line<br/>
-      • <strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> on the line<br/>
-      • <strong>Identification (ID):</strong> Write your answer clearly in PRINT letters on the line<br/>
-      • Use BLACK pen or pencil — write LARGE and CLEAR for accurate AI scanning
-    </p>
+    <div class="instr-title">Instructions:</div>
+    <ul>
+      <li><strong>Multiple Choice (MC):</strong> Write only the letter — <strong>A, B, C, or D</strong> — on the line</li>
+      <li><strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> on the line</li>
+      <li><strong>Identification (ID):</strong> Write your answer clearly in <strong>PRINT</strong> letters on the line</li>
+      <li>Use <strong>BLACK</strong> pen or pencil — write <strong>LARGE</strong> and <strong>CLEAR</strong> for accurate AI scanning</li>
+    </ul>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th style="width:28px;">#</th>
-        <th>Answer</th>
-        <th style="width:30px;">Type</th>
-        <th style="width:10px;background:#fff;border:none;"></th>
-        <th style="width:28px;">#</th>
-        <th>Answer</th>
-        <th style="width:30px;">Type</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>
+  <div class="cols">
+    ${buildCol(cols[0], false)}
+    ${buildCol(cols[1], false)}
+    ${buildCol(cols[2], true)}
+  </div>
 
+  ${!hasGap ? `
   <div class="score-wrap">
     <div class="score-box">
       <div class="score-lbl">Score</div>
-      <div class="score-val">_____ / ${total}</div>
+      <div class="score-val"><span class="score-line"></span> / ${total}</div>
     </div>
+  </div>` : ''}
+
+  <div class="corners" style="margin-top:4px;">
+    <div class="marker"></div><div class="marker"></div>
   </div>
+
 </div>
 
 </body>

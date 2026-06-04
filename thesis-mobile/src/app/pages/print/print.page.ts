@@ -41,6 +41,8 @@ export class PrintPage implements OnInit {
   selectedSection       = '';
   selectedSubject       = '';
   selectedQ             = '';
+  viewMode: 'exam' | 'sheet' = 'exam';
+  sheetColumns: { num: number; type: string }[][] = [[], [], []];
 
   constructor(
     private api: ApiService,
@@ -76,9 +78,12 @@ export class PrintPage implements OnInit {
   }
 
   loadQuestionnaire() {
-    if (!this.selectedQ) { this.questionnaire = null; return; }
+    if (!this.selectedQ) { this.questionnaire = null; this.sheetColumns = [[], [], []]; return; }
     this.api.getQuestionnaire(parseInt(this.selectedQ)).subscribe({
-      next: (d: any) => this.questionnaire = d
+      next: (d: any) => {
+        this.questionnaire = d;
+        this.sheetColumns = this.computeSheetColumns();
+      }
     });
   }
 
@@ -135,6 +140,39 @@ export class PrintPage implements OnInit {
 
   getTotalItems(): number {
     return this.getParts().reduce((t, p) => t + p.questions.length, 0);
+  }
+
+  getTypeShort(type: string): string {
+    const map: Record<string, string> = {
+      multiple_choice: 'MC',
+      true_false:      'T/F',
+      identification:  'ID',
+      essay:           'ESS'
+    };
+    return map[type] ?? 'MC';
+  }
+
+  getItemTypes(): { num: number; type: string }[] {
+    const items: { num: number; type: string }[] = [];
+    let count = 0;
+    for (const part of this.getParts()) {
+      const t = this.getTypeShort(part.type);
+      for (const _q of part.questions) items.push({ num: ++count, type: t });
+    }
+    return items;
+  }
+
+  computeSheetColumns(): { num: number; type: string }[][] {
+    const items = this.getItemTypes();
+    const n = items.length;
+    if (n === 0) return [[], [], []];
+    const s1 = Math.ceil(n / 3);
+    const s2 = Math.ceil((n - s1) / 2);
+    return [
+      items.slice(0, s1),
+      items.slice(s1, s1 + s2),
+      items.slice(s1 + s2)
+    ];
   }
 
   async print() {

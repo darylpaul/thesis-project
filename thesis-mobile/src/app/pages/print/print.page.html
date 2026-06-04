@@ -42,6 +42,12 @@
       </select>
     </div>
 
+    <!-- View toggle (only when a questionnaire is selected) -->
+    <div *ngIf="selectedQ && questionnaire" class="view-toggle">
+      <button [class.active]="viewMode === 'exam'"  (click)="viewMode = 'exam'">Exam Paper</button>
+      <button [class.active]="viewMode === 'sheet'" (click)="viewMode = 'sheet'">Answer Sheet</button>
+    </div>
+
     <!-- Empty state -->
     <div *ngIf="!selectedQ" class="empty-state">
       <ion-icon name="print-outline"></ion-icon>
@@ -50,7 +56,7 @@
     </div>
 
     <!-- Preview -->
-    <div *ngIf="selectedQ && questionnaire" class="exam-preview">
+    <div *ngIf="selectedQ && questionnaire && viewMode === 'exam'" class="exam-preview">
 
       <!-- Header -->
       <div class="exam-header">
@@ -126,6 +132,70 @@
           <div class="score-blank">___ / {{ getTotalItems() }}</div>
         </div>
       </div>
+
+    </div>
+
+    <!-- Answer Sheet -->
+    <div *ngIf="selectedQ && questionnaire && viewMode === 'sheet'" class="as-preview">
+
+      <div class="as-corners"><div class="as-marker"></div><div class="as-marker"></div></div>
+
+      <div class="as-school">Mindful School of Berlyn Achievers</div>
+      <div class="as-subtitle">Examination Answer Sheet</div>
+      <div class="as-exam-title">{{ questionnaire.title }}</div>
+      <hr class="as-divider"/>
+
+      <div class="as-info-row">
+        <div class="as-ifield grow"><span class="as-ilabel">Name:</span><div class="as-iline"></div></div>
+        <div class="as-ifield"><span class="as-ilabel">Section:</span><span class="as-ival">{{ questionnaire.section_name }}</span></div>
+        <div class="as-ifield"><span class="as-ilabel">Date:</span><div class="as-iline" style="min-width:44px;"></div></div>
+      </div>
+      <div class="as-info-row">
+        <div class="as-ifield grow"><span class="as-ilabel">Subject:</span><span class="as-ival">{{ questionnaire.subject_name }}</span></div>
+        <div class="as-ifield"><span class="as-ilabel">Total Items:</span><span class="as-ival" style="min-width:20px;text-align:center;">{{ getTotalItems() }}</span></div>
+      </div>
+
+      <div class="as-inst">
+        <div class="as-inst-title">Instructions:</div>
+        <ul>
+          <li><strong>Multiple Choice (MC):</strong> Write only the letter — <strong>A, B, C, or D</strong> — on the line</li>
+          <li><strong>True/False (T/F):</strong> Write <strong>TRUE</strong> or <strong>FALSE</strong> on the line</li>
+          <li><strong>Identification (ID):</strong> Write your answer clearly in <strong>PRINT</strong> letters on the line</li>
+          <li>Use <strong>BLACK</strong> pen or pencil — write <strong>LARGE</strong> and <strong>CLEAR</strong> for accurate AI scanning</li>
+        </ul>
+      </div>
+
+      <div class="as-cols">
+        <div *ngFor="let col of sheetColumns; let ci = index" class="as-col">
+          <div class="as-col-head">
+            <span>#</span><span class="ach">Answer</span><span>Type</span>
+          </div>
+          <div class="as-rows">
+            <div *ngFor="let item of col" class="as-row">
+              <div class="as-num">{{ item.num }}</div>
+              <div class="as-ans"><div class="as-ans-line"></div></div>
+              <div class="as-type"><span class="as-badge">{{ item.type }}</span></div>
+            </div>
+            <!-- Score box fills empty slot in last column -->
+            <div *ngIf="ci === 2 && sheetColumns[2].length < sheetColumns[0].length" class="as-score-slot">
+              <div class="as-score-box">
+                <div class="as-score-lbl">Score</div>
+                <div class="as-score-val"><span class="as-score-line"></span> / {{ getTotalItems() }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score box when all columns equal (items divisible by 3) -->
+      <div *ngIf="sheetColumns[2].length === sheetColumns[0].length" class="as-score-section">
+        <div class="as-score-box">
+          <div class="as-score-lbl">Score</div>
+          <div class="as-score-val"><span class="as-score-line"></span> / {{ getTotalItems() }}</div>
+        </div>
+      </div>
+
+      <div class="as-corners" style="margin-top:4px;"><div class="as-marker"></div><div class="as-marker"></div></div>
 
     </div>
 
