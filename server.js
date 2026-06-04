@@ -161,17 +161,7 @@ app.post('/api/archive', async (req, res) => {
       return res.json({ message: 'Archived successfully!' });
     }
 
-    if (table === 'answerkeys') {
-      await db.query(
-        'UPDATE answerkeys SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=?',
-        [user.fullname, item_id]
-      );
-      await logActivity(user.id, user.fullname, 'ARCHIVE_DELETE',
-        `Archived answer key "${item_name}": ${reason}`, req.body.platform||'web');
-      return res.json({ message: 'Archived successfully!' });
-    }
-
-    // All other tables: store in archive table then hard-delete
+    // All other tables (including answerkeys): store in archive table then hard-delete
     await db.query(
       `INSERT INTO archives (table_name, item_id, item_name, item_data, reason, deleted_by_id, deleted_by_name, expires_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, NULL)`,
@@ -387,9 +377,7 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   const records        = await count('SELECT COUNT(*) as count FROM records');
   const sections       = await count('SELECT COUNT(*) as count FROM sections');
   const students       = await count('SELECT COUNT(*) as count FROM students');
-  const archivedQ  = await count('SELECT COUNT(*) as count FROM questionnaires WHERE is_archived=1');
-  const archivedAK = await count('SELECT COUNT(*) as count FROM answerkeys WHERE is_archived=1');
-  const archived_exams = archivedQ + archivedAK;
+  const archived_exams = await count('SELECT COUNT(*) as count FROM questionnaires WHERE is_archived=1');
   res.json({ teachers, questionnaires, answerkeys, records, sections, students, archived_exams });
 });
 
@@ -821,26 +809,16 @@ app.get('/api/debug/questionnaires', requireAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Archived questionnaires + answer keys — Test Bank — must be BEFORE /:id route
+// Archived questionnaires — Test Bank — must be BEFORE /:id route
 app.get('/api/questionnaires/archived/list', requireAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT q.id, q.title, q.type, q.section_id, q.subject_id, q.questions AS content,
-              q.user_id, q.is_archived, q.archived_at, q.archived_by_name,
-              s.name AS section_name, sub.name AS subject_name, 'questionnaire' AS item_type
+      `SELECT q.*, s.name AS section_name, sub.name AS subject_name
        FROM questionnaires q
        LEFT JOIN sections s ON q.section_id=s.id
        LEFT JOIN subjects sub ON q.subject_id=sub.id
        WHERE q.is_archived=1
-       UNION ALL
-       SELECT ak.id, ak.title, ak.type, ak.section_id, ak.subject_id, ak.answers AS content,
-              ak.user_id, ak.is_archived, ak.archived_at, ak.archived_by_name,
-              s.name AS section_name, sub.name AS subject_name, 'answerkey' AS item_type
-       FROM answerkeys ak
-       LEFT JOIN sections s ON ak.section_id=s.id
-       LEFT JOIN subjects sub ON ak.subject_id=sub.id
-       WHERE ak.is_archived=1
-       ORDER BY archived_at DESC`
+       ORDER BY q.archived_at DESC`
     );
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
@@ -958,7 +936,7 @@ app.get('/api/answerkeys', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE (answerkeys.is_archived=0 OR answerkeys.is_archived IS NULL) AND answerkeys.user_id=?`;
+    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE answerkeys.user_id=?`;
     let query = akBase + ` ORDER BY answerkeys.title ASC`;
     let params = [user.id];
     if (req.query.section_id && req.query.subject_id) {
