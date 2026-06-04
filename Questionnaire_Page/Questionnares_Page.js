@@ -439,7 +439,7 @@ document.getElementById('createQuestionnaireBtn').addEventListener('click', () =
 document.getElementById('createFirstBtn').addEventListener('click', () => openCreateModal());
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('modalCancel').addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+// Outside click intentionally disabled — prevents accidental loss of questionnaire work
 document.getElementById('addPartBtn').addEventListener('click', () => { parts.push(newPart()); renderParts(); });
 document.getElementById('uploadInlineBtn').addEventListener('click', () => { closeModal(); openUploadModal(); });
 document.getElementById('exportBtn').addEventListener('click', () => {
