@@ -134,14 +134,10 @@ function renderPreview(q) {
           </div>`;
 
       } else if (part.type === 'true_false') {
-        answerHTML = `
-          <div class="tf-bubbles">
-            <div class="tf-option"><span class="tf-bubble">○</span><span class="tf-word">True</span></div>
-            <div class="tf-option"><span class="tf-bubble">○</span><span class="tf-word">False</span></div>
-          </div>`;
+        answerHTML = '';
 
       } else if (part.type === 'identification') {
-        answerHTML = `<div class="id-answer-ocr"><span class="id-label">Answer:</span><div class="id-underline"></div></div>`;
+        answerHTML = '';
 
       } else if (part.type === 'essay') {
         // Essay lines stay — students write on exam paper
