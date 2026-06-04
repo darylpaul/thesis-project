@@ -42,7 +42,7 @@ ion-content { --background: #f0f2f7; }
 .info-val   { color: #374151; font-weight: 600; }
 
 /* PARTS */
-.exam-part { margin-bottom: 10px; }
+.exam-part { margin-bottom: 16px; }
 .part-label {
   font-weight: 800; font-size: 11px; color: #1a2eaa; text-transform: uppercase;
   letter-spacing: 0.4px; margin-bottom: 3px; padding: 4px 8px;
@@ -55,7 +55,7 @@ ion-content { --background: #f0f2f7; }
 }
 
 /* QUESTIONS */
-.question-item { margin-bottom: 6px; display: flex; gap: 5px; }
+.question-item { margin-bottom: 12px; display: flex; gap: 5px; }
 .q-num { font-weight: 800; min-width: 20px; color: #1a2eaa; font-size: 11px; padding-top: 1px; flex-shrink: 0; }
 .q-body { flex: 1; }
 .q-text { font-size: 12px; color: #1e293b; font-weight: 600; margin-bottom: 4px; line-height: 1.4; }
