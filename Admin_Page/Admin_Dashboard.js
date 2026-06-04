@@ -788,8 +788,10 @@ async function loadQArchive() {
 
 function filterQArchive() {
   const search = (document.getElementById('qArchiveSearch')?.value || '').toLowerCase();
+  const kind   = document.getElementById('qArchiveKindFilter')?.value || '';
   const type   = document.getElementById('qArchiveTypeFilter')?.value || '';
   let filtered = Array.isArray(allQArchiveData) ? allQArchiveData : [];
+  if (kind)   filtered = filtered.filter(q => q.item_type === kind);
   if (type)   filtered = filtered.filter(q => q.type === type);
   if (search) filtered = filtered.filter(q =>
     (q.title||'').toLowerCase().includes(search) ||
@@ -804,7 +806,7 @@ function renderQArchive(data) {
   const list = document.getElementById('qArchiveList');
   if (!list) return;
   if (!data.length) {
-    list.innerHTML = '<div style="text-align:center;padding:48px;color:#9ca3af;">No archived exams found.</div>';
+    list.innerHTML = '<div style="text-align:center;padding:48px;color:#9ca3af;">No archived items found.</div>';
     return;
   }
   const typeColor = { Quiz:'#eff6ff;color:#2563eb', Exam:'#f5f3ff;color:#7c3aed', Activity:'#f0fdf4;color:#16a34a', Seatwork:'#fff7ed;color:#ea580c' };
@@ -812,14 +814,20 @@ function renderQArchive(data) {
     <div class="table-wrap">
       <table class="admin-table">
         <thead>
-          <tr><th>Title</th><th>Type</th><th>Section</th><th>Subject</th><th>Deleted By</th><th>Archived On</th><th>Actions</th></tr>
+          <tr><th>Kind</th><th>Title</th><th>Type</th><th>Section</th><th>Subject</th><th>Deleted By</th><th>Archived On</th><th>Actions</th></tr>
         </thead>
         <tbody>
           ${data.map(q => {
             const tc = typeColor[q.type] || '#f3f4f6;color:#374151';
             const archivedDate = q.archived_at ? new Date(q.archived_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+            const kindLabel = q.item_type === 'answerkey' ? 'Answer Key' : 'Questionnaire';
+            const kindStyle = q.item_type === 'answerkey'
+              ? 'background:#fef9ec;color:#ca8a04;border:1px solid #fde68a;'
+              : 'background:#f0f4ff;color:#1a2eaa;border:1px solid #c7d2fe;';
+            const safeTitle = escHtml(q.title).replace(/'/g, '&#39;');
             return `<tr>
-              <td style="font-size:13px;font-weight:600;color:#111827;max-width:220px;">${escHtml(q.title)}</td>
+              <td><span style="${kindStyle}font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;white-space:nowrap;">${kindLabel}</span></td>
+              <td style="font-size:13px;font-weight:600;color:#111827;max-width:200px;">${escHtml(q.title)}</td>
               <td><span style="background:${tc.split(';')[0]};${tc.split(';')[1]};font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;">${escHtml(q.type)}</span></td>
               <td style="font-size:13px;color:#374151;">${escHtml(q.section_name||'—')}</td>
               <td style="font-size:13px;color:#374151;">${escHtml(q.subject_name||'—')}</td>
@@ -827,15 +835,16 @@ function renderQArchive(data) {
               <td style="font-size:13px;color:#6b7280;">${archivedDate}</td>
               <td>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="archiveView(${q.id})"
+                  ${q.item_type === 'questionnaire' ? `
+                  <button onclick="archiveView(${q.id},'${q.item_type}')"
                     style="padding:5px 10px;background:#eff6ff;color:#2563eb;border:1.5px solid #bfdbfe;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
                     View
-                  </button>
-                  <button onclick="archiveRestore(${q.id},'${escHtml(q.title).replace(/'/g,'')}')"
+                  </button>` : ''}
+                  <button onclick="archiveRestore(${q.id},'${q.item_type}','${safeTitle}')"
                     style="padding:5px 10px;background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
                     Restore
                   </button>
-                  <button onclick="archiveDelete(${q.id},'${escHtml(q.title).replace(/'/g,'')}')"
+                  <button onclick="archiveDelete(${q.id},'${q.item_type}','${safeTitle}')"
                     style="padding:5px 10px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
                     Delete
                   </button>
@@ -847,16 +856,16 @@ function renderQArchive(data) {
       </table>
     </div>
     <div style="padding:12px 16px;font-size:12px;color:#9ca3af;border-top:1px solid #f1f5f9;">
-      ${data.length} archived exam${data.length !== 1 ? 's' : ''}
+      ${data.length} archived item${data.length !== 1 ? 's' : ''}
     </div>`;
 }
 
-function archiveView(id) {
-  const q = allQArchiveData.find(x => x.id === id);
+function archiveView(id, itemType) {
+  const q = allQArchiveData.find(x => x.id === id && x.item_type === itemType);
   if (!q) return;
   document.getElementById('archiveViewTitle').textContent = q.title;
   let parts = [];
-  try { parts = JSON.parse(q.questions); } catch {}
+  try { parts = JSON.parse(q.content); } catch {}
   const partLabels = { multiple_choice:'Multiple Choice', true_false:'True or False', identification:'Identification', essay:'Essay' };
   let html = `<div style="font-size:12px;color:#6b7280;margin-bottom:12px;">
     <strong>Section:</strong> ${escHtml(q.section_name||'—')} &nbsp;&middot;&nbsp;
@@ -881,10 +890,14 @@ function archiveView(id) {
   document.getElementById('archiveViewOverlay').style.display = 'flex';
 }
 
-async function archiveRestore(id, title) {
-  if (!confirm(`Restore "${title}"?\nIt will reappear in the teacher's questionnaire list.`)) return;
+async function archiveRestore(id, itemType, title) {
+  const label = itemType === 'answerkey' ? 'answer key' : 'questionnaire';
+  if (!confirm(`Restore "${title}"?\nIt will reappear in the teacher's ${label} list.`)) return;
+  const endpoint = itemType === 'answerkey'
+    ? `${API}/answerkeys/${id}/restore`
+    : `${API}/questionnaires/${id}/restore`;
   try {
-    const res = await fetch(`${API}/questionnaires/${id}/restore`, { method: 'PUT', headers });
+    const res = await fetch(endpoint, { method: 'PUT', headers });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     showToast(`"${title}" restored successfully.`, 'success');
@@ -892,10 +905,13 @@ async function archiveRestore(id, title) {
   } catch (err) { showToast(err.message || 'Could not restore.', 'error'); }
 }
 
-async function archiveDelete(id, title) {
+async function archiveDelete(id, itemType, title) {
   if (!confirm(`Permanently delete "${title}"?\nThis cannot be undone.`)) return;
+  const endpoint = itemType === 'answerkey'
+    ? `${API}/answerkeys/${id}/permanent`
+    : `${API}/questionnaires/${id}/permanent`;
   try {
-    const res = await fetch(`${API}/questionnaires/${id}/permanent`, { method: 'DELETE', headers });
+    const res = await fetch(endpoint, { method: 'DELETE', headers });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     showToast(`"${title}" permanently deleted.`, 'success');

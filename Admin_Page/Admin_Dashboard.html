@@ -307,8 +307,6 @@
               <option value="">All Types</option>
               <option value="sections">Sections</option>
               <option value="students">Students</option>
-              <option value="questionnaires">Questionnaires</option>
-              <option value="answerkeys">Answer Keys</option>
               <option value="records">Records</option>
               <option value="users">Teachers</option>
             </select>
@@ -376,6 +374,11 @@
             <input type="text" id="qArchiveSearch" placeholder="🔍 Search archived exams..."
               style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;outline:none;flex:1;min-width:200px;"
               oninput="filterQArchive()" />
+            <select id="qArchiveKindFilter" onchange="filterQArchive()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;">
+              <option value="">All Items</option>
+              <option value="questionnaire">Questionnaires</option>
+              <option value="answerkey">Answer Keys</option>
+            </select>
             <select id="qArchiveTypeFilter" onchange="filterQArchive()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;background:#f9fafb;">
               <option value="">All Types</option>
               <option value="Quiz">Quiz</option>

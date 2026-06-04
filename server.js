@@ -39,6 +39,9 @@ app.use(cors({
   await migrate(`ALTER TABLE questionnaires ADD COLUMN archived_at DATETIME DEFAULT NULL`);
   await migrate(`ALTER TABLE questionnaires ADD COLUMN archived_by_name VARCHAR(255) DEFAULT NULL`);
   await migrate(`ALTER TABLE subjects ADD COLUMN is_global TINYINT(1) DEFAULT 0`);
+  await migrate(`ALTER TABLE answerkeys ADD COLUMN is_archived TINYINT(1) DEFAULT 0`);
+  await migrate(`ALTER TABLE answerkeys ADD COLUMN archived_at DATETIME DEFAULT NULL`);
+  await migrate(`ALTER TABLE answerkeys ADD COLUMN archived_by_name VARCHAR(255) DEFAULT NULL`);
 })();
 
 // ===========================
@@ -142,24 +145,41 @@ app.post('/api/archive', async (req, res) => {
   if (!allowed.includes(table)) return res.status(400).json({ error: 'Invalid table' });
 
   try {
-    // Store in archive
+    // Questionnaires and answer keys use soft-delete (is_archived=1) → appear in Test Bank
+    if (table === 'questionnaires') {
+      await db.query(
+        'UPDATE questionnaires SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=?',
+        [user.fullname, item_id]
+      );
+      // Also soft-archive any answer key linked to this questionnaire
+      await db.query(
+        'UPDATE answerkeys SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE questionnaire_id=?',
+        [user.fullname, item_id]
+      );
+      await logActivity(user.id, user.fullname, 'ARCHIVE_DELETE',
+        `Archived questionnaire "${item_name}": ${reason}`, req.body.platform||'web');
+      return res.json({ message: 'Archived successfully!' });
+    }
+
+    if (table === 'answerkeys') {
+      await db.query(
+        'UPDATE answerkeys SET is_archived=1, archived_at=NOW(), archived_by_name=? WHERE id=?',
+        [user.fullname, item_id]
+      );
+      await logActivity(user.id, user.fullname, 'ARCHIVE_DELETE',
+        `Archived answer key "${item_name}": ${reason}`, req.body.platform||'web');
+      return res.json({ message: 'Archived successfully!' });
+    }
+
+    // All other tables: store in archive table then hard-delete
     await db.query(
       `INSERT INTO archives (table_name, item_id, item_name, item_data, reason, deleted_by_id, deleted_by_name, expires_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, NULL)`,
       [table, item_id, item_name, JSON.stringify(item_data), reason, user.id, user.fullname]
     );
-
-    // When deleting a questionnaire, also remove its linked answer key
-    if (table === 'questionnaires') {
-      await db.query('DELETE FROM answerkeys WHERE questionnaire_id=?', [item_id]);
-    }
-
-    // Now actually delete from original table
     await db.query(`DELETE FROM ${table} WHERE id=?`, [item_id]);
-
     await logActivity(user.id, user.fullname, 'ARCHIVE_DELETE',
       `Archived ${table} "${item_name}": ${reason}`, req.body.platform||'web');
-
     res.json({ message: 'Archived successfully!' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
@@ -367,7 +387,9 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   const records        = await count('SELECT COUNT(*) as count FROM records');
   const sections       = await count('SELECT COUNT(*) as count FROM sections');
   const students       = await count('SELECT COUNT(*) as count FROM students');
-  const archived_exams = await count('SELECT COUNT(*) as count FROM questionnaires WHERE is_archived=1');
+  const archivedQ  = await count('SELECT COUNT(*) as count FROM questionnaires WHERE is_archived=1');
+  const archivedAK = await count('SELECT COUNT(*) as count FROM answerkeys WHERE is_archived=1');
+  const archived_exams = archivedQ + archivedAK;
   res.json({ teachers, questionnaires, answerkeys, records, sections, students, archived_exams });
 });
 
@@ -799,16 +821,26 @@ app.get('/api/debug/questionnaires', requireAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Archived questionnaires — must be BEFORE /:id route
+// Archived questionnaires + answer keys — Test Bank — must be BEFORE /:id route
 app.get('/api/questionnaires/archived/list', requireAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT q.*, s.name AS section_name, sub.name AS subject_name
+      `SELECT q.id, q.title, q.type, q.section_id, q.subject_id, q.questions AS content,
+              q.user_id, q.is_archived, q.archived_at, q.archived_by_name,
+              s.name AS section_name, sub.name AS subject_name, 'questionnaire' AS item_type
        FROM questionnaires q
        LEFT JOIN sections s ON q.section_id=s.id
        LEFT JOIN subjects sub ON q.subject_id=sub.id
        WHERE q.is_archived=1
-       ORDER BY q.archived_at DESC`
+       UNION ALL
+       SELECT ak.id, ak.title, ak.type, ak.section_id, ak.subject_id, ak.answers AS content,
+              ak.user_id, ak.is_archived, ak.archived_at, ak.archived_by_name,
+              s.name AS section_name, sub.name AS subject_name, 'answerkey' AS item_type
+       FROM answerkeys ak
+       LEFT JOIN sections s ON ak.section_id=s.id
+       LEFT JOIN subjects sub ON ak.subject_id=sub.id
+       WHERE ak.is_archived=1
+       ORDER BY archived_at DESC`
     );
     res.json(rows);
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
@@ -830,6 +862,24 @@ app.delete('/api/questionnaires/:id/permanent', requireAdmin, async (req, res) =
     await db.query('DELETE FROM questionnaires WHERE id=?', [req.params.id]);
     await logActivity(user.id, user.fullname, 'PERMANENT_DELETE_QUESTIONNAIRE', `Permanently deleted ID: ${req.params.id}`, 'web');
     res.json({ message: 'Questionnaire permanently deleted.' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.put('/api/answerkeys/:id/restore', requireAdmin, async (req, res) => {
+  const user = getUser(req);
+  try {
+    await db.query('UPDATE answerkeys SET is_archived=0, archived_at=NULL, archived_by_name=NULL WHERE id=?', [req.params.id]);
+    await logActivity(user.id, user.fullname, 'RESTORE_ANSWERKEY', `Restored answer key ID: ${req.params.id}`, 'web');
+    res.json({ message: 'Answer key restored successfully.' });
+  } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/answerkeys/:id/permanent', requireAdmin, async (req, res) => {
+  const user = getUser(req);
+  try {
+    await db.query('DELETE FROM answerkeys WHERE id=?', [req.params.id]);
+    await logActivity(user.id, user.fullname, 'PERMANENT_DELETE_ANSWERKEY', `Permanently deleted answer key ID: ${req.params.id}`, 'web');
+    res.json({ message: 'Answer key permanently deleted.' });
   } catch (err) { console.log(err); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -908,7 +958,7 @@ app.get('/api/answerkeys', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE answerkeys.user_id=?`;
+    const akBase = `SELECT answerkeys.*, sections.name AS section_name, subjects.name AS subject_name FROM answerkeys LEFT JOIN sections ON answerkeys.section_id=sections.id LEFT JOIN subjects ON answerkeys.subject_id=subjects.id WHERE (answerkeys.is_archived=0 OR answerkeys.is_archived IS NULL) AND answerkeys.user_id=?`;
     let query = akBase + ` ORDER BY answerkeys.title ASC`;
     let params = [user.id];
     if (req.query.section_id && req.query.subject_id) {
