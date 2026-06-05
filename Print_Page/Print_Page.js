@@ -258,7 +258,7 @@ body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
 .marker  { width:9px; height:9px; background:#111; }
 
 /* Header */
-.school    { text-align:center; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#1a2eaa; margin-top:4px; flex-shrink:0; }
+.school    { text-align:center; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#111; margin-top:4px; flex-shrink:0; }
 .sheet-sub { text-align:center; font-size:16px; font-weight:900; color:#000; margin:3px 0 1px; flex-shrink:0; }
 .exam-ttl  { text-align:center; font-size:10px; font-weight:700; text-transform:uppercase; color:#374151; letter-spacing:0.3px; margin-bottom:3px; flex-shrink:0; }
 .divider   { border:none; border-top:1.5px solid #111; margin:3px 0; flex-shrink:0; }
@@ -268,10 +268,10 @@ body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
 .ifield   { display:flex; align-items:flex-end; gap:4px; font-size:8pt; font-weight:700; }
 .ifield.grow { flex:1; }
 .iline    { flex:1; min-width:50px; border-bottom:1px solid #111; height:14px; }
-.ival     { font-size:8pt; font-weight:700; color:#1a2eaa; border-bottom:1px solid #bbb; height:14px; line-height:14px; }
+.ival     { font-size:8pt; font-weight:700; color:#111; border-bottom:1px solid #bbb; height:14px; line-height:14px; }
 
 /* Instructions */
-.instr       { border:1.5px solid #1a2eaa; border-radius:4px; padding:5px 10px; margin:5px 0; flex-shrink:0; }
+.instr       { border:1.5px solid #111; border-radius:4px; padding:5px 10px; margin:5px 0; flex-shrink:0; }
 .instr-title { font-size:8pt; font-weight:bold; margin-bottom:2px; }
 .instr ul    { list-style:none; padding:0; }
 .instr li    { font-size:7.5pt; color:#333; line-height:1.6; }
@@ -291,7 +291,7 @@ body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
 .arow { display:grid; grid-template-columns:26px 1fr 32px; min-height:46px; border-bottom:1px solid #f0f0f0; }
 .arow:last-child { border-bottom:none; }
 
-.anum  { font-size:9pt; font-weight:900; color:#1a2eaa; display:flex; align-items:flex-end; justify-content:center; padding-bottom:3px; }
+.anum  { font-size:9pt; font-weight:900; color:#111; display:flex; align-items:flex-end; justify-content:center; padding-bottom:3px; }
 .acell { display:flex; align-items:flex-end; padding:0 5px 3px; }
 .aline { width:100%; border-bottom:1.5px solid #555; }
 .atype { display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px; }
