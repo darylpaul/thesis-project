@@ -297,16 +297,6 @@ body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
 .atype { display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px; }
 .abadge { font-size:6pt; font-weight:700; color:#666; background:#f4f5f7; border:1px solid #ddd; border-radius:2px; padding:1px 3px; }
 
-/* Score slot inside col3 */
-.score-slot { min-height:46px; display:flex; align-items:center; justify-content:center; padding:4px 6px; }
-.score-slot .score-box { width:100%; }
-
-/* Score box fallback (when all cols equal) */
-.score-wrap { display:flex; justify-content:flex-end; margin-top:8px; flex-shrink:0; }
-.score-box  { border:2px solid #1a2eaa; border-radius:5px; padding:5px 18px; text-align:center; min-width:120px; }
-.score-lbl  { font-size:7pt; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.8px; }
-.score-val  { font-size:14pt; font-weight:900; color:#111; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:2px; }
-.score-line { display:inline-block; width:34px; border-bottom:1.5px solid #111; }
 
 @media print {
   #as-toolbar { display:none; }
