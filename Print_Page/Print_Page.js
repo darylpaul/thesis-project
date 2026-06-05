@@ -211,9 +211,7 @@ function openAnswerSheet(q, parts, section, subject) {
   const s1     = Math.ceil(total / 3);
   const s2     = Math.ceil((total - s1) / 2);
   const cols   = [items.slice(0, s1), items.slice(s1, s1 + s2), items.slice(s1 + s2)];
-  const hasGap = cols[2].length < cols[0].length;
-
-  const buildCol = (colItems, isLast) => `
+  const buildCol = (colItems) => `
     <div class="col">
       <div class="col-head">
         <span>#</span><span class="ach">Answer</span><span>Type</span>
@@ -225,13 +223,6 @@ function openAnswerSheet(q, parts, section, subject) {
             <div class="acell"><div class="aline"></div></div>
             <div class="atype"><span class="abadge">${it.typ}</span></div>
           </div>`).join('')}
-        ${isLast && hasGap ? `
-          <div class="score-slot">
-            <div class="score-box">
-              <div class="score-lbl">Score</div>
-              <div class="score-val"><span class="score-line"></span> / ${total}</div>
-            </div>
-          </div>` : ''}
       </div>
     </div>`;
 
@@ -364,18 +355,11 @@ body { font-family:Arial,sans-serif; background:#f3f4f6; padding-top:56px; }
   </div>
 
   <div class="cols">
-    ${buildCol(cols[0], false)}
-    ${buildCol(cols[1], false)}
-    ${buildCol(cols[2], true)}
+    ${buildCol(cols[0])}
+    ${buildCol(cols[1])}
+    ${buildCol(cols[2])}
   </div>
 
-  ${!hasGap ? `
-  <div class="score-wrap">
-    <div class="score-box">
-      <div class="score-lbl">Score</div>
-      <div class="score-val"><span class="score-line"></span> / ${total}</div>
-    </div>
-  </div>` : ''}
 
   <div class="corners" style="margin-top:4px;">
     <div class="marker"></div><div class="marker"></div>

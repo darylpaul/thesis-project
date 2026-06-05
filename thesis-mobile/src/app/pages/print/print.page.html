@@ -167,26 +167,11 @@
               <div class="as-ans"><div class="as-ans-line"></div></div>
               <div class="as-type"><span class="as-badge">{{ item.type }}</span></div>
             </div>
-            <!-- Score box fills empty slot in last column -->
-            <div *ngIf="ci === 2 && sheetColumns[2].length < sheetColumns[0].length" class="as-score-slot">
-              <div class="as-score-box">
-                <div class="as-score-lbl">Score</div>
-                <div class="as-score-val"><span class="as-score-line"></span> / {{ getTotalItems() }}</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      <!-- Score box when all columns equal (items divisible by 3) -->
-      <div *ngIf="sheetColumns[2].length === sheetColumns[0].length" class="as-score-section">
-        <div class="as-score-box">
-          <div class="as-score-lbl">Score</div>
-          <div class="as-score-val"><span class="as-score-line"></span> / {{ getTotalItems() }}</div>
-        </div>
-      </div>
-
-      <div class="as-corners" style="margin-top:4px;"><div class="as-marker"></div><div class="as-marker"></div></div>
+<div class="as-corners" style="margin-top:4px;"><div class="as-marker"></div><div class="as-marker"></div></div>
 
     </div>
 
