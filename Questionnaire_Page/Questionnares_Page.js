@@ -337,8 +337,8 @@ function renderQuestionHTML(pi, qi, type, q) {
   } else if (type === 'true_false') {
     answerHTML = `
       <div class="tf-selector">
-        <button class="tf-select-btn ${q.answer==='True'?'selected':''}" data-pi="${pi}" data-qi="${qi}" data-val="True">✓ True</button>
-        <button class="tf-select-btn ${q.answer==='False'?'selected':''}" data-pi="${pi}" data-qi="${qi}" data-val="False">✗ False</button>
+        <button class="tf-select-btn ${q.answer==='TRUE'?'selected':''}" data-pi="${pi}" data-qi="${qi}" data-val="TRUE">✓ TRUE</button>
+        <button class="tf-select-btn ${q.answer==='FALSE'?'selected':''}" data-pi="${pi}" data-qi="${qi}" data-val="FALSE">✗ FALSE</button>
       </div>`;
   } else if (type === 'identification') {
     answerHTML = `
@@ -594,12 +594,12 @@ function openViewModal(q) {
         } else if (part.type === 'true_false') {
           extraHTML = `<div class="view-tf-bubbles">
             <div class="view-tf-opt">
-              <span class="view-tf-bubble${qt.answer==='True'?' filled':''}"></span>
-              <span class="view-tf-word${qt.answer==='True'?' selected':''}">True</span>
+              <span class="view-tf-bubble${qt.answer==='TRUE'?' filled':''}"></span>
+              <span class="view-tf-word${qt.answer==='TRUE'?' selected':''}">TRUE</span>
             </div>
             <div class="view-tf-opt">
-              <span class="view-tf-bubble${qt.answer==='False'?' filled':''}"></span>
-              <span class="view-tf-word${qt.answer==='False'?' selected':''}">False</span>
+              <span class="view-tf-bubble${qt.answer==='FALSE'?' filled':''}"></span>
+              <span class="view-tf-word${qt.answer==='FALSE'?' selected':''}">FALSE</span>
             </div>
           </div>`;
         } else if (part.type === 'identification') {
