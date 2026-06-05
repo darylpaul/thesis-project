@@ -549,6 +549,13 @@ app.post('/api/admin/section-assignments', requireAdmin, async (req, res) => {
   if (!section_id || !teacher_id || !subject_id)
     return res.status(400).json({ error: 'section_id, teacher_id, and subject_id are required' });
   try {
+    const [existing] = await db.query(
+      'SELECT st.id, u.fullname FROM section_teachers st JOIN users u ON st.teacher_id = u.id WHERE st.section_id = ? AND st.subject_id = ?',
+      [section_id, subject_id]
+    );
+    if (existing.length > 0)
+      return res.status(400).json({ error: `This subject is already assigned to ${existing[0].fullname} in this section. Remove that assignment first.` });
+
     await db.query(
       'INSERT INTO section_teachers (section_id, teacher_id, subject_id) VALUES (?, ?, ?)',
       [section_id, teacher_id, subject_id]
